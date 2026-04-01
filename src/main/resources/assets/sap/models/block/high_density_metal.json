@@ -1,8 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "sap:block/high_density_metal",
-    "particle": "sap:block/high_density_metal"
-  },
-  "render_type": "solid"
-}

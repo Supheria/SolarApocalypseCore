@@ -1,0 +1,12 @@
+﻿{
+  "block.solar_apocalypse_core.dust": "尘土",
+  "block.solar_apocalypse_core.crushed_dirt": "碎土",
+  "block.solar_apocalypse_core.withered_leaves": "枯叶",
+  "block.solar_apocalypse_core.high_density_metal": "高密度金属",
+  "block.solar_apocalypse_core.redstone_coated_metal": "红石涂层金属",
+  "block.solar_apocalypse_core.heat_resistant_high_strength_metal": "耐热高强度金属",
+  "block.solar_apocalypse_core.measuring_instrument": "测量仪器",
+  "item.solar_apocalypse_core.uv_umbrella": "防紫外线伞",
+  "item.solar_apocalypse_core.coordinates_of_the_sun": "太阳坐标",
+  "effect.solar_apocalypse_core.dehydration": "脱水"
+}

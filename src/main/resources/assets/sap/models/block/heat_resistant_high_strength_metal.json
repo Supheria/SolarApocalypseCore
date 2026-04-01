@@ -1,8 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "sap:block/heat_resistant_high_strength_metal",
-    "particle": "sap:block/heat_resistant_high_strength_metal"
-  },
-  "render_type": "solid"
-}

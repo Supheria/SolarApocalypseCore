@@ -1,8 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "sap:block/crushed_dirt",
-    "particle": "sap:block/crushed_dirt"
-  },
-  "render_type": "solid"
-}

@@ -30,22 +30,22 @@ public abstract class LevelRendererMixin {
     private void onRendersky(PoseStack p_202424_, Matrix4f p_254034_, float p_202426_, Camera p_202427_, boolean p_202428_, Runnable p_202429_, CallbackInfo ci){
 
         if (SapModVariables.MapVariables.get(world).SolarFlare == 1){
-            SUN_LOCATION = new ResourceLocation("sap:textures/environment/sun_step1.png");
+            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step1.png");
         }
         if (SapModVariables.MapVariables.get(world).SolarFlare == 2){
-            SUN_LOCATION = new ResourceLocation("sap:textures/environment/sun_step2.png");
+            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step2.png");
         }
         if (SapModVariables.MapVariables.get(world).SolarFlare == 3){
-            SUN_LOCATION = new ResourceLocation("sap:textures/environment/sun_step3.png");
+            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step3.png");
         }
         if (SapModVariables.MapVariables.get(world).SolarFlare == 4){
-            SUN_LOCATION = new ResourceLocation("sap:textures/environment/sun_step4.png");
+            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step4.png");
         }
         if (SapModVariables.MapVariables.get(world).SolarFlare == 5){
-            SUN_LOCATION = new ResourceLocation("sap:textures/environment/sun_step5.png");
+            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step5.png");
         }
         if (SapModVariables.MapVariables.get(world).SolarFlare == 6){
-            SUN_LOCATION = new ResourceLocation("sap:textures/environment/sun_step6.png");
+            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step6.png");
         }
     }
 

@@ -11,6 +11,6 @@
                 "minecraft:mangrove_leaves",
                 "minecraft:azalea_leaves",
                 "minecraft:flowering_azalea_leaves",
-                "sap:withered_leaves"
+                "solar_apocalypse_core:withered_leaves"
         ]
 }

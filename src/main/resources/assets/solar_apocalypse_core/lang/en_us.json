@@ -1,0 +1,12 @@
+{
+  "block.solar_apocalypse_core.dust": "Dust",
+  "block.solar_apocalypse_core.crushed_dirt": "Crushed Dirt",
+  "block.solar_apocalypse_core.withered_leaves": "Withered Leaves",
+  "block.solar_apocalypse_core.high_density_metal": "High Density metal",
+  "block.solar_apocalypse_core.redstone_coated_metal": "Redstone Coated Metal",
+  "block.solar_apocalypse_core.heat_resistant_high_strength_metal": "Heat Resistant High Strength Metal",
+  "block.solar_apocalypse_core.measuring_instrument": "Measuring Instrument",
+  "item.solar_apocalypse_core.uv_umbrella": "UV Umbrella",
+  "item.solar_apocalypse_core.coordinates_of_the_sun": "Coordinates Of The Sun",
+  "effect.solar_apocalypse_core.dehydration": "Dehydration"
+}
