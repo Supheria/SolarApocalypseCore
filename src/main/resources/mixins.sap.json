@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "com.supheria.solar_apocalypse_core",
+	"minVersion": "0.8.5",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+      "com.supheria.solar_apocalypse_core.mixin.BlockStateBaseMixin",
+      "com.supheria.solar_apocalypse_core.mixin.LevelRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"refmap": "mixins.sap.refmap.json"
+}

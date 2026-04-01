@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "sap:block/heat_resistant_high_strength_metal"
+    }
+  }
+}

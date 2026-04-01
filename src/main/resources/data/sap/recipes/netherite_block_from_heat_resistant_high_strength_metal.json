@@ -1,0 +1,33 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "sap:heat_resistant_high_strength_metal"
+        },
+        {
+            "item": "sap:heat_resistant_high_strength_metal"
+        },
+        {
+            "item": "sap:heat_resistant_high_strength_metal"
+        },
+        {
+            "item": "sap:heat_resistant_high_strength_metal"
+        },
+        {
+            "item": "minecraft:gold_block"
+        },
+        {
+            "item": "minecraft:gold_block"
+        },
+        {
+            "item": "minecraft:gold_block"
+        },
+        {
+            "item": "minecraft:gold_block"
+        }
+    ],
+    "result": {
+        "item": "minecraft:netherite_block",
+        "count": 4
+    }
+}

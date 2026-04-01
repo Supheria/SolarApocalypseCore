@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#S",
+    "S#"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:coarse_dirt"
+    },
+    "S": {
+      "item": "minecraft:sand"
+    }
+  },
+  "result": {
+    "item": "sap:crushed_dirt",
+    "count": 4
+  },
+  "group": "crushed_dirt"
+}

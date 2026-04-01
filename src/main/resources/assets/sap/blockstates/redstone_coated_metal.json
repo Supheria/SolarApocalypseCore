@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "sap:block/redstone_coated_metal"
+    }
+  }
+}

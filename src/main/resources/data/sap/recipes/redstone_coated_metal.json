@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#I#",
+        "IDI",
+        "#I#"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:redstone_block"
+        },
+        "I": {
+            "item": "sap:high_density_metal"
+        },
+        "D": {
+            "item": "minecraft:diamond_block"
+        }
+    },
+    "result": {
+        "item": "sap:redstone_coated_metal",
+        "count": 1
+    },
+    "group": "high_density_metal"
+}

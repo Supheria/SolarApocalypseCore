@@ -1,0 +1,21 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        "#O#",
+        "###"
+    ],
+    "key": {
+        "#": {
+            "item": "redstone_coated_metal"
+        },
+        "O": {
+            "item": "minecraft:obsidian"
+        }
+    },
+    "result": {
+        "item": "sap:heat_resistant_high_strength_metal",
+        "count": 1
+    },
+    "group": "high_density_metal"
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "sap:block/dust",
+    "particle": "sap:block/dust"
+  },
+  "render_type": "solid"
+}

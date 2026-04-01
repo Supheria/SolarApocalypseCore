@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        "#R#",
+        "OOO"
+    ],
+    "key": {
+        "#": {
+            "item": "sap:high_density_metal"
+        },
+        "R": {
+            "item": "sap:redstone_coated_metal"
+        },
+        "O": {
+            "item": "minecraft:obsidian"
+        }
+    },
+    "result": {
+        "item": "sap:measuring_instrument",
+        "count": 1
+    }
+}

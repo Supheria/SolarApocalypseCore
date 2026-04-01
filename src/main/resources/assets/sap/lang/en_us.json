@@ -1,0 +1,12 @@
+{
+  "block.sap.dust": "Dust",
+  "block.sap.crushed_dirt": "Crushed Dirt",
+  "block.sap.withered_leaves": "Withered Leaves",
+  "block.sap.high_density_metal": "High Density metal",
+  "block.sap.redstone_coated_metal": "Redstone Coated Metal",
+  "block.sap.heat_resistant_high_strength_metal": "Heat Resistant High Strength Metal",
+  "block.sap.measuring_instrument": "Measuring Instrument",
+  "item.sap.uv_umbrella": "UV Umbrella",
+  "item.sap.coordinates_of_the_sun": "Coordinates Of The Sun",
+  "effect.sap.dehydration": "Dehydration"
+}

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "sap:high_density_metal",
+    "sap:redstone_coated_metal",
+    "sap:heat_resistant_high_strength_metal",
+    "sap:measuring_instrument"
+  ]
+}
