@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "solar_apocalypse_core:block/heat_resistant_high_strength_metal",
+    "particle": "solar_apocalypse_core:block/heat_resistant_high_strength_metal"
+  },
+  "render_type": "solid"
+}
