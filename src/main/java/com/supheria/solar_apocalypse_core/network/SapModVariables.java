@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Supplier;
 
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
+import com.supheria.solar_apocalypse_core.world.SolarPhase;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SapModVariables {
@@ -87,7 +88,8 @@ public class SapModVariables {
 
 	public static class MapVariables extends SavedData {
 		public static final String DATA_NAME = "sap_mapvars";
-		public double SolarFlare = 0;
+		public double SolarFlare = 0;        // 废弃字段，仅用于向后兼容
+		public int solarPhase = 0;           // 新字段：SolarPhase.ordinal()
 		public double TodayTime = 0;
 		public double Today = 0;
 		public double LunarToday = 0;
@@ -99,7 +101,15 @@ public class SapModVariables {
 		}
 
 		public void read(CompoundTag nbt) {
-			SolarFlare = nbt.getDouble("SolarFlare");
+			// 读取新字段 solarPhase
+			if (nbt.contains("solarPhase")) {
+				this.solarPhase = nbt.getInt("solarPhase");
+			} else if (nbt.contains("SolarFlare")) {
+				// 从旧的 SolarFlare 字段迁移
+				SolarPhase oldPhase = SolarPhase.fromLegacyId((int) nbt.getDouble("SolarFlare"));
+				this.solarPhase = oldPhase.ordinal();
+			}
+			this.SolarFlare = nbt.getDouble("SolarFlare");
 			TodayTime = nbt.getDouble("TodayTime");
 			Today = nbt.getDouble("Today");
 			LunarToday = nbt.getDouble("LunarToday");
@@ -107,7 +117,11 @@ public class SapModVariables {
 
 		@Override
 		public CompoundTag save(CompoundTag nbt) {
-			nbt.putDouble("SolarFlare", SolarFlare);
+			// 保存新字段
+			nbt.putInt("solarPhase", solarPhase);
+			// 保存旧字段以兼容极旧的版本
+			SolarPhase phase = getCurrentPhase();
+			nbt.putDouble("SolarFlare", phase.getLegacyId());
 			nbt.putDouble("TodayTime", TodayTime);
 			nbt.putDouble("Today", Today);
 			nbt.putDouble("LunarToday", LunarToday);
@@ -118,6 +132,24 @@ public class SapModVariables {
 			this.setDirty();
 			if (world instanceof Level && !world.isClientSide())
 				SolarApocalypseCoreMod.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new SavedDataSyncMessage(0, this));
+		}
+
+		/**
+		 * 获取当前的太阳阶段
+		 */
+		public SolarPhase getCurrentPhase() {
+			if (solarPhase >= 0 && solarPhase < SolarPhase.values().length) {
+				return SolarPhase.values()[solarPhase];
+			}
+			return SolarPhase.NONE;
+		}
+
+		/**
+		 * 设置太阳阶段
+		 */
+		public void setPhase(SolarPhase phase) {
+			this.solarPhase = phase.ordinal();
+			this.SolarFlare = phase.getLegacyId(); // 也更新旧字段以保持兼容
 		}
 
 		static MapVariables clientSide = new MapVariables();

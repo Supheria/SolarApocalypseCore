@@ -1,8 +1,10 @@
 package com.supheria.solar_apocalypse_core;
 
+import com.supheria.solar_apocalypse_core.config.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.init.*;
 import com.supheria.solar_apocalypse_core.procedures.*;
 import com.supheria.solar_apocalypse_core.procedures.stones.*;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,6 +48,9 @@ public class SolarApocalypseCoreMod {
     public SolarApocalypseCoreMod() {
         MinecraftForge.EVENT_BUS.register(this);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        // Register Solar Stage Configuration
+        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SolarStageConfig.SPEC);
 
         SapModBlocks.REGISTRY.register(bus);
 
