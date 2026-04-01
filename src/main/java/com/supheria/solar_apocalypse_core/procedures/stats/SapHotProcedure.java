@@ -24,6 +24,7 @@ import net.minecraft.client.Minecraft;
 import javax.annotation.Nullable;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.world.SolarPhase;
 import com.supheria.solar_apocalypse_core.init.SapModMobEffects;
 import com.supheria.solar_apocalypse_core.init.SapModItems;
 
@@ -83,7 +84,7 @@ public class SapHotProcedure {
 		}.checkGamemode(entity)) {
 			entity.getPersistentData().putDouble("SapStack", 0);
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 1 && !(new Object() {
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.WARMING && !(new Object() {
 			public boolean checkGamemode(Entity _ent) {
 				if (_ent instanceof ServerPlayer _serverPlayer) {
 					return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -109,7 +110,7 @@ public class SapHotProcedure {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 1
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.WARMING
 				&& (SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450 || !world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || world.getLevelData().isRaining()
 				|| entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
 				|| (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
@@ -118,7 +119,7 @@ public class SapHotProcedure {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 2 && !(new Object() {
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.ACCELERATION && !(new Object() {
 			public boolean checkGamemode(Entity _ent) {
 				if (_ent instanceof ServerPlayer _serverPlayer) {
 					return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -149,7 +150,7 @@ public class SapHotProcedure {
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 2 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.ACCELERATION && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
 				&& (y < 63 || world.getLevelData().isRaining() || entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
 				|| (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get())
 				|| !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
@@ -157,7 +158,7 @@ public class SapHotProcedure {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 3 && !(new Object() {
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.PEAK && !(new Object() {
 			public boolean checkGamemode(Entity _ent) {
 				if (_ent instanceof ServerPlayer _serverPlayer) {
 					return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -186,13 +187,13 @@ public class SapHotProcedure {
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 3 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < 8 || entity.isInWaterRainOrBubble())
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.PEAK && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < 8 || entity.isInWaterRainOrBubble())
 				|| !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
 			if (entity.getPersistentData().getDouble("SapStack") > 0) {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 4 && !(new Object() {
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.CRITICAL && !(new Object() {
 			public boolean checkGamemode(Entity _ent) {
 				if (_ent instanceof ServerPlayer _serverPlayer) {
 					return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -221,13 +222,13 @@ public class SapHotProcedure {
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 4 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < -16 || entity.isInWaterRainOrBubble())
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.CRITICAL && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < -16 || entity.isInWaterRainOrBubble())
 				|| !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
 			if (entity.getPersistentData().getDouble("SapStack") > 0) {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 5 && !(new Object() {
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.ULTIMATE && !(new Object() {
 			public boolean checkGamemode(Entity _ent) {
 				if (_ent instanceof ServerPlayer _serverPlayer) {
 					return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -254,7 +255,7 @@ public class SapHotProcedure {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 5 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && entity.isInWaterRainOrBubble()
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.ULTIMATE && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && entity.isInWaterRainOrBubble()
 				|| !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
 			if (entity.getPersistentData().getDouble("SapStack") > 0) {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));

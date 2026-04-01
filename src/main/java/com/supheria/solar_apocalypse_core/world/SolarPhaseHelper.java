@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.world;
 
-import com.supheria.solar_apocalypse_core.config.SolarStageConfig;
+import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 
 /**
  * 太阳阶段辅助工具类

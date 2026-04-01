@@ -16,7 +16,7 @@ import net.minecraft.commands.CommandSource;
 
 import javax.annotation.Nullable;
 
-import com.supheria.solar_apocalypse_core.config.SolarStageConfig;
+import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarPhase;
 import com.supheria.solar_apocalypse_core.world.SolarPhaseHelper;
