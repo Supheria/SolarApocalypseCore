@@ -153,8 +153,8 @@ dependencies {
 
 mixin {
     // MixinGradle Settings
-    add sourceSets.main, 'mixins.sap.refmap.json'
-    config 'mixins.sap.json'
+    add sourceSets.main, 'mixins.main.refmap.json'
+    config 'mixins.main.json'
 
     debug.verbose = true
     debug.export = true

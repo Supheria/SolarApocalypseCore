@@ -10,5 +10,5 @@
 	"injectors": {
 		"defaultRequire": 1
 	},
-	"refmap": "mixins.sap.refmap.json"
+	"refmap": "mixins.main.refmap.json"
 }
