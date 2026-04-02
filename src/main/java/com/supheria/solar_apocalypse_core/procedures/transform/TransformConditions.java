@@ -241,5 +241,10 @@ public final class TransformConditions {
                 y >= Math.min(StageHeightConfig.getSafeHeight(stageA), StageHeightConfig.getSafeHeight(stageB));
     }
 
+    /** y > StageHeightConfig.getWaterEvapHeight(stage)（水蒸发高度阈值，严格大于） */
+    public static TransformCondition aboveWaterEvapHeight() {
+        return (world, x, y, z, stage) -> y > StageHeightConfig.getWaterEvapHeight(stage);
+    }
+
     private TransformConditions() {}
 }

@@ -72,5 +72,10 @@ public final class TransformActions {
                 world.setBlock(BlockPos.containing(x, y + 1, z), target.defaultBlockState(), 3);
     }
 
+    /** 将中心及水流体邻居（按 offsets 扩散）全部设为 AIR（水蒸发扩散）。 */
+    public static TransformAction spreadWater(int[][] offsets) {
+        return (world, x, y, z) -> BlockSpreadUtils.spreadWater(world, x, y, z, offsets);
+    }
+
     private TransformActions() {}
 }

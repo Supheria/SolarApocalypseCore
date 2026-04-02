@@ -1,49 +1,36 @@
 package com.supheria.solar_apocalypse_core.procedures;
-import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
+import com.supheria.solar_apocalypse_core.Procedure;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformRule;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformActions.setBlock;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformRule.when;
+
 public class FlowerPotFProcedure {
-	public static void execute(LevelAccessor world, double x, double y, double z) {
-		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage >= 1 && stage < 6
-				&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
-				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == Blocks.FLOWER_POT)
-				&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 1) <= (world.dayTime() / 24000)) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.FLOWER_POT.defaultBlockState(), 3);
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage == 2
-				&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
-				&& y >= StageHeightConfig.getSafeHeight(2)
-				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == Blocks.FLOWER_POT)
-				&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 1) <= (world.dayTime() / 24000)) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.FLOWER_POT.defaultBlockState(), 3);
-		} else if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage == 3
-				&& y >= StageHeightConfig.getSafeHeight(2)
-				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == Blocks.FLOWER_POT)) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.FLOWER_POT.defaultBlockState(), 3);
-		}else if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage == 4
-				&& y >= StageHeightConfig.getSafeHeight(4)
-				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == Blocks.FLOWER_POT)) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.FLOWER_POT.defaultBlockState(), 3);
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare == 5
-				&& y >= 8
-				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == Blocks.FLOWER_POT)) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.FLOWER_POT.defaultBlockState(), 3);
-		}
-	}
+
+    private static final Procedure INSTANCE = TransformRule.rulesOf(
+            // 阶段1-5：天空可见，非花盆，概率→花盆
+            when(stageRange(1, 6).and(sky()).and(isBlock(Blocks.FLOWER_POT).negate()).and(randomDayRate()),
+                    setBlock(Blocks.FLOWER_POT)),
+            // 阶段2：晴天+高于安全高度，非花盆，概率→花盆
+            when(stageExact(2).and(daytime()).and(aboveSafeHeight(2))
+                    .and(isBlock(Blocks.FLOWER_POT).negate()).and(randomDayRate()),
+                    setBlock(Blocks.FLOWER_POT)),
+            // 阶段3：高于安全高度，非花盆→花盆
+            when(stageExact(3).and(aboveSafeHeight(2)).and(isBlock(Blocks.FLOWER_POT).negate()),
+                    setBlock(Blocks.FLOWER_POT)),
+            // 阶段4：高于安全高度，非花盆→花盆
+            when(stageExact(4).and(aboveSafeHeight(4)).and(isBlock(Blocks.FLOWER_POT).negate()),
+                    setBlock(Blocks.FLOWER_POT)),
+            // 阶段5：y>=8，非花盆→花盆
+            when(stageExact(5).and(minY(8)).and(isBlock(Blocks.FLOWER_POT).negate()),
+                    setBlock(Blocks.FLOWER_POT))
+    );
+
+    public static void execute(LevelAccessor world, double x, double y, double z) {
+        INSTANCE.call(world, x, y, z);
+    }
 }

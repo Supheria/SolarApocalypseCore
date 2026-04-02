@@ -1,40 +1,43 @@
 package com.supheria.solar_apocalypse_core.procedures;
-import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.Procedure;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformAction;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformCondition;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformRule;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformRule.when;
+
 public class WaterTagDeleteProcedure {
-	public static void execute(LevelAccessor world, double x, double y, double z) {
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare >= 2 && SapModVariables.MapVariables.get(world).SolarFlare < 6
-				&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
-				&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
-				&& ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock().getStateDefinition().getProperty("waterlogged") instanceof BooleanProperty _getbp2 && (world.getBlockState(BlockPos.containing(x, y, z))).getValue(_getbp2)) == true
-				&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 1) <= (world.dayTime() / 24000)) {
-			if (world.getBlockState(BlockPos.containing(x, y, z)).getBlock().getStateDefinition().getProperty("waterlogged") instanceof BooleanProperty _booleanProp)
-				world.setBlock(BlockPos.containing(x, y, z), world.getBlockState(BlockPos.containing(x, y, z)).setValue(_booleanProp, false), 3);
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare == 3
-				&& y >= 63
-				&& ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock().getStateDefinition().getProperty("waterlogged") instanceof BooleanProperty _getbp2 && (world.getBlockState(BlockPos.containing(x, y, z))).getValue(_getbp2)) == true) {
-			if (world.getBlockState(BlockPos.containing(x, y, z)).getBlock().getStateDefinition().getProperty("waterlogged") instanceof BooleanProperty _booleanProp)
-				world.setBlock(BlockPos.containing(x, y, z), world.getBlockState(BlockPos.containing(x, y, z)).setValue(_booleanProp, false), 3);
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare >= 4 && SapModVariables.MapVariables.get(world).SolarFlare < 6
-				&& y >= 8
-				&& ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock().getStateDefinition().getProperty("waterlogged") instanceof BooleanProperty _getbp2 && (world.getBlockState(BlockPos.containing(x, y, z))).getValue(_getbp2)) == true) {
-			if (world.getBlockState(BlockPos.containing(x, y, z)).getBlock().getStateDefinition().getProperty("waterlogged") instanceof BooleanProperty _booleanProp)
-				world.setBlock(BlockPos.containing(x, y, z), world.getBlockState(BlockPos.containing(x, y, z)).setValue(_booleanProp, false), 3);
-		}
-	}
+
+    // 方块当前处于含水状态
+    private static final TransformCondition IS_WATERLOGGED = (world, x, y, z, stage) ->
+            world.getBlockState(BlockPos.containing(x, y, z)).getBlock()
+                    .getStateDefinition().getProperty("waterlogged") instanceof BooleanProperty bp
+            && world.getBlockState(BlockPos.containing(x, y, z)).getValue(bp);
+
+    // 移除含水属性
+    private static final TransformAction DEWATERLOG = (world, x, y, z) -> {
+        BlockPos pos = BlockPos.containing(x, y, z);
+        if (world.getBlockState(pos).getBlock().getStateDefinition().getProperty("waterlogged")
+                instanceof BooleanProperty prop) {
+            world.setBlock(pos, world.getBlockState(pos).setValue(prop, false), 3);
+        }
+    };
+
+    private static final Procedure INSTANCE = TransformRule.rulesOf(
+            // 阶段2-5：天空+晴天，概率去水
+            when(stageRange(2, 6).and(sky()).and(daytime()).and(IS_WATERLOGGED).and(randomDayRate()), DEWATERLOG),
+            // 阶段3：y>=63，直接去水
+            when(stageExact(3).and(minY(63)).and(IS_WATERLOGGED), DEWATERLOG),
+            // 阶段4-5：y>=8，直接去水
+            when(stageRange(4, 6).and(minY(8)).and(IS_WATERLOGGED), DEWATERLOG)
+    );
+
+    public static void execute(LevelAccessor world, double x, double y, double z) {
+        INSTANCE.call(world, x, y, z);
+    }
 }
