@@ -3,9 +3,11 @@ package com.supheria.solar_apocalypse_core.procedures.util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Predicate;
@@ -84,12 +86,32 @@ public final class BlockSpreadUtils {
     }
 
     // -------------------------------------------------------------------------
-    // 便利方法：常用主世界检测
+    // 便利方法：常用世界状态检测
     // -------------------------------------------------------------------------
 
     /** 判断当前坐标是否在主世界。 */
     public static boolean isOverworld(LevelAccessor world, double x, double y, double z) {
         return world.getBiome(BlockPos.containing(x, y, z)).is(IS_OVERWORLD);
+    }
+
+    /** 判断六面相邻位置中是否有岩浆（石头/卵石 TC 扩散条件）。 */
+    public static boolean hasAdjacentLava(LevelAccessor world, double x, double y, double z) {
+        return world.getBlockState(BlockPos.containing(x, y + 1, z)).getBlock() == Blocks.LAVA
+                || world.getBlockState(BlockPos.containing(x, y - 1, z)).getBlock() == Blocks.LAVA
+                || world.getBlockState(BlockPos.containing(x + 1, y, z)).getBlock() == Blocks.LAVA
+                || world.getBlockState(BlockPos.containing(x - 1, y, z)).getBlock() == Blocks.LAVA
+                || world.getBlockState(BlockPos.containing(x, y, z + 1)).getBlock() == Blocks.LAVA
+                || world.getBlockState(BlockPos.containing(x, y, z - 1)).getBlock() == Blocks.LAVA;
+    }
+
+    /** 判断六面相邻位置中是否有水（熔岩→黑曜石 TC 加速条件）。 */
+    public static boolean hasAdjacentWater(LevelAccessor world, double x, double y, double z) {
+        return world.getFluidState(BlockPos.containing(x + 1, y, z)).is(FluidTags.WATER)
+                || world.getFluidState(BlockPos.containing(x - 1, y, z)).is(FluidTags.WATER)
+                || world.getFluidState(BlockPos.containing(x, y + 1, z)).is(FluidTags.WATER)
+                || world.getFluidState(BlockPos.containing(x, y - 1, z)).is(FluidTags.WATER)
+                || world.getFluidState(BlockPos.containing(x, y, z + 1)).is(FluidTags.WATER)
+                || world.getFluidState(BlockPos.containing(x, y, z - 1)).is(FluidTags.WATER);
     }
 
     // -------------------------------------------------------------------------

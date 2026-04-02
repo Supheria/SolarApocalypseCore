@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.collect.ImmutableMap;
+import com.supheria.solar_apocalypse_core.Procedure;
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
-import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod.Procedure;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;

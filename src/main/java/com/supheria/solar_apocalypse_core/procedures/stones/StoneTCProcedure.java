@@ -8,7 +8,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 
 /**
  * 通用石头系方块转换过程。
@@ -35,7 +34,7 @@ public class StoneTCProcedure {
             int minHeight = Math.min(
                     Math.min(StageHeightConfig.getSafeHeight(2), StageHeightConfig.getSafeHeight(3)),
                     Math.min(StageHeightConfig.getSafeHeight(4), StageHeightConfig.getSafeHeight(5)));
-            if ((world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || hasAdjacentLava(world, x, y, z))
+            if ((world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || BlockSpreadUtils.hasAdjacentLava(world, x, y, z))
                     && y >= minHeight
                     && isRandomTriggered(world)) {
                 world.setBlock(BlockPos.containing(x, y, z), target.defaultBlockState(), 3);
@@ -55,15 +54,6 @@ public class StoneTCProcedure {
                 world.setBlock(BlockPos.containing(x, y, z), target.defaultBlockState(), 3);
             }
         }
-    }
-
-    private static boolean hasAdjacentLava(LevelAccessor world, double x, double y, double z) {
-        return world.getBlockState(BlockPos.containing(x, y + 1, z)).getBlock() == Blocks.LAVA
-                || world.getBlockState(BlockPos.containing(x, y - 1, z)).getBlock() == Blocks.LAVA
-                || world.getBlockState(BlockPos.containing(x + 1, y, z)).getBlock() == Blocks.LAVA
-                || world.getBlockState(BlockPos.containing(x - 1, y, z)).getBlock() == Blocks.LAVA
-                || world.getBlockState(BlockPos.containing(x, y, z + 1)).getBlock() == Blocks.LAVA
-                || world.getBlockState(BlockPos.containing(x, y, z - 1)).getBlock() == Blocks.LAVA;
     }
 
     private static boolean isRandomTriggered(LevelAccessor world) {

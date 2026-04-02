@@ -196,28 +196,28 @@ public class SolarApocalypseCoreMod {
         if (builtInRegistryHolder.is(SapModTags.Blocks.MOIST_DIRT)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return GrassBlockTCDirtProcedure::execute;
+                return DirtChainProcedures.GRASS_BLOCK;
             }
         }
         //흙
         if (builtInRegistryHolder.is(SapModTags.Blocks.DIRT)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return DirtTCCoarseDirtProcedure::execute;
+                return DirtChainProcedures.DIRT;
             }
         }
         //거친흙
         if (builtInRegistryHolder.is(SapModTags.Blocks.HARD_DIRT)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return CoarseDirtTCCrushedDirtBlockProcedure::execute;
+                return DirtChainProcedures.COARSE_DIRT;
             }
         }
         //모래
         if (builtInRegistryHolder.is(BlockTags.SAND)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return SandTCDustProcedure::execute;
+                return DirtChainProcedures.SAND;
             }
         }
         //가루
@@ -348,7 +348,7 @@ public class SolarApocalypseCoreMod {
         if (builtInRegistryHolder.is(SapModTags.Blocks.SANDSTONE)) {
             if  (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return CrushedDirtTCSandProcedure::execute;
+                return DirtChainProcedures.CRUSHED_DIRT;
             }
         }
         //점토
@@ -473,28 +473,28 @@ public class SolarApocalypseCoreMod {
         if (builtInRegistryHolder.is(SapModTags.Blocks.MOIST_DIRT)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return GrassBlockTCDirtProcedure::execute;
+                return DirtChainProcedures.GRASS_BLOCK;
             }
         }
         //흙
         if (builtInRegistryHolder.is(SapModTags.Blocks.DIRT)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return DirtTCCoarseDirtProcedure::execute;
+                return DirtChainProcedures.DIRT;
             }
         }
         //거친흙
         if (builtInRegistryHolder.is(SapModTags.Blocks.HARD_DIRT)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return CoarseDirtTCCrushedDirtBlockProcedure::execute;
+                return DirtChainProcedures.COARSE_DIRT;
             }
         }
         //모래
         if (builtInRegistryHolder.is(BlockTags.SAND)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return SandTCDustProcedure::execute;
+                return DirtChainProcedures.SAND;
             }
         }
         //가루
@@ -536,8 +536,4 @@ public class SolarApocalypseCoreMod {
         return null;
     }
 
-    @FunctionalInterface
-    public static interface Procedure {
-        void call(LevelAccessor world, double x, double y, double z);
-    }
 }
