@@ -1,142 +1,62 @@
 package com.supheria.solar_apocalypse_core.procedures;
-import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.init.SapModBlocks;
 import com.supheria.solar_apocalypse_core.init.SapModTags;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.util.RandomSource;
-import net.minecraft.util.Mth;
-import net.minecraft.tags.TagKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.core.BlockPos;
-
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.procedures.util.BlockSpreadUtils;
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 public class GrassBlockTCDirtProcedure {
-	public static void execute(LevelAccessor world, double x, double y, double z) {
-		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
-		if (stage >= 1 && stage < 6) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450) //해가 떠있을때
-					&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) //블럭이 하늘이 보일때
-					&& !world.getLevelData().isRaining() //비가 내리지 않을때
-					&& world.dayTime() >= 1000 //게임시간이 1000틱하고 같거나 클때
-					&& Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000 + 1) {
-				world.setBlock(BlockPos.containing(x, y, z), Blocks.DIRT.defaultBlockState(), 3);
-			}
-		}
-		if (stage >= 2 && stage < 6) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
-				world.setBlock(BlockPos.containing(x, y, z), Blocks.COARSE_DIRT.defaultBlockState(), 3);
-			}
-		}
-		if (stage == 3) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= StageHeightConfig.getSafeHeight(2)) {
-				world.setBlock(BlockPos.containing(x, y, z), Blocks.SAND.defaultBlockState(), 3);
-				if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.SAND.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.SAND.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.SAND.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.SAND.defaultBlockState(), 3);
-				}
-			}
-		}
-		if (stage == 4) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= StageHeightConfig.getSafeHeight(4)) {
-				world.setBlock(BlockPos.containing(x, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x + 1, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x - 1, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x, y, z + 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x, y, z - 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x + 1, y, z + 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x + 1, y, z + 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x - 1, y, z + 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x - 1, y, z + 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x + 1, y, z - 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x + 1, y, z - 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x - 1, y, z - 1))).is(SapModTags.Blocks.MOIST_DIRT)) {
-					world.setBlock(BlockPos.containing(x - 1, y, z - 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-				}
-			}
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage == 5
-				&& y >= 8) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-			if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x + 1, y, z + 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x + 1, y, z + 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x - 1, y, z + 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x - 1, y, z + 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x + 1, y, z - 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x + 1, y, z - 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x - 1, y, z - 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x - 1, y, z - 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x + 1, y - 1, z), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x - 1, y - 1, z), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x, y - 1, z + 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x, y - 1, z + 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x, y - 1, z - 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x, y - 1, z - 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z + 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x + 1, y - 1, z + 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z + 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x - 1, y - 1, z + 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z - 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x + 1, y - 1, z - 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z - 1))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x - 1, y - 1, z - 1), Blocks.AIR.defaultBlockState(), 3);
-			}
-			if ((world.getBlockState(BlockPos.containing(x, y - 1, z))).is(BlockTags.DIRT)) {
-				world.setBlock(BlockPos.containing(x, y - 1, z), Blocks.AIR.defaultBlockState(), 3);
-			}
-		}
-	}
+    public static void execute(LevelAccessor world, double x, double y, double z) {
+        if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
+        var vars = SapModVariables.MapVariables.get(world);
+        int stage = (int) vars.SolarFlare;
+        boolean isNight = vars.TodayTime > 12566 && vars.TodayTime < 23450;
+
+        // 阶段 1-5：白天、有天空可见、不下雨时，概率性转为泥土
+        if (stage >= 1 && stage < 6
+                && !isNight
+                && world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
+                && !world.getLevelData().isRaining()
+                && world.dayTime() >= 1000
+                && Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000.0 + 1) {
+            world.setBlock(BlockPos.containing(x, y, z), Blocks.DIRT.defaultBlockState(), 3);
+        }
+
+        // 阶段 2-5：有天空可见时，立即转为粗泥土
+        if (stage >= 2 && stage < 6
+                && world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
+            world.setBlock(BlockPos.containing(x, y, z), Blocks.COARSE_DIRT.defaultBlockState(), 3);
+        }
+
+        // 阶段 3：高于安全高度时，转为沙子并向 MOIST_DIRT 4邻扩散
+        if (stage == 3 && y >= StageHeightConfig.getSafeHeight(2)) {
+            BlockSpreadUtils.spreadBlock(world, x, y, z,
+                    Blocks.SAND.defaultBlockState(),
+                    bs -> bs.is(SapModTags.Blocks.MOIST_DIRT),
+                    BlockSpreadUtils.OFFSETS_4H);
+        }
+
+        // 阶段 4：高于安全高度时，转为尘土并向 MOIST_DIRT 8邻扩散
+        if (stage == 4 && y >= StageHeightConfig.getSafeHeight(4)) {
+            BlockSpreadUtils.spreadBlock(world, x, y, z,
+                    SapModBlocks.DUST.get().defaultBlockState(),
+                    bs -> bs.is(SapModTags.Blocks.MOIST_DIRT),
+                    BlockSpreadUtils.OFFSETS_8H);
+        }
+
+        // 阶段 5：高于 y=8 时，转为空气并向 DIRT 17邻扩散（含下层）
+        if (stage == 5 && y >= 8) {
+            BlockSpreadUtils.spreadBlock(world, x, y, z,
+                    Blocks.AIR.defaultBlockState(),
+                    bs -> bs.is(BlockTags.DIRT),
+                    BlockSpreadUtils.OFFSETS_17);
+        }
+    }
 }

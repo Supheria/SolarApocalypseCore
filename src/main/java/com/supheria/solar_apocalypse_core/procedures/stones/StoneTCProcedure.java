@@ -2,10 +2,8 @@ package com.supheria.solar_apocalypse_core.procedures.stones;
 
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.procedures.util.BlockSpreadUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
@@ -25,13 +23,10 @@ import net.minecraft.world.level.block.Blocks;
  */
 public class StoneTCProcedure {
 
-    private static final TagKey<net.minecraft.world.level.biome.Biome> IS_OVERWORLD =
-            TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"));
-
     public static void execute(Block target, LevelAccessor world, double x, double y, double z) {
         int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
 
-        if (!world.getBiome(BlockPos.containing(x, y, z)).is(IS_OVERWORLD)) {
+        if (!BlockSpreadUtils.isOverworld(world, x, y, z)) {
             return;
         }
 
