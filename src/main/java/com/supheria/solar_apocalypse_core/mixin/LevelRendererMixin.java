@@ -1,6 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.world.SolarPhase;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.resources.ResourceLocation;
@@ -59,24 +60,43 @@ public abstract class LevelRendererMixin {
 
     @Inject(method="renderSky", at = @At("HEAD"))
     private void onRendersky(PoseStack p_202424_, Matrix4f p_254034_, float p_202426_, Camera p_202427_, boolean p_202428_, Runnable p_202429_, CallbackInfo ci){
+        int solarFlare = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+        SolarPhase currentPhase = SapModVariables.MapVariables.get(world).getCurrentPhase();
 
-        if (SapModVariables.MapVariables.get(world).SolarFlare == 1){
+        // 太阳纹理根据阶段变化
+        if (solarFlare == 1){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step1.png");
         }
-        if (SapModVariables.MapVariables.get(world).SolarFlare == 2){
+        if (solarFlare == 2){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step2.png");
         }
-        if (SapModVariables.MapVariables.get(world).SolarFlare == 3){
+        if (solarFlare == 3){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step3.png");
         }
-        if (SapModVariables.MapVariables.get(world).SolarFlare == 4){
+        if (solarFlare == 4){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step4.png");
         }
-        if (SapModVariables.MapVariables.get(world).SolarFlare == 5){
+        if (solarFlare == 5){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step5.png");
         }
-        if (SapModVariables.MapVariables.get(world).SolarFlare == 6){
+        if (solarFlare == 6){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step6.png");
+        }
+
+        // 第六阶段白天降低光照
+        if (currentPhase == SolarPhase.COLLAPSE) {
+            if (world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                long dayTime = serverLevel.dayTime();
+                long timeOfDay = dayTime % 24000;
+                boolean isDaytime = timeOfDay < 12000;
+
+                if (isDaytime) {
+                    // 降低白天的光照亮度 - 通过修改着色器颜色和雾效果
+                    com.mojang.blaze3d.systems.RenderSystem.setShaderFogColor(0.15f, 0.15f, 0.15f, 1.0f);
+                    // 降低渲染的整体颜色强度（通过降低颜色乘数）
+                    com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.4f, 0.4f, 0.4f, 1.0f);
+                }
+            }
         }
     }
 
@@ -107,5 +127,30 @@ public abstract class LevelRendererMixin {
         copy.scale(1.0F, 1.0F, 1.0F);
         originalCelestialMatrix = null;
         return copy;
+    }
+
+    /**
+     * 获取第六阶段白天的亮度因子
+     * 用于降低白天的光照等级，使僵尸能在白天生成
+     */
+    private float getCollapseDayBrightnessFactor() {
+        if (world == null) return 1.0f;
+
+        SolarPhase currentPhase = SapModVariables.MapVariables.get(world).getCurrentPhase();
+        if (currentPhase != SolarPhase.COLLAPSE) {
+            return 1.0f;
+        }
+
+        // 检查是否为白天
+        if (world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            long dayTime = serverLevel.dayTime();
+            long timeOfDay = dayTime % 24000;
+            boolean isDaytime = timeOfDay < 12000;
+
+            if (isDaytime) {
+                return 0.3f; // 白天亮度降至30%
+            }
+        }
+        return 1.0f;
     }
 }

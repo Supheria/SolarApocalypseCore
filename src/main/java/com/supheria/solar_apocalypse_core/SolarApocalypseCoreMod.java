@@ -337,6 +337,12 @@ public class SolarApocalypseCoreMod {
                 return GravelTCLavaProcedure::execute;
             }
         }
+        //용암 (제6단계에서 흑요석으로 변환)
+        if (block == Blocks.LAVA) {
+            if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)) {
+                return LavaTCObsidianProcedure::execute;
+            }
+        }
         //사암
         if (builtInRegistryHolder.is(SapModTags.Blocks.SANDSTONE)) {
             if  (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)

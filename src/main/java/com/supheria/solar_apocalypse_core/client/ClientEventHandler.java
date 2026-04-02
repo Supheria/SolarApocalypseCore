@@ -8,6 +8,7 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
+import org.lwjgl.glfw.GLFW;
 
 import com.supheria.solar_apocalypse_core.client.hud.SolarHudEditScreen;
 
@@ -38,10 +39,11 @@ public class ClientEventHandler {
 class KeyInputHandler {
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
-        if (ClientEventHandler.HUD_EDIT_KEY.consumeClick()) {
+        // 检查H键是否被按下（不消费其他键的事件）
+        if (event.getKey() == InputConstants.KEY_H && event.getAction() == GLFW.GLFW_PRESS) {
             Minecraft minecraft = Minecraft.getInstance();
             // 只在有世界且不在其他屏幕打开时才打开编辑屏幕
-            if (minecraft.level != null) {
+            if (minecraft.level != null && minecraft.screen == null) {
                 minecraft.setScreen(new SolarHudEditScreen());
             }
         }

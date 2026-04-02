@@ -5,7 +5,12 @@
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
 		"BlockStateBaseMixin",
-		"LevelRendererMixin"
+		"LevelRendererMixin",
+		"MobSpawnRulesMixin",
+		"UndeadMobBurnMixin",
+		"SkeletonBurnMixin",
+		"SnowLayerMixin",
+		"BiomeGetTemperatureMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

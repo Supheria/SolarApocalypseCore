@@ -85,4 +85,17 @@ public class SunRenderHelper {
             default -> 0.5f; // COLLAPSE
         };
     }
+
+    /**
+     * 获取第六阶段（坍缩）的白天亮度倍数
+     * 白天返回配置的亮度倍数（默认0.3），夜晚返回1.0（正常亮度）
+     * 用于LevelRendererMixin在渲染天空时调整亮度
+     */
+    public static float getCollapseDayBrightness(long dayTime, float brightnessFactor) {
+        // 白天时间范围：0-12000 ticks（昼夜周期24000）
+        long timeOfDay = dayTime % 24000;
+        boolean isDaytime = timeOfDay < 12000;
+
+        return isDaytime ? (float) brightnessFactor : 1.0f;
+    }
 }

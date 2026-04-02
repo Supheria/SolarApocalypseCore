@@ -2,6 +2,7 @@ package com.supheria.solar_apocalypse_core.config.solar;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -27,9 +28,15 @@ public class SolarStageConfig {
     }
 
     public static class SolarStageValues {
-        // 仅需两个关键配置参数
+        // 阶段转换时间配置
         public final IntValue stage5StartTime;
         public final IntValue stage6StartTime;
+
+        // 第六阶段特性配置
+        public final IntValue collapseMaxSnowLayer;
+        public final IntValue collapseSnowAccumulationRate;
+        public final DoubleValue collapseDayBrightnessFactor;
+        public final IntValue collapseBlockTransformRate;
 
         // 固定的随机刻度等级（随阶段递增）
         public static final int[] RANDOM_TICKING_LEVELS = {4, 5, 8, 9, 10, 10};
@@ -55,6 +62,28 @@ public class SolarStageConfig {
                     .comment("Stage 6 (Collapse/Eternal Winter) start time in ticks")
                     .comment("Default: 960000 = 40 Minecraft days")
                     .defineInRange("stage6StartTime", 960000, 1, Integer.MAX_VALUE);
+            builder.pop();
+
+            builder.push("collapse_effects");
+            collapseMaxSnowLayer = builder
+                    .comment("Maximum snow layer depth in Stage 6 (1-8 layers)")
+                    .comment("Each layer = 1/8 block height")
+                    .defineInRange("maxSnowLayer", 6, 1, 8);
+
+            collapseSnowAccumulationRate = builder
+                    .comment("Snow accumulation tick interval in Stage 6")
+                    .comment("Lower = faster accumulation, 100 = default")
+                    .defineInRange("snowAccumulationRate", 100, 1, 1000);
+
+            collapseDayBrightnessFactor = builder
+                    .comment("Daytime brightness factor in Stage 6 (0.0-1.0)")
+                    .comment("0.3 = 30% brightness, allows mob spawning")
+                    .defineInRange("dayBrightnessFactor", 0.3, 0.0, 1.0);
+
+            collapseBlockTransformRate = builder
+                    .comment("Block transformation speed multiplier in Stage 6")
+                    .comment("Higher = faster transformation, 2 = default")
+                    .defineInRange("blockTransformRate", 2, 1, 10);
             builder.pop();
         }
 
