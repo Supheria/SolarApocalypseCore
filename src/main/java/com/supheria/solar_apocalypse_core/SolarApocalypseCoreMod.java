@@ -300,29 +300,26 @@ public class SolarApocalypseCoreMod {
                         || builtInRegistryHolder.is(Tags.Blocks.ORE_BEARING_GROUND_DEEPSLATE)
                         || builtInRegistryHolder.is(Tags.Blocks.ORES_IN_GROUND_DEEPSLATE)
                         || builtInRegistryHolder.is(SapModTags.Blocks.DEEPSLATE)) {
+                    // 深板岩系列
                     if (builtInRegistryHolder.is(BlockTags.STAIRS)) {
-                        return StoneTCCobbledDeepslateStairsProcedure::execute;
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE_STAIRS, w, x, y, z);
                     } else if (builtInRegistryHolder.is(BlockTags.SLABS)) {
-                        return StoneTCCobbledDeepslateSlabProcedure::execute;
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE_SLAB, w, x, y, z);
                     } else if (builtInRegistryHolder.is(BlockTags.WALLS)) {
-                        return StoneTCCobbledDeepslateWallProcedure::execute;
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE_WALL, w, x, y, z);
                     } else {
-                        return StoneTCCobbledDeepslateProcedure::execute;
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE, w, x, y, z);
                     }
-                    //일반돌계열
                 } else {
-                    //계단
+                    // 普通石头系列
                     if (builtInRegistryHolder.is(BlockTags.STAIRS)) {
-                        return StoneTCCobblestoneStairsProcedure::execute;
-                        //반블록
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE_STAIRS, w, x, y, z);
                     } else if (builtInRegistryHolder.is(BlockTags.SLABS)) {
-                        return StoneTCCobblestoneSlabProcedure::execute;
-                        //담장
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE_SLAB, w, x, y, z);
                     } else if (builtInRegistryHolder.is(BlockTags.WALLS)) {
-                        return StoneTCCobblestoneWallProcedure::execute;
-                        //일반블록
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE_WALL, w, x, y, z);
                     } else {
-                        return StoneTCCobblestoneProcedure::execute;
+                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE, w, x, y, z);
                     }
                 }
             }
