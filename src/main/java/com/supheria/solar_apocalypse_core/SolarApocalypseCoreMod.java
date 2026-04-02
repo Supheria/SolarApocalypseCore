@@ -54,8 +54,8 @@ public class SolarApocalypseCoreMod {
         // Register Solar Stage Configuration (COMMON)
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SolarStageConfig.SPEC);
 
-        // Register Stage Height Configuration (COMMON)
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, StageHeightConfig.SPEC);
+        // Register Stage Height Configuration (SERVER)
+        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.SERVER, StageHeightConfig.SPEC);
 
         // Register HUD Configuration (CLIENT)
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.CLIENT, SolarHudConfig.SPEC);
