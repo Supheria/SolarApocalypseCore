@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import com.supheria.solar_apocalypse_core.init.SapModBlocks;
 import com.supheria.solar_apocalypse_core.init.SapModTags;
@@ -15,8 +16,9 @@ import net.minecraft.world.level.block.Blocks;
 
 public class DirtTCCoarseDirtProcedure {
     public static void execute(LevelAccessor world, double x, double y, double z) {
+        int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
         if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-                && SapModVariables.MapVariables.get(world).SolarFlare >= 1 && SapModVariables.MapVariables.get(world).SolarFlare < 6
+                && stage >= 1 && stage < 6
                 && !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
                 && world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && world.dayTime() >= 24000
                 && !world.getLevelData().isRaining()
@@ -24,13 +26,13 @@ public class DirtTCCoarseDirtProcedure {
             world.setBlock(BlockPos.containing(x, y, z), Blocks.COARSE_DIRT.defaultBlockState(), 3);
         }
         if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-                && SapModVariables.MapVariables.get(world).SolarFlare == 2
+                && stage == 2
                 && world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
                 && world.dayTime() >= 168000) {
             world.setBlock(BlockPos.containing(x, y, z), Blocks.SAND.defaultBlockState(), 3);
         }else if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-                && SapModVariables.MapVariables.get(world).SolarFlare == 3
-                && y >= 63) {
+                && stage == 3
+                && y >= StageHeightConfig.getSafeHeight(2)) {
             world.setBlock(BlockPos.containing(x, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
             if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(SapModTags.Blocks.DIRT)) {
                 world.setBlock(BlockPos.containing(x + 1, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
@@ -45,8 +47,8 @@ public class DirtTCCoarseDirtProcedure {
                 world.setBlock(BlockPos.containing(x, y, z - 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
             }
         }else if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-                && SapModVariables.MapVariables.get(world).SolarFlare >= 4 && SapModVariables.MapVariables.get(world).SolarFlare < 6
-                && y >= 32) {
+                && stage >= 4 && stage < 6
+                && y >= StageHeightConfig.getSafeHeight(4)) {
             world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
             if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.DIRT)) {
                 world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.AIR.defaultBlockState(), 3);
@@ -74,8 +76,8 @@ public class DirtTCCoarseDirtProcedure {
             }
         }
         if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-                && SapModVariables.MapVariables.get(world).SolarFlare == 5
-                && y >= 8) {
+                && stage == 5
+                && y >= StageHeightConfig.getSafeHeight(5)) {
             world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
             if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.DIRT)) {
                 world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.AIR.defaultBlockState(), 3);

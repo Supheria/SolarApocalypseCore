@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures.stones;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import net.minecraft.core.BlockPos;
@@ -12,7 +13,8 @@ import net.minecraft.world.level.block.Blocks;
 
 public class StoneTCCobblestoneStairsProcedure {
 	public static void execute(LevelAccessor world, double x, double y, double z) {
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 2 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+		if (stage >= 2 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& (world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
 					|| ((world.getBlockState(BlockPos.containing(x, y + 1, z))).getBlock() == Blocks.LAVA)
@@ -21,21 +23,22 @@ public class StoneTCCobblestoneStairsProcedure {
 					|| ((world.getBlockState(BlockPos.containing(x - 1, y, z))).getBlock() == Blocks.LAVA)
 					|| ((world.getBlockState(BlockPos.containing(x, y, z + 1))).getBlock() == Blocks.LAVA)
 					|| ((world.getBlockState(BlockPos.containing(x, y, z - 1))).getBlock() == Blocks.LAVA))
-					&& y >= -16
+					&& y >= Math.min(Math.min(StageHeightConfig.getSafeHeight(2), StageHeightConfig.getSafeHeight(3)),
+							Math.min(StageHeightConfig.getSafeHeight(4), StageHeightConfig.getSafeHeight(5)))
 					&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 5) <= (world.dayTime() / 16000)) {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.COBBLESTONE_STAIRS.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 3) {
+		if (stage == 3) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= 63
+					&& y >= StageHeightConfig.getSafeHeight(2)
 					&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 5) <= (world.dayTime() / 16000)) {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.COBBLESTONE_STAIRS.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 4  && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+		if (stage >= 4 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= 8) {
+					&& y >= StageHeightConfig.getSafeHeight(4)) {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.COBBLESTONE_STAIRS.defaultBlockState(), 3);
 			}
 		}

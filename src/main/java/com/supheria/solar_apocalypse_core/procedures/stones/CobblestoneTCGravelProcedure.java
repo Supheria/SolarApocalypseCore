@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures.stones;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import net.minecraft.core.BlockPos;

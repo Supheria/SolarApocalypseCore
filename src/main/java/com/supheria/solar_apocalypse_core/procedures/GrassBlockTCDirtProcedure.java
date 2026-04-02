@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import com.supheria.solar_apocalypse_core.init.SapModBlocks;
 import com.supheria.solar_apocalypse_core.init.SapModTags;
@@ -16,7 +17,8 @@ import com.supheria.solar_apocalypse_core.network.SapModVariables;
 
 public class GrassBlockTCDirtProcedure {
 	public static void execute(LevelAccessor world, double x, double y, double z) {
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 1 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+		if (stage >= 1 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450) //해가 떠있을때
 					&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) //블럭이 하늘이 보일때
@@ -26,15 +28,15 @@ public class GrassBlockTCDirtProcedure {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.DIRT.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 2 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+		if (stage >= 2 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.COARSE_DIRT.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 3) {
+		if (stage == 3) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= 63) {
+					&& y >= StageHeightConfig.getSafeHeight(2)) {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.SAND.defaultBlockState(), 3);
 				if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(SapModTags.Blocks.MOIST_DIRT)) {
 					world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.SAND.defaultBlockState(), 3);
@@ -50,9 +52,9 @@ public class GrassBlockTCDirtProcedure {
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 4) {
+		if (stage == 4) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= 8) {
+					&& y >= StageHeightConfig.getSafeHeight(4)) {
 				world.setBlock(BlockPos.containing(x, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
 				if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(SapModTags.Blocks.MOIST_DIRT)) {
 					world.setBlock(BlockPos.containing(x + 1, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
@@ -81,7 +83,7 @@ public class GrassBlockTCDirtProcedure {
 			}
 		}
 		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare == 5
+				&& stage == 5
 				&& y >= 8) {
 			world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
 			if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.DIRT)) {

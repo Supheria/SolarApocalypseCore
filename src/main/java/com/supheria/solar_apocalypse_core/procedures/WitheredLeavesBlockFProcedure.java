@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import com.supheria.solar_apocalypse_core.init.SapModBlocks;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
@@ -14,8 +15,9 @@ import net.minecraft.world.level.block.Blocks;
 
 public class WitheredLeavesBlockFProcedure {
 	public static void execute(LevelAccessor world, double x, double y, double z) {
+		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
 		if (!((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
-				&& SapModVariables.MapVariables.get(world).SolarFlare >= 1 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+				&& stage >= 1 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
 					&& (world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || (world.getBlockState(BlockPos.containing(x, y+1, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
@@ -26,17 +28,17 @@ public class WitheredLeavesBlockFProcedure {
 			}
 		}
 		if (!((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
-				&& SapModVariables.MapVariables.get(world).SolarFlare >= 2 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+				&& stage >= 2 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
 					&& !world.getLevelData().isRaining()
 					&& world.dayTime() >= 240000
-					&& y >= 63
+					&& y >= StageHeightConfig.getSafeHeight(2)
 					&& Mth.nextDouble(RandomSource.create(), 0, 10) <= ((world.dayTime() / 24000) / 3) + 5) {
 				world.setBlock(BlockPos.containing(x, y, z), SapModBlocks.WITHERED_LEAVES.get().defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 2 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+		if (stage >= 2 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
 					&& (world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || (world.getBlockState(BlockPos.containing(x, y+1, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
@@ -46,7 +48,7 @@ public class WitheredLeavesBlockFProcedure {
 				world.setBlock(BlockPos.containing(x, y + 1, z), Blocks.FIRE.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 2) {
+		if (stage == 2) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
 					&& !world.getLevelData().isRaining()
@@ -57,7 +59,7 @@ public class WitheredLeavesBlockFProcedure {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 3 && SapModVariables.MapVariables.get(world).SolarFlare < 6
+		if (stage >= 3 && stage < 6
 				&& (world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get()) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))) {
 				world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
@@ -75,7 +77,7 @@ public class WitheredLeavesBlockFProcedure {
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 3 && SapModVariables.MapVariables.get(world).SolarFlare < 6
+		if (stage >= 3 && stage < 6
 				&& world.dayTime() >= 360000
 				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
@@ -95,7 +97,7 @@ public class WitheredLeavesBlockFProcedure {
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 3 && SapModVariables.MapVariables.get(world).SolarFlare < 6
+		if (stage >= 3 && stage < 6
 				&& world.dayTime() >= 360000
 				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
@@ -119,7 +121,7 @@ public class WitheredLeavesBlockFProcedure {
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 4) {
+		if (stage == 4) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& y >= 64) {
 				if (Mth.nextDouble(RandomSource.create(), 0, 2) <= 1){
@@ -178,7 +180,7 @@ public class WitheredLeavesBlockFProcedure {
 			}
 		}
 		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare == 5
+				&& stage == 5
 				&& y >= 8) {
 				if (Mth.nextDouble(RandomSource.create(), 0, 2) <= 1){
 					world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);

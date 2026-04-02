@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures.stats;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,6 +43,7 @@ public class SapHotProcedure {
 	private static void execute(@Nullable Event event, LevelAccessor world, double x, double y, double z, Entity entity) {
 		if (entity == null)
 			return;
+		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
 		if (entity.getPersistentData().getDouble("SapStack") >= 200 && entity.getPersistentData().getDouble("WaterStack") <= 0
 				&& (entity instanceof LivingEntity _livEnt && _livEnt.hasEffect(SapModMobEffects.DEHYDRATION.get()) ? _livEnt.getEffect(SapModMobEffects.DEHYDRATION.get()).getDuration() : 0) < entity.getPersistentData().getDouble("SapStack")) {
 			if (entity instanceof LivingEntity _entity && !_entity.level().isClientSide())
@@ -144,14 +146,14 @@ public class SapHotProcedure {
 				entity.setSecondsOnFire(1);
 				entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
 			}
-			if (y >= 63) {
+			if (y >= StageHeightConfig.getSapHeight(stage)) {
 				if (entity.getPersistentData().getDouble("SapStack") < 1200 && entity.getPersistentData().getDouble("WaterStack") <= 0) {
 					entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
 				}
 			}
 		}
 		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.ACCELERATION && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
-				&& (y < 63 || world.getLevelData().isRaining() || entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
+				&& (y < StageHeightConfig.getSapHeight(stage) || world.getLevelData().isRaining() || entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
 				|| (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get())
 				|| !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
 			if (entity.getPersistentData().getDouble("SapStack") > 0) {
@@ -177,17 +179,17 @@ public class SapHotProcedure {
 				return false;
 			}
 		}.checkGamemode(entity)) && world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))) && !entity.isInWaterRainOrBubble()) {
-			if (y >= 63 || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
+			if (y >= StageHeightConfig.getExtraDamageHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
 				entity.setSecondsOnFire(2);
 				entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
 			}
-			if (y >= 8) {
+			if (y >= StageHeightConfig.getSapHeight(stage)) {
 				if (entity.getPersistentData().getDouble("SapStack") < 1200 && entity.getPersistentData().getDouble("WaterStack") <= 0) {
 					entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.PEAK && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < 8 || entity.isInWaterRainOrBubble())
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.PEAK && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
 				|| !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
 			if (entity.getPersistentData().getDouble("SapStack") > 0) {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
@@ -212,17 +214,17 @@ public class SapHotProcedure {
 				return false;
 			}
 		}.checkGamemode(entity)) && world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))) && !entity.isInWaterRainOrBubble()) {
-			if (y >= 32 || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
+			if (y >= StageHeightConfig.getExtraDamageHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
 				entity.setSecondsOnFire(3);
 				entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
 			}
-			if (y >= -16) {
+			if (y >= StageHeightConfig.getSapHeight(stage)) {
 				if (entity.getPersistentData().getDouble("SapStack") < 1200 && entity.getPersistentData().getDouble("WaterStack") <= 0) {
 					entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
 				}
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.CRITICAL && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < -16 || entity.isInWaterRainOrBubble())
+		if (SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.CRITICAL && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
 				|| !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
 			if (entity.getPersistentData().getDouble("SapStack") > 0) {
 				entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
@@ -247,7 +249,7 @@ public class SapHotProcedure {
 				return false;
 			}
 		}.checkGamemode(entity)) && world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))) && !entity.isInWaterRainOrBubble()) {
-			if (y >= 8 || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
+			if (y >= StageHeightConfig.getExtraDamageHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
 				entity.setSecondsOnFire(4);
 				entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
 			}

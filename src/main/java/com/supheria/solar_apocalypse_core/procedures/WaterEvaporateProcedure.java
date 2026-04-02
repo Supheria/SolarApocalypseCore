@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.procedures;
 
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -13,10 +14,14 @@ import net.minecraft.world.level.block.Blocks;
 
 public class WaterEvaporateProcedure {
 	public static void execute(LevelAccessor world, double x, double y, double z) {
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare >= 2 && SapModVariables.MapVariables.get(world).SolarFlare <= 6
+		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+
+		// 阶段2-5的水蒸发逻辑（需要检查高度）
+		if (stage >= 2 && stage < 6
+				&& world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 				&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
 				&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
+				&& y > StageHeightConfig.getWaterEvapHeight(stage)
 				&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 1) <= (world.dayTime() / 24000)) {
 			world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
 			if ((world.getFluidState(BlockPos.containing(x + 1, y, z))).is(FluidTags.WATER)) {

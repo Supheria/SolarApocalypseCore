@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures.stats;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
@@ -57,6 +58,7 @@ public class EntityFireProcedure {
 			}
 		}
 		if (!(entity instanceof Projectile)) {
+			int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
 			SolarApocalypseCoreMod.queueServerWork(1, () -> {
 				if (SapModVariables.MapVariables.get(world).SolarFlare == 2
 						&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
@@ -78,7 +80,7 @@ public class EntityFireProcedure {
 								});
 							});
 						});
-					} else if (y >= 63) {
+					} else if (y > StageHeightConfig.getExtraDamageHeight(stage)) {
 						entity.setSecondsOnFire(10);
 						SolarApocalypseCoreMod.queueServerWork(20, () -> {
 							entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (1));
@@ -107,8 +109,8 @@ public class EntityFireProcedure {
 						});
 					});
 				}
-				if (SapModVariables.MapVariables.get(world).SolarFlare == 3
-						&& y >= 32) {
+				if (stage == 3
+						&& y > StageHeightConfig.getSafeHeight(stage)) {
 					entity.setSecondsOnFire(5);
 					SolarApocalypseCoreMod.queueServerWork(20, () -> {
 						entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (1));
@@ -125,7 +127,7 @@ public class EntityFireProcedure {
 							});
 						});
 					});
-					if (y >= 63) {
+					if (y > StageHeightConfig.getExtraDamageHeight(stage)) {
 						SolarApocalypseCoreMod.queueServerWork(5, () -> {
 							entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (1));
 							SolarApocalypseCoreMod.queueServerWork(5, () -> {
@@ -134,8 +136,8 @@ public class EntityFireProcedure {
 						});
 					}
 				}
-				if (SapModVariables.MapVariables.get(world).SolarFlare == 4
-						&& y >= 8) {
+				if (stage == 4
+						&& y > StageHeightConfig.getSafeHeight(stage)) {
 					entity.setSecondsOnFire(5);
 					SolarApocalypseCoreMod.queueServerWork(20, () -> {
 						entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (1));
@@ -146,7 +148,7 @@ public class EntityFireProcedure {
 							});
 						});
 					});
-					if (y >= 32) {
+					if (y > StageHeightConfig.getExtraDamageHeight(stage)) {
 						SolarApocalypseCoreMod.queueServerWork(5, () -> {
 							entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (1));
 							SolarApocalypseCoreMod.queueServerWork(5, () -> {
@@ -155,8 +157,8 @@ public class EntityFireProcedure {
 						});
 					}
 				}
-				if (SapModVariables.MapVariables.get(world).SolarFlare == 5
-						&& y >= -16) {
+				if (stage == 5
+						&& y > StageHeightConfig.getSafeHeight(stage)) {
 					entity.setSecondsOnFire(5);
 					SolarApocalypseCoreMod.queueServerWork(5, () -> {
 						entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (1));
@@ -164,7 +166,7 @@ public class EntityFireProcedure {
 							entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (10));
 						});
 					});
-					if (y >= 8) {
+					if (y > StageHeightConfig.getExtraDamageHeight(stage)) {
 						SolarApocalypseCoreMod.queueServerWork(1, () -> {
 							entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), (float) (1));
 							SolarApocalypseCoreMod.queueServerWork(1, () -> {

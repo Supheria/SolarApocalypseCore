@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.procedures;
 
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarPhase;

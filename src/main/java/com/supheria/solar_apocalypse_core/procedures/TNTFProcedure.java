@@ -1,4 +1,5 @@
 package com.supheria.solar_apocalypse_core.procedures;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import net.minecraft.core.BlockPos;
@@ -12,7 +13,8 @@ import net.minecraft.world.level.block.Blocks;
 
 public class TNTFProcedure {
 	public static void execute(LevelAccessor world, double x, double y, double z) {
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 1 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+		if (stage >= 1 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
 					&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
@@ -23,7 +25,7 @@ public class TNTFProcedure {
 				world.setBlock(BlockPos.containing(x, y+1, z), Blocks.FIRE.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare == 2) {
+		if (stage == 2) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
 					&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
@@ -33,14 +35,14 @@ public class TNTFProcedure {
 					&& Mth.nextDouble(RandomSource.create(), 0, 15) <= ((world.dayTime() / 24000) / 4) + 3) {
 				world.setBlock(BlockPos.containing(x, y+1, z), Blocks.FIRE.defaultBlockState(), 3);
 			}
-		} else if (SapModVariables.MapVariables.get(world).SolarFlare == 3) {
+		} else if (stage == 3) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= 63
+					&& y >= StageHeightConfig.getSafeHeight(2)
 					&& (world.getBlockState(BlockPos.containing(x, y+1, z))).getBlock() == Blocks.AIR) {
 				world.setBlock(BlockPos.containing(x, y+1, z), Blocks.FIRE.defaultBlockState(), 3);
 			}
 		}
-		if (SapModVariables.MapVariables.get(world).SolarFlare >= 4 && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+		if (stage >= 4 && stage < 6) {
 			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
 					&& y >= 8
 					&& (world.getBlockState(BlockPos.containing(x, y+1, z))).getBlock() == Blocks.AIR) {

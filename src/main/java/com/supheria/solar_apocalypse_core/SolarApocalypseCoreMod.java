@@ -2,6 +2,7 @@ package com.supheria.solar_apocalypse_core;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
+import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.init.*;
 import com.supheria.solar_apocalypse_core.procedures.*;
 import com.supheria.solar_apocalypse_core.procedures.stones.*;
@@ -52,6 +53,9 @@ public class SolarApocalypseCoreMod {
 
         // Register Solar Stage Configuration (COMMON)
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SolarStageConfig.SPEC);
+
+        // Register Stage Height Configuration (COMMON)
+        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, StageHeightConfig.SPEC);
 
         // Register HUD Configuration (CLIENT)
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.CLIENT, SolarHudConfig.SPEC);
