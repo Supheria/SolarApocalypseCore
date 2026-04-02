@@ -1,11 +1,14 @@
 package com.supheria.solar_apocalypse_core.procedures.transform;
 
+import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.procedures.util.BlockSpreadUtils;
+import com.supheria.solar_apocalypse_core.world.SolarPhase;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 /**
@@ -148,6 +151,94 @@ public final class TransformConditions {
     public static TransformCondition randomOneIn10() {
         return (world, x, y, z, stage) ->
                 Mth.nextInt(RandomSource.create(), 1, 10) == 1;
+    }
+
+    /**
+     * nextDouble(0, D+1) <= D，其中 D = dayTime/24000（整数除法）。
+     * （普通方块随天累积删除概率，SimpleDelete / Bubble / WaterEvaporate 等共享公式）
+     */
+    public static TransformCondition randomDayRate() {
+        return (world, x, y, z, stage) -> {
+            long d = world.dayTime() / 24000;
+            return Mth.nextDouble(RandomSource.create(), 0, d + 1) <= d;
+        };
+    }
+
+    /**
+     * nextDouble(0, 10) <= (D/2)+2，其中 D = dayTime/24000（整数除法）。
+     * （木制方块阶段1-5的燃烧概率）
+     */
+    public static TransformCondition randomDayWood() {
+        return (world, x, y, z, stage) -> {
+            long d = world.dayTime() / 24000;
+            return Mth.nextDouble(RandomSource.create(), 0, 10) <= (d / 2) + 2;
+        };
+    }
+
+    /**
+     * nextDouble(0, 15) <= (D/4)+3，其中 D = dayTime/24000（整数除法）。
+     * （木制方块阶段2-3的慢速燃烧概率）
+     */
+    public static TransformCondition randomDayWoodSlow() {
+        return (world, x, y, z, stage) -> {
+            long d = world.dayTime() / 24000;
+            return Mth.nextDouble(RandomSource.create(), 0, 15) <= (d / 4) + 3;
+        };
+    }
+
+    /**
+     * nextDouble(0, 15) <= (D/2)+3，其中 D = dayTime/24000（整数除法）。
+     * （木制方块阶段4-5的快速燃烧概率）
+     */
+    public static TransformCondition randomDayWoodFast() {
+        return (world, x, y, z, stage) -> {
+            long d = world.dayTime() / 24000;
+            return Mth.nextDouble(RandomSource.create(), 0, 15) <= (d / 2) + 3;
+        };
+    }
+
+    /** world.dayTime() < maxTicks */
+    public static TransformCondition dayTimeLessThan(long maxTicks) {
+        return (world, x, y, z, stage) -> world.dayTime() < maxTicks;
+    }
+
+    /** 50% 随机触发（nextDouble(0,2) <= 1）。 */
+    public static TransformCondition random50() {
+        return (world, x, y, z, stage) ->
+                Mth.nextDouble(RandomSource.create(), 0, 2) <= 1;
+    }
+
+    /** 当前世界处于坍缩阶段（SolarPhase.COLLAPSE）。 */
+    public static TransformCondition collapsePhase() {
+        return (world, x, y, z, stage) ->
+                SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.COLLAPSE;
+    }
+
+    /**
+     * 坍缩阶段的概率转换条件，概率由配置项 collapseBlockTransformRate 决定：
+     * probability = min(1.0, transformRate / 2.0)
+     */
+    public static TransformCondition randomCollapse() {
+        return (world, x, y, z, stage) -> {
+            int rate = SolarStageConfig.SOLAR_STAGE_VALUES.collapseBlockTransformRate.get();
+            double p = Math.min(1.0, (double) rate / 2.0);
+            return Mth.nextDouble(RandomSource.create(), 0, 1) <= p;
+        };
+    }
+
+    /** 当前坐标处的方块为指定方块。 */
+    public static TransformCondition isBlock(Block block) {
+        return (world, x, y, z, stage) ->
+                world.getBlockState(BlockPos.containing(x, y, z)).getBlock() == block;
+    }
+
+    /**
+     * y >= min(getSafeHeight(stageA), getSafeHeight(stageB)) - lazy evaluation。
+     * 用于砾石→岩浆阶段4-5：取两阶段安全高度的较小值，保证一致的触发下限。
+     */
+    public static TransformCondition aboveMinOf(int stageA, int stageB) {
+        return (world, x, y, z, stage) ->
+                y >= Math.min(StageHeightConfig.getSafeHeight(stageA), StageHeightConfig.getSafeHeight(stageB));
     }
 
     private TransformConditions() {}

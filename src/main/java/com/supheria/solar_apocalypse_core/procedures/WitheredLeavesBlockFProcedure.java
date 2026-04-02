@@ -1,294 +1,131 @@
 package com.supheria.solar_apocalypse_core.procedures;
-import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
+import com.supheria.solar_apocalypse_core.Procedure;
 import com.supheria.solar_apocalypse_core.init.SapModBlocks;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformAction;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformCondition;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformRule;
+import com.supheria.solar_apocalypse_core.procedures.util.BlockSpreadUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformActions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformRule.when;
+
+/**
+ * 树叶枯萎与燃烧过程。
+ */
 public class WitheredLeavesBlockFProcedure {
-	public static void execute(LevelAccessor world, double x, double y, double z) {
-		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
-		if (!((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
-				&& stage >= 1 && stage < 6) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
-					&& (world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || (world.getBlockState(BlockPos.containing(x, y+1, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
-					&& !world.getLevelData().isRaining()
-					&& world.dayTime() >= 48000
-					&& Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) + 3) {
-				world.setBlock(BlockPos.containing(x, y, z), SapModBlocks.WITHERED_LEAVES.get().defaultBlockState(), 3);
-			}
-		}
-		if (!((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
-				&& stage >= 2 && stage < 6) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
-					&& !world.getLevelData().isRaining()
-					&& world.dayTime() >= 240000
-					&& y >= StageHeightConfig.getSafeHeight(2)
-					&& Mth.nextDouble(RandomSource.create(), 0, 10) <= ((world.dayTime() / 24000) / 3) + 5) {
-				world.setBlock(BlockPos.containing(x, y, z), SapModBlocks.WITHERED_LEAVES.get().defaultBlockState(), 3);
-			}
-		}
-		if (stage >= 2 && stage < 6) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
-					&& (world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || (world.getBlockState(BlockPos.containing(x, y+1, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
-					&& !world.getLevelData().isRaining()
-					&& ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())
-					&& Mth.nextDouble(RandomSource.create(), 0, 10) <= ((world.dayTime() / 24000) / 3) + 2) {
-				world.setBlock(BlockPos.containing(x, y + 1, z), Blocks.FIRE.defaultBlockState(), 3);
-			}
-		}
-		if (stage == 2) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
-					&& !world.getLevelData().isRaining()
-					&& world.dayTime() >= 240000
-					&& ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get()
-					&& y >= 63)
-					&& Mth.nextDouble(RandomSource.create(), 0, 15) <= ((world.dayTime() / 24000) / 4) + 3) {
-				world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
-			}
-		}
-		if (stage >= 3 && stage < 6
-				&& (world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get()) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))) {
-				world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
-				if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-				}
-			}
-		}
-		if (stage >= 3 && stage < 6
-				&& world.dayTime() >= 360000
-				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= 63) {
-				world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
-				if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-				}
-				if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.LEAVES)) {
-					world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-				}
-			}
-		}
-		if (stage >= 3 && stage < 6
-				&& world.dayTime() >= 360000
-				&& !((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.WITHERED_LEAVES.get())) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y < 63 && y >= 8) {
-				if (Mth.nextDouble(RandomSource.create(), 0, 2) <= 1){
-					world.setBlock(BlockPos.containing(x, y, z), SapModBlocks.WITHERED_LEAVES.get().defaultBlockState(), 3);
-				} else {
-					world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-				}
-			}
-		}
-		if (stage == 4) {
-			if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-					&& y >= 64) {
-				if (Mth.nextDouble(RandomSource.create(), 0, 2) <= 1){
-					world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-				} else {
-					world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z + 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z - 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z + 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z + 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z - 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z - 1), SapModBlocks.DUST.get().defaultBlockState(), 3);
-					}
-				}
-			}
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage == 5
-				&& y >= 8) {
-				if (Mth.nextDouble(RandomSource.create(), 0, 2) <= 1){
-					world.setBlock(BlockPos.containing(x, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y - 1, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y - 1, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y - 1, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y - 1, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y - 1, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y - 1, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y - 1, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y - 1, z + 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y - 1, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y - 1, z - 1), Blocks.FIRE.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y - 1, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y - 1, z), Blocks.FIRE.defaultBlockState(), 3);
-					}
-			} else {
-					world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z + 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y, z - 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z + 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z + 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y, z - 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y, z - 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y - 1, z), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y - 1, z), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y - 1, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y - 1, z + 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y - 1, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y - 1, z - 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y - 1, z + 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z + 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y - 1, z + 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x + 1, y - 1, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x + 1, y - 1, z - 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x - 1, y - 1, z - 1))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x - 1, y - 1, z - 1), Blocks.AIR.defaultBlockState(), 3);
-					}
-					if ((world.getBlockState(BlockPos.containing(x, y - 1, z))).is(BlockTags.LEAVES)) {
-						world.setBlock(BlockPos.containing(x, y - 1, z), Blocks.AIR.defaultBlockState(), 3);
-					}
-				}
-		}
-	}
+
+    /** 叶片谓词：匹配任意树叶方块。 */
+    private static final java.util.function.Predicate<BlockState> IS_LEAVES =
+            bs -> bs.is(BlockTags.LEAVES);
+
+    /** 向4邻扩散火焰。 */
+    private static final TransformAction FIRE_4H =
+            spread4H(Blocks.FIRE.defaultBlockState(), IS_LEAVES);
+
+    /** 向8邻扩散火焰。 */
+    private static final TransformAction FIRE_8H =
+            spread8H(Blocks.FIRE.defaultBlockState(), IS_LEAVES);
+
+    /** 向17邻（8H+下层）扩散火焰。 */
+    private static final TransformAction FIRE_17 =
+            spread17(Blocks.FIRE.defaultBlockState(), IS_LEAVES);
+
+    /** 向17邻（8H+下层）扩散空气。 */
+    private static final TransformAction AIR_17 =
+            spread17(Blocks.AIR.defaultBlockState(), IS_LEAVES);
+
+    /** 天空可见 或 正上方是枯萎树叶。 */
+    private static final TransformCondition SKY_OR_WITHER_ABOVE =
+            sky().or((world, x, y, z, stage) ->
+                    world.getBlockState(BlockPos.containing(x, y + 1, z)).getBlock()
+                            == SapModBlocks.WITHERED_LEAVES.get());
+
+    /** 当前方块是枯萎树叶。 */
+    private static final TransformCondition IS_WITHERED =
+            isBlock(SapModBlocks.WITHERED_LEAVES.get());
+
+    /** 当前方块不是枯萎树叶。 */
+    private static final TransformCondition NOT_WITHERED = IS_WITHERED.negate();
+
+    /** 阶段2-5 softBase：白天 + 不下雨。 */
+    private static final TransformCondition SOFT_BASE_2 = daytime().and(noRain());
+
+    /**
+     * 阶段4 y>=64 的二选一动作：
+     * 50% → 扩散火焰到中心+8邻树叶
+     * 50% → 中心变空气，8邻树叶变尘土（中心与邻居目标不同，不能用 spreadBlock）
+     */
+    private static final TransformAction STAGE4_FIRE_OR_DUST =
+            coinFlip(FIRE_8H,
+                    (world, x, y, z) -> {
+                        BlockPos center = BlockPos.containing(x, y, z);
+                        world.setBlock(center, Blocks.AIR.defaultBlockState(), 3);
+                        for (int[] o : BlockSpreadUtils.OFFSETS_8H) {
+                            BlockPos neighbor = center.offset(o[0], o[1], o[2]);
+                            if (world.getBlockState(neighbor).is(BlockTags.LEAVES)) {
+                                world.setBlock(neighbor, SapModBlocks.DUST.get().defaultBlockState(), 3);
+                            }
+                        }
+                    });
+
+    private static final Procedure INSTANCE = TransformRule.rulesOf(
+            // 阶段1-5（非枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + dayTime>=48000 + 概率 → 枯萎树叶
+            when(stageRange(1, 6).and(NOT_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
+                            .and(dayTimeMin(48000))
+                            .and((world, x, y, z, stage) ->
+                                    Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000 + 3),
+                    setBlock(SapModBlocks.WITHERED_LEAVES.get())),
+
+            // 阶段2-5（非枯萎叶）：白天 + 不下雨 + dayTime>=240000 + 高于阶段2安全高度 + 概率 → 枯萎树叶
+            when(stageRange(2, 6).and(NOT_WITHERED).and(SOFT_BASE_2).and(dayTimeMin(240000))
+                            .and(aboveSafeHeight(2))
+                            .and((world, x, y, z, stage) ->
+                                    Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000 / 3 + 5),
+                    setBlock(SapModBlocks.WITHERED_LEAVES.get())),
+
+            // 阶段2-5（枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 概率 → 上方点火
+            when(stageRange(2, 6).and(IS_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
+                            .and((world, x, y, z, stage) ->
+                                    Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000 / 3 + 2),
+                    setBlockAbove(Blocks.FIRE)),
+
+            // 阶段2（枯萎叶，y>=63）：白天 + 不下雨 + dayTime>=240000 + 慢速概率 → 点火
+            when(stageExact(2).and(IS_WITHERED).and(SOFT_BASE_2).and(dayTimeMin(240000)).and(minY(63))
+                            .and(randomDayWoodSlow()),
+                    setBlock(Blocks.FIRE)),
+
+            // 阶段3-5（枯萎叶）：直接扩散火焰到4邻树叶
+            when(stageRange(3, 6).and(IS_WITHERED),
+                    FIRE_4H),
+
+            // 阶段3-5（非枯萎叶，dayTime>=360000，y>=63）：扩散火焰到4邻树叶
+            when(stageRange(3, 6).and(NOT_WITHERED).and(dayTimeMin(360000)).and(minY(63)),
+                    FIRE_4H),
+
+            // 阶段3-5（非枯萎叶，dayTime>=360000，8<=y<63）：50% 枯萎叶 或 50% 扩散火焰
+            when(stageRange(3, 6).and(NOT_WITHERED).and(dayTimeMin(360000)).and(minY(8)).and(minY(63).negate()),
+                    coinFlip(setBlock(SapModBlocks.WITHERED_LEAVES.get()), FIRE_4H)),
+
+            // 阶段4（y>=64）：50% 扩散火焰8H 或 50% 空气+树叶→尘土8H
+            when(stageExact(4).and(minY(64)),
+                    STAGE4_FIRE_OR_DUST),
+
+            // 阶段5（y>=8）：50% 扩散火焰17 或 50% 扩散空气17
+            when(stageExact(5).and(minY(8)),
+                    coinFlip(FIRE_17, AIR_17))
+    );
+
+    public static void execute(LevelAccessor world, double x, double y, double z) {
+        INSTANCE.call(world, x, y, z);
+    }
 }

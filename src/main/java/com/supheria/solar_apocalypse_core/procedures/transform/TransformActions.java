@@ -2,6 +2,8 @@ package com.supheria.solar_apocalypse_core.procedures.transform;
 
 import com.supheria.solar_apocalypse_core.procedures.util.BlockSpreadUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -48,6 +50,26 @@ public final class TransformActions {
     public static TransformAction spread5x5(BlockState target, Predicate<BlockState> neighborPredicate) {
         return (world, x, y, z) ->
                 BlockSpreadUtils.spreadBlock(world, x, y, z, target, neighborPredicate, BlockSpreadUtils.OFFSETS_5X5);
+    }
+
+    /**
+     * 50% 概率二选一：随机执行 heads 或 tails 动作。
+     * （枯叶/木块阶段高级燃烧逻辑中使用）
+     */
+    public static TransformAction coinFlip(TransformAction heads, TransformAction tails) {
+        return (world, x, y, z) -> {
+            if (Mth.nextDouble(RandomSource.create(), 0, 2) <= 1) {
+                heads.execute(world, x, y, z);
+            } else {
+                tails.execute(world, x, y, z);
+            }
+        };
+    }
+
+    /** 将当前方块正上方一格设为指定方块（不影响当前方块本身）。 */
+    public static TransformAction setBlockAbove(Block target) {
+        return (world, x, y, z) ->
+                world.setBlock(BlockPos.containing(x, y + 1, z), target.defaultBlockState(), 3);
     }
 
     private TransformActions() {}

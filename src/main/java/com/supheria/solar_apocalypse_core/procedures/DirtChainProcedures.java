@@ -7,6 +7,7 @@ import com.supheria.solar_apocalypse_core.init.SapModTags;
 import com.supheria.solar_apocalypse_core.procedures.transform.TransformCondition;
 import com.supheria.solar_apocalypse_core.procedures.transform.TransformRule;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 import static com.supheria.solar_apocalypse_core.procedures.transform.TransformActions.*;
@@ -23,6 +24,7 @@ import static com.supheria.solar_apocalypse_core.procedures.transform.TransformR
  *   <li>{@link #COARSE_DIRT} — 粗泥土 → 碎泥土链</li>
  *   <li>{@link #CRUSHED_DIRT}— 碎泥土 → 沙子链</li>
  *   <li>{@link #SAND}        — 沙子 → 尘土链</li>
+ *   <li>{@link #DUST}        — 尘土消散</li>
  * </ul>
  *
  * <h3>规则执行顺序</h3>
@@ -139,6 +141,19 @@ public final class DirtChainProcedures {
             // 阶段5：高于 y=8，→ 空气，向沙子5×5扩散（含下层）
             when(stageExact(5).and(minY(8)),
                     spread5x5(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.SAND)))
+    );
+
+    // -----------------------------------------------------------------------
+    // 尘土消散
+    // 原: DustLostProcedure.java
+    // -----------------------------------------------------------------------
+    public static final Procedure DUST = TransformRule.rulesOf(
+            // 阶段2-5：dayTime>=144000 + 高于阶段2安全高度，向8邻扩散 → 空气
+            when(stageRange(2, 6).and(dayTimeMin(144000)).and(aboveSafeHeight(2)),
+                    spread8H(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == SapModBlocks.DUST.get())),
+            // 阶段5：高于阶段5安全高度，向17邻扩散（含下层）→ 空气
+            when(stageExact(5).and(aboveSafeHeight(5)),
+                    spread17(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == SapModBlocks.DUST.get()))
     );
 
     private DirtChainProcedures() {}

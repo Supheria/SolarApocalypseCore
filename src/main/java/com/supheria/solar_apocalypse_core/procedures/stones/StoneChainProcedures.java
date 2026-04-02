@@ -1,0 +1,67 @@
+package com.supheria.solar_apocalypse_core.procedures.stones;
+
+import com.supheria.solar_apocalypse_core.Procedure;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformRule;
+import net.minecraft.world.level.block.Blocks;
+
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformActions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformRule.when;
+
+/**
+ * 石头系方块转换链，集中定义于此。
+ *
+ * <ul>
+ *   <li>{@link #COBBLESTONE} — 卵石 → 砾石链</li>
+ *   <li>{@link #CLAY}        — 粘土 → 陶土链</li>
+ *   <li>{@link #GRAVEL}      — 砾石 → 岩浆链（含坍缩阶段）</li>
+ * </ul>
+ *
+ * <p>石头→卵石的转换通过 {@link StoneTCProcedure#of(net.minecraft.world.level.block.Block)} 工厂方法获取。</p>
+ */
+public final class StoneChainProcedures {
+
+    // -----------------------------------------------------------------------
+    // 卵石 → 砾石
+    // 原: CobblestoneTCGravelProcedure.java
+    // -----------------------------------------------------------------------
+    public static final Procedure COBBLESTONE = TransformRule.rulesOf(
+            // 阶段3-5：天空可见，概率性 → 砾石
+            when(stageRange(3, 6).and(sky()).and(randomDayVariable(20000)),
+                    setBlock(Blocks.GRAVEL)),
+            // 阶段5：y>=8 且上方为空气 → 砾石
+            when(stageExact(5).and(minY(8)).and(airAbove()),
+                    setBlock(Blocks.GRAVEL))
+    );
+
+    // -----------------------------------------------------------------------
+    // 粘土 → 陶土
+    // 原: ClayTCTerracottaProcedure.java
+    // -----------------------------------------------------------------------
+    public static final Procedure CLAY = TransformRule.rulesOf(
+            // 阶段3-5：天空可见，概率性 → 陶土
+            when(stageRange(3, 6).and(sky()).and(randomDayVariable(16000)),
+                    setBlock(Blocks.TERRACOTTA)),
+            // 阶段4-5：y>=8，直接 → 陶土
+            when(stageRange(4, 6).and(minY(8)),
+                    setBlock(Blocks.TERRACOTTA))
+    );
+
+    // -----------------------------------------------------------------------
+    // 砾石 → 岩浆
+    // 原: GravelTCLavaProcedure.java
+    // -----------------------------------------------------------------------
+    public static final Procedure GRAVEL = TransformRule.rulesOf(
+            // 阶段4-5：天空可见或相邻岩浆，高于阶段4/5安全高度最小值，50%概率 → 岩浆
+            when(stageRange(4, 6).and(sky().or(adjacentLava())).and(aboveMinOf(4, 5)).and(random50()),
+                    setBlock(Blocks.LAVA)),
+            // 阶段5：高于额外伤害高度，直接 → 岩浆
+            when(stageExact(5).and(aboveExtraDamageHeight(5)),
+                    setBlock(Blocks.LAVA)),
+            // 坍缩阶段：概率由配置决定 → 岩浆
+            when(stageExact(6).and(randomCollapse()),
+                    setBlock(Blocks.LAVA))
+    );
+
+    private StoneChainProcedures() {}
+}

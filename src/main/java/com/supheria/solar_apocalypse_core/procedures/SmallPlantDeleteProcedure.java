@@ -1,43 +1,35 @@
 package com.supheria.solar_apocalypse_core.procedures;
-import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
+import com.supheria.solar_apocalypse_core.Procedure;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformRule;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformActions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformRule.when;
+
+/**
+ * 小型植物删除过程（树苗、竹子等）。
+ */
 public class SmallPlantDeleteProcedure {
-	public static void execute(LevelAccessor world, double x, double y, double z) {
-		int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage >= 1 && stage < 6
-				&& !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
-				&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
-				&& !world.getLevelData().isRaining()
-				&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 1) <= (world.dayTime() / 24000)) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& stage == 2
-				&& world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
-				&& !world.getLevelData().isRaining()
-				&& Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000) + 1) <= (world.dayTime() / 24000)) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare == 3
-				&& y >= 63) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-		}
-		if (world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld")))
-				&& SapModVariables.MapVariables.get(world).SolarFlare >= 4 && SapModVariables.MapVariables.get(world).SolarFlare < 6
-				&& y >= 8) {
-			world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-		}
-	}
+
+    private static final Procedure INSTANCE = TransformRule.rulesOf(
+            // 阶段1-5：白天 + 天空可见 + 不下雨 + 概率触发 → 空气
+            when(stageRange(1, 6).and(daytime()).and(sky()).and(noRain()).and(randomDayRate()),
+                    setBlock(Blocks.AIR)),
+            // 阶段2：天空可见 + 不下雨 + 概率触发 → 空气（无白天限制，夜间也触发）
+            when(stageExact(2).and(sky()).and(noRain()).and(randomDayRate()),
+                    setBlock(Blocks.AIR)),
+            // 阶段3：y>=63 → 空气
+            when(stageExact(3).and(minY(63)),
+                    setBlock(Blocks.AIR)),
+            // 阶段4-5：y>=8 → 空气
+            when(stageRange(4, 6).and(minY(8)),
+                    setBlock(Blocks.AIR))
+    );
+
+    public static void execute(LevelAccessor world, double x, double y, double z) {
+        INSTANCE.call(world, x, y, z);
+    }
 }

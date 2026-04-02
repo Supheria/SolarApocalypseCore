@@ -5,7 +5,9 @@ import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.init.*;
 import com.supheria.solar_apocalypse_core.procedures.*;
-import com.supheria.solar_apocalypse_core.procedures.stones.*;
+import com.supheria.solar_apocalypse_core.procedures.stones.LavaTCObsidianProcedure;
+import com.supheria.solar_apocalypse_core.procedures.stones.StoneChainProcedures;
+import com.supheria.solar_apocalypse_core.procedures.stones.StoneTCProcedure;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.*;
@@ -224,7 +226,7 @@ public class SolarApocalypseCoreMod {
         if (builtInRegistryHolder.is(SapModTags.Blocks.POWDER)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return DustLostProcedure::execute;
+                return DirtChainProcedures.DUST;
             }
         }
         //얼음
@@ -302,24 +304,24 @@ public class SolarApocalypseCoreMod {
                         || builtInRegistryHolder.is(SapModTags.Blocks.DEEPSLATE)) {
                     // 深板岩系列
                     if (builtInRegistryHolder.is(BlockTags.STAIRS)) {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE_STAIRS, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE_STAIRS);
                     } else if (builtInRegistryHolder.is(BlockTags.SLABS)) {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE_SLAB, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE_SLAB);
                     } else if (builtInRegistryHolder.is(BlockTags.WALLS)) {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE_WALL, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE_WALL);
                     } else {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLED_DEEPSLATE, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE);
                     }
                 } else {
                     // 普通石头系列
                     if (builtInRegistryHolder.is(BlockTags.STAIRS)) {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE_STAIRS, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLESTONE_STAIRS);
                     } else if (builtInRegistryHolder.is(BlockTags.SLABS)) {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE_SLAB, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLESTONE_SLAB);
                     } else if (builtInRegistryHolder.is(BlockTags.WALLS)) {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE_WALL, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLESTONE_WALL);
                     } else {
-                        return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE, w, x, y, z);
+                        return StoneTCProcedure.of(Blocks.COBBLESTONE);
                     }
                 }
             }
@@ -328,14 +330,14 @@ public class SolarApocalypseCoreMod {
         if (builtInRegistryHolder.is(SapModTags.Blocks.COBBLESTONE)) {
             if  (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return CobblestoneTCGravelProcedure::execute;
+                return StoneChainProcedures.COBBLESTONE;
             }
         }
         //자갈
         if (builtInRegistryHolder.is(Tags.Blocks.GRAVEL)) {
             if  (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return GravelTCLavaProcedure::execute;
+                return StoneChainProcedures.GRAVEL;
             }
         }
         //용암 (제6단계에서 흑요석으로 변환)
@@ -355,7 +357,14 @@ public class SolarApocalypseCoreMod {
         if (builtInRegistryHolder.is(SapModTags.Blocks.CLAY)) {
             if  (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return ClayTCTerracottaProcedure::execute;
+                return StoneChainProcedures.CLAY;
+            }
+        }
+        //가루
+        if (builtInRegistryHolder.is(SapModTags.Blocks.POWDER)) {
+            if  (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
+                    && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
+                return DirtChainProcedures.DUST;
             }
         }
         //포탈관련
@@ -501,7 +510,7 @@ public class SolarApocalypseCoreMod {
         if (builtInRegistryHolder.is(SapModTags.Blocks.POWDER)) {
             if (!builtInRegistryHolder.is(SapModTags.Blocks.FIRE_RESISTANCE)
                     && !builtInRegistryHolder.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-                return DustLostProcedure::execute;
+                return DirtChainProcedures.DUST;
             }
         }
         //얼음

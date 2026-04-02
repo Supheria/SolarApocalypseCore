@@ -1,16 +1,15 @@
 package com.supheria.solar_apocalypse_core.procedures.stones;
 
-import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.procedures.util.BlockSpreadUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelAccessor;
+import com.supheria.solar_apocalypse_core.Procedure;
+import com.supheria.solar_apocalypse_core.procedures.transform.TransformRule;
 import net.minecraft.world.level.block.Block;
 
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformActions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.procedures.transform.TransformRule.when;
+
 /**
- * 通用石头系方块转换过程。
+ * 通用石头系方块转换工厂。
  * 替代以下8个几乎完全相同的类：
  *   StoneTCCobblestoneProcedure, StoneTCCobblestoneSlabProcedure,
  *   StoneTCCobblestoneStairsProcedure, StoneTCCobblestoneWallProcedure,
@@ -18,45 +17,29 @@ import net.minecraft.world.level.block.Block;
  *   StoneTCCobbledDeepslateStairsProcedure, StoneTCCobbledDeepslateWallProcedure
  *
  * 使用方式（在 SolarApocalypseCoreMod 中）：
- *   return (w, x, y, z) -> StoneTCProcedure.execute(Blocks.COBBLESTONE, w, x, y, z);
+ *   return StoneTCProcedure.of(Blocks.COBBLESTONE);
  */
 public class StoneTCProcedure {
 
-    public static void execute(Block target, LevelAccessor world, double x, double y, double z) {
-        int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
-
-        if (!BlockSpreadUtils.isOverworld(world, x, y, z)) {
-            return;
-        }
-
-        // 阶段 2-5：需要暴露天空或相邻岩浆，高于各阶段安全高度的最小值，满足概率
-        if (stage >= 2 && stage < 6) {
-            int minHeight = Math.min(
-                    Math.min(StageHeightConfig.getSafeHeight(2), StageHeightConfig.getSafeHeight(3)),
-                    Math.min(StageHeightConfig.getSafeHeight(4), StageHeightConfig.getSafeHeight(5)));
-            if ((world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || BlockSpreadUtils.hasAdjacentLava(world, x, y, z))
-                    && y >= minHeight
-                    && isRandomTriggered(world)) {
-                world.setBlock(BlockPos.containing(x, y, z), target.defaultBlockState(), 3);
-            }
-        }
-
-        // 阶段 3：无需邻接条件，高于阶段2安全高度，满足概率
-        if (stage == 3) {
-            if (y >= StageHeightConfig.getSafeHeight(2) && isRandomTriggered(world)) {
-                world.setBlock(BlockPos.containing(x, y, z), target.defaultBlockState(), 3);
-            }
-        }
-
-        // 阶段 4-5：无需邻接条件，无需概率，高于阶段4安全高度即触发
-        if (stage >= 4 && stage < 6) {
-            if (y >= StageHeightConfig.getSafeHeight(4)) {
-                world.setBlock(BlockPos.containing(x, y, z), target.defaultBlockState(), 3);
-            }
-        }
+    /**
+     * 创建将当前方块转换为 {@code target} 的 {@link Procedure}。
+     *
+     * <ul>
+     *   <li>阶段2-5：天空可见或相邻岩浆 + 高于各阶段最小安全高度 + 概率触发 → target</li>
+     *   <li>阶段3：高于阶段2安全高度 + 概率触发 → target（无天空条件）</li>
+     *   <li>阶段4-5：高于阶段4安全高度 → target（无概率条件）</li>
+     * </ul>
+     */
+    public static Procedure of(Block target) {
+        return TransformRule.rulesOf(
+                when(stageRange(2, 6).and(sky().or(adjacentLava())).and(aboveMinSafeHeight()).and(randomDayVariable(16000)),
+                        setBlock(target)),
+                when(stageExact(3).and(aboveSafeHeight(2)).and(randomDayVariable(16000)),
+                        setBlock(target)),
+                when(stageRange(4, 6).and(aboveSafeHeight(4)),
+                        setBlock(target))
+        );
     }
 
-    private static boolean isRandomTriggered(LevelAccessor world) {
-        return Mth.nextDouble(RandomSource.create(), 0, (world.dayTime() / 24000.0) + 5) <= (world.dayTime() / 16000.0);
-    }
+    private StoneTCProcedure() {}
 }
