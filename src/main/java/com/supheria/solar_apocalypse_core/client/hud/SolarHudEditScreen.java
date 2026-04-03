@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.client.hud;
 
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -28,7 +29,7 @@ public class SolarHudEditScreen extends Screen {
     private boolean isDetailedMode;
 
     private long sampleDay = 27;
-    private int samplePhase = SolarStageHelper.STAGE_4;
+    private SolarStage samplePhase = SolarStage.STAGE_4;
     private float sampleProgress = 0.75f;
 
     private Button toggleModeButton;
@@ -192,8 +193,8 @@ public class SolarHudEditScreen extends Screen {
     /**
      * 获取阶段的显示名称（中文）
      */
-    private String getPhaseDisplayName(int phase) {
-        return SolarStageHelper.getDisplayName(phase);
+    private String getPhaseDisplayName(SolarStage phase) {
+        return phase.getDisplayName().getString();
     }
 
     @Override

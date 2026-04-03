@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Supplier;
 
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SapModVariables {
@@ -87,7 +88,7 @@ public class SapModVariables {
 
 	public static class MapVariables extends SavedData {
 		public static final String DATA_NAME = "sap_mapvars";
-		public int solarStage = 0;
+		public SolarStage solarStage = SolarStage.NONE;
 		public double TodayTime = 0;
 		public double Today = 0;
 		public double LunarToday = 0;
@@ -99,7 +100,25 @@ public class SapModVariables {
 		}
 
 		public void read(CompoundTag nbt) {
-			this.solarStage = nbt.getInt("solarStage");
+			// 从 NBT 读取阶段值，支持 int (旧格式) 和 String (新格式)
+			if (nbt.contains("solarStage")) {
+				Object value = nbt.get("solarStage");
+				if (value instanceof net.minecraft.nbt.IntTag) {
+					// 旧版本兼容：int 值
+					int ordinal = nbt.getInt("solarStage");
+					this.solarStage = SolarStage.getByOrdinal(ordinal);
+				} else {
+					// 新版本：String 名称
+					String stageName = nbt.getString("solarStage");
+					try {
+						this.solarStage = SolarStage.valueOf(stageName);
+					} catch (IllegalArgumentException e) {
+						this.solarStage = SolarStage.NONE;
+					}
+				}
+			} else {
+				this.solarStage = SolarStage.NONE;
+			}
 			TodayTime = nbt.getDouble("TodayTime");
 			Today = nbt.getDouble("Today");
 			LunarToday = nbt.getDouble("LunarToday");
@@ -107,8 +126,8 @@ public class SapModVariables {
 
 		@Override
 		public CompoundTag save(CompoundTag nbt) {
-			// 保存新字段
-			nbt.putInt("solarStage", solarStage);
+			// 保存阶段信息（使用枚举名称）
+			nbt.putString("solarStage", solarStage.name());
 			nbt.putDouble("TodayTime", TodayTime);
 			nbt.putDouble("Today", Today);
 			nbt.putDouble("LunarToday", LunarToday);
@@ -123,11 +142,15 @@ public class SapModVariables {
 
 		static MapVariables clientSide = new MapVariables();
 
-		public int getCurrentStage() {
+		public SolarStage getCurrentStage() {
 			return this.solarStage;
 		}
 
-		public void setCurrentStage(int stage) {
+		public SolarStage getSolarStage() {
+			return this.solarStage;
+		}
+
+		public void setCurrentStage(SolarStage stage) {
 			this.solarStage = stage;
 		}
 

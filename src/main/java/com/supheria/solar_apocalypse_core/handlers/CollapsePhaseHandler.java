@@ -3,6 +3,7 @@ package com.supheria.solar_apocalypse_core.handlers;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.transforms.fluid.SnowMelt;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -25,9 +26,9 @@ public class CollapsePhaseHandler {
     public static void onWorldTick(TickEvent.LevelTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             LevelAccessor world = event.level;
-            int currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
+            SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
 
-            if (currentPhase == SolarStageHelper.STAGE_6) {
+            if (currentPhase == SolarStage.STAGE_6) {
                 int accumulationRate = SolarStageConfig.SOLAR_STAGE_VALUES.collapseSnowAccumulationRate.get();
                 tickCounter++;
 

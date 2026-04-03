@@ -32,7 +32,8 @@ public class SolarStageConfig {
         public final IntValue stage6StartTime;
 
         // 固定的随机刻度等级（随阶段递增）
-        public static final int[] RANDOM_TICKING_LEVELS = {4, 5, 8, 9, 10, 10};
+        // 索引对应 SolarStage.ordinal()：0=NONE, 1=STAGE_1, ..., 6=STAGE_6
+        public static final int[] RANDOM_TICKING_LEVELS = {4, 4, 5, 8, 9, 10, 10};
 
         public SolarStageValues(ForgeConfigSpec.Builder builder) {
             builder.comment("===============================");
@@ -59,11 +60,15 @@ public class SolarStageConfig {
         }
 
         /**
-         * 获取指定阶段（1-6）的随机刻度等级
+         * 获取指定阶段的随机刻度等级
+         *
+         * @param stage 太阳阶段
+         * @return 随机刻度等级
          */
-        public int getRandomTickingLevel(int stage) {
-            if (stage >= 1 && stage <= 6) {
-                return RANDOM_TICKING_LEVELS[stage - 1];
+        public int getRandomTickingLevel(com.supheria.solar_apocalypse_core.world.SolarStage stage) {
+            int ordinal = stage.ordinal();
+            if (ordinal >= 0 && ordinal < RANDOM_TICKING_LEVELS.length) {
+                return RANDOM_TICKING_LEVELS[ordinal];
             }
             return 4;
         }
@@ -72,7 +77,7 @@ public class SolarStageConfig {
     /**
      * 获取指定阶段的随机刻度等级
      */
-    public static int getRandomTickingLevel(int stage) {
+    public static int getRandomTickingLevel(com.supheria.solar_apocalypse_core.world.SolarStage stage) {
         return SOLAR_STAGE_VALUES.getRandomTickingLevel(stage);
     }
 }

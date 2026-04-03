@@ -4,6 +4,7 @@ import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -21,7 +22,7 @@ public class IceMelt {
     private static void transform(LevelAccessor world, double x, double y, double z) {
         if (world.getBlockState(BlockPos.containing(x, y, z)).getBlock() == Blocks.LAVA) return;
 
-        int stage = (int) SapModVariables.MapVariables.get(world).solarStage;
+        SolarStage stage = SapModVariables.MapVariables.get(world).getSolarStage();
         BlockPos pos = BlockPos.containing(x, y, z);
 
         if (BlockSpreadUtils.isOverworld(world, x, y, z)) {
@@ -34,17 +35,17 @@ public class IceMelt {
                 if (block == Blocks.ICE || block == Blocks.FROSTED_ICE) {
                     // 规则A：阶段1-5，概率融化为水
                     if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage >= 1 && stage < 6) {
+                            && stage.ordinal() >= 1 && stage.ordinal() < 6) {
                         world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
                     }
                     // 规则B/C/D（读取调用时的当前方块状态，可能已由A变为水）
                     if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage == 2 && y >= StageHeightConfig.getSafeHeight(2)) {
+                            && stage == SolarStage.STAGE_2 && y >= StageHeightConfig.getSafeHeight(2)) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                     } else if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage == 2 && y < 63 && y >= 8) {
+                            && stage == SolarStage.STAGE_2 && y < 63 && y >= 8) {
                         world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
-                    } else if (stage >= 3 && stage < 6 && y >= StageHeightConfig.getSafeHeight(3)) {
+                    } else if (stage.ordinal() >= 3 && stage.ordinal() < 6 && y >= StageHeightConfig.getSafeHeight(3)) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.AIR.defaultBlockState(),
@@ -56,22 +57,22 @@ public class IceMelt {
                 // --- 浮冰 ---
                 if (world.getBlockState(pos).getBlock() == Blocks.PACKED_ICE) {
                     if (Mth.nextDouble(RandomSource.create(), 0, 15) <= (world.dayTime() / 24000) / 1.5
-                            && stage == 2) {
+                            && stage == SolarStage.STAGE_2) {
                         world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
-                    } else if (stage == 3 && y >= StageHeightConfig.getSafeHeight(2)) {
+                    } else if (stage == SolarStage.STAGE_3 && y >= StageHeightConfig.getSafeHeight(2)) {
                         world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.WATER.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.PACKED_ICE,
                                 BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage == 3
+                    } else if (stage == SolarStage.STAGE_3
                             && y < StageHeightConfig.getSafeHeight(2) && y >= StageHeightConfig.getSafeHeight(4)) {
                         world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.ICE.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.PACKED_ICE,
                                 BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage >= 4 && stage < 6 && y >= 8) {
+                    } else if (stage.ordinal() >= 4 && stage.ordinal() < 6 && y >= 8) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.AIR.defaultBlockState(),
@@ -82,19 +83,19 @@ public class IceMelt {
 
                 // --- 蓝冰 ---
                 if (world.getBlockState(pos).getBlock() == Blocks.BLUE_ICE) {
-                    if (stage == 3 && y >= 8) {
+                    if (stage == SolarStage.STAGE_3 && y >= 8) {
                         world.setBlock(pos, Blocks.PACKED_ICE.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.PACKED_ICE.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.BLUE_ICE,
                                 BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage >= 4 && stage < 6 && y >= 63) {
+                    } else if (stage.ordinal() >= 4 && stage.ordinal() < 6 && y >= 63) {
                         world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.PACKED_ICE.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.BLUE_ICE,
                                 BlockSpreadUtils.OFFSETS_8H);
-                    } else if (stage >= 4 && stage < 6 && y >= StageHeightConfig.getSafeHeight(4)) {
+                    } else if (stage.ordinal() >= 4 && stage.ordinal() < 6 && y >= StageHeightConfig.getSafeHeight(4)) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.AIR.defaultBlockState(),
@@ -105,7 +106,7 @@ public class IceMelt {
             }
 
             // 阶段5：无需晴天，直接消除+spread17所有冰类
-            if (stage == 5 && y >= 8) {
+            if (stage == SolarStage.STAGE_5 && y >= 8) {
                 world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                 BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                         Blocks.AIR.defaultBlockState(),

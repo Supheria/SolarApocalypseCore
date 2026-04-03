@@ -1,6 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.util.RandomSource;
@@ -27,10 +28,10 @@ public abstract class MobSpawnRulesMixin {
 			RandomSource random,
 			CallbackInfoReturnable<Boolean> cir) {
 
-		int currentPhase = SapModVariables.MapVariables.get(level).getCurrentStage();
+		SolarStage currentPhase = SapModVariables.MapVariables.get(level).getCurrentStage();
 
 		// 只在COLLAPSE阶段处理
-		if (currentPhase != SolarStageHelper.STAGE_6) {
+		if (currentPhase != SolarStage.STAGE_6) {
 			return;
 		}
 

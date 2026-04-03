@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.config.solar;
 
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
@@ -96,12 +97,29 @@ public class SolarStageConfig {
             }
             return 4;
         }
+
+        /**
+         * 获取指定阶段（SolarStage）的随机刻度等级
+         */
+        public int getRandomTickingLevel(SolarStage stage) {
+            if (stage == null) {
+                return 4;
+            }
+            return getRandomTickingLevel(stage.getEruptionLevel());
+        }
     }
 
     /**
      * 获取指定阶段的随机刻度等级
      */
     public static int getRandomTickingLevel(int stage) {
+        return SOLAR_STAGE_VALUES.getRandomTickingLevel(stage);
+    }
+
+    /**
+     * 获取指定阶段（SolarStage）的随机刻度等级
+     */
+    public static int getRandomTickingLevel(SolarStage stage) {
         return SOLAR_STAGE_VALUES.getRandomTickingLevel(stage);
     }
 }

@@ -1,6 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
@@ -29,8 +30,8 @@ public abstract class UndeadMobBurnMixin {
 			return;
 		}
 
-		int currentPhase = SapModVariables.MapVariables.get(level).getCurrentStage();
-		if (currentPhase != SolarStageHelper.STAGE_6) {
+		SolarStage currentPhase = SapModVariables.MapVariables.get(level).getCurrentStage();
+		if (currentPhase != SolarStage.STAGE_6) {
 			return;
 		}
 

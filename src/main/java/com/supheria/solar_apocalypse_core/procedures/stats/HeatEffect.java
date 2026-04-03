@@ -4,6 +4,7 @@ import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.init.SapModItems;
 import com.supheria.solar_apocalypse_core.init.SapModMobEffects;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -38,7 +39,7 @@ public class HeatEffect {
     public static void execute(LevelAccessor world, double x, double y, double z, Entity entity) {
         if (entity == null)
             return;
-        int stage = (int) SapModVariables.MapVariables.get(world).solarStage;
+        int stage = SapModVariables.MapVariables.get(world).solarStage.getEruptionLevel();
         if (entity.getPersistentData().getDouble("SapStack") >= 200 && entity.getPersistentData().getDouble("WaterStack") <= 0
                 && (entity instanceof LivingEntity _livEnt && _livEnt.hasEffect(SapModMobEffects.DEHYDRATION.get()) ? _livEnt.getEffect(SapModMobEffects.DEHYDRATION.get()).getDuration() : 0) < entity.getPersistentData().getDouble("SapStack")) {
             if (entity instanceof LivingEntity _entity && !_entity.level().isClientSide())
@@ -81,7 +82,7 @@ public class HeatEffect {
         }.checkGamemode(entity)) {
             entity.getPersistentData().putDouble("SapStack", 0);
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_1 && !(new Object() {
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_1 && !(new Object() {
             public boolean checkGamemode(Entity _ent) {
                 if (_ent instanceof ServerPlayer _serverPlayer) {
                     return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -107,7 +108,7 @@ public class HeatEffect {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_1
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_1
                 && (SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450 || !world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) || world.getLevelData().isRaining()
                 || entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
                 || (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
@@ -116,7 +117,7 @@ public class HeatEffect {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_2 && !(new Object() {
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_2 && !(new Object() {
             public boolean checkGamemode(Entity _ent) {
                 if (_ent instanceof ServerPlayer _serverPlayer) {
                     return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -147,7 +148,7 @@ public class HeatEffect {
                 }
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_2 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_2 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
                 && (y < StageHeightConfig.getSapHeight(stage) || world.getLevelData().isRaining() || entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
                 || (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get())
                 || !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
@@ -155,7 +156,7 @@ public class HeatEffect {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_3 && !(new Object() {
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_3 && !(new Object() {
             public boolean checkGamemode(Entity _ent) {
                 if (_ent instanceof ServerPlayer _serverPlayer) {
                     return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -184,13 +185,13 @@ public class HeatEffect {
                 }
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_3 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_3 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
                 || !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
             if (entity.getPersistentData().getDouble("SapStack") > 0) {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_4 && !(new Object() {
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_4 && !(new Object() {
             public boolean checkGamemode(Entity _ent) {
                 if (_ent instanceof ServerPlayer _serverPlayer) {
                     return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -219,13 +220,13 @@ public class HeatEffect {
                 }
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_4 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_4 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
                 || !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
             if (entity.getPersistentData().getDouble("SapStack") > 0) {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_5 && !(new Object() {
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_5 && !(new Object() {
             public boolean checkGamemode(Entity _ent) {
                 if (_ent instanceof ServerPlayer _serverPlayer) {
                     return _serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE;
@@ -252,7 +253,7 @@ public class HeatEffect {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStageHelper.STAGE_5 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && entity.isInWaterRainOrBubble()
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_5 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && entity.isInWaterRainOrBubble()
                 || !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
             if (entity.getPersistentData().getDouble("SapStack") > 0) {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));

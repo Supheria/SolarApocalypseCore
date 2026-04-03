@@ -1,4 +1,4 @@
-﻿{
+{
   "block.solar_apocalypse_core.dust": "尘土",
   "block.solar_apocalypse_core.crushed_dirt": "碎土",
   "block.solar_apocalypse_core.withered_leaves": "枯叶",
@@ -6,9 +6,20 @@
   "block.solar_apocalypse_core.redstone_coated_metal": "红石涂层金属",
   "block.solar_apocalypse_core.heat_resistant_high_strength_metal": "耐热高强度金属",
   "block.solar_apocalypse_core.measuring_instrument": "测量仪器",
+
   "item.solar_apocalypse_core.uv_umbrella": "防紫外线伞",
   "item.solar_apocalypse_core.coordinates_of_the_sun": "太阳坐标",
+
   "effect.solar_apocalypse_core.dehydration": "脱水",
+
   "key.categories.solar_apocalypse_core": "烈日升腾",
-  "key.solar_apocalypse_core.hud_edit": "HUD编辑器"
+  "key.solar_apocalypse_core.hud_edit": "HUD编辑器",
+
+  "solarstage.none": "未初始化",
+  "solarstage.stage1": "爆发初期",
+  "solarstage.stage2": "爆发前期",
+  "solarstage.stage3": "爆发中期",
+  "solarstage.stage4": "爆发后期",
+  "solarstage.stage5": "终极期",
+  "solarstage.stage6": "恒冬期"
 }
