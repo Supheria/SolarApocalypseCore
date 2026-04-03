@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import org.jetbrains.annotations.NotNull;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SapModVariables {
@@ -100,34 +101,17 @@ public class SapModVariables {
 		}
 
 		public void read(CompoundTag nbt) {
-			// 从 NBT 读取阶段值，支持 int (旧格式) 和 String (新格式)
-			if (nbt.contains("solarStage")) {
-				Object value = nbt.get("solarStage");
-				if (value instanceof net.minecraft.nbt.IntTag) {
-					// 旧版本兼容：int 值
-					int ordinal = nbt.getInt("solarStage");
-					this.solarStage = SolarStage.getByOrdinal(ordinal);
-				} else {
-					// 新版本：String 名称
-					String stageName = nbt.getString("solarStage");
-					try {
-						this.solarStage = SolarStage.valueOf(stageName);
-					} catch (IllegalArgumentException e) {
-						this.solarStage = SolarStage.NONE;
-					}
-				}
-			} else {
-				this.solarStage = SolarStage.NONE;
-			}
+			// 从 NBT 读取阶段值
+			solarStage = SolarStage.getByOrdinal(nbt.getInt("solarStage"));
 			TodayTime = nbt.getDouble("TodayTime");
 			Today = nbt.getDouble("Today");
 			LunarToday = nbt.getDouble("LunarToday");
 		}
 
 		@Override
-		public CompoundTag save(CompoundTag nbt) {
+		public @NotNull CompoundTag save(CompoundTag nbt) {
 			// 保存阶段信息（使用枚举名称）
-			nbt.putString("solarStage", solarStage.name());
+			nbt.putInt("solarStage", solarStage.ordinal());
 			nbt.putDouble("TodayTime", TodayTime);
 			nbt.putDouble("Today", Today);
 			nbt.putDouble("LunarToday", LunarToday);

@@ -2,6 +2,7 @@ package com.supheria.solar_apocalypse_core.transforms.plant;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.world.level.block.Blocks;
 
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.*;
@@ -15,19 +16,19 @@ public class SimpleDecay {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
             // 阶段1-5：天空可见 + 概率触发 → 空气
-            when(stageRange(1, 6).and(sky()).and(randomDayRate()),
+            when(stageIsEruptionPhase().and(sky()).and(randomDayRate()),
                     setBlock(Blocks.AIR)),
-            // 阶段2：白天 + 高于阶段2安全高度 + 概率触发 → 空气
-            when(stageExact(2).and(daytime()).and(aboveSafeHeight(2)).and(randomDayRate()),
+            // 阶段2：白天 + 高于安全高度 + 概率触发 → 空气
+            when(stageExact(SolarStage.STAGE_2).and(daytime()).and(aboveSafeHeight()).and(randomDayRate()),
                     setBlock(Blocks.AIR)),
-            // 阶段3：高于阶段2安全高度 → 空气
-            when(stageExact(3).and(aboveSafeHeight(2)),
+            // 阶段3：高于安全高度 → 空气
+            when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                     setBlock(Blocks.AIR)),
-            // 阶段4：高于阶段4安全高度 → 空气
-            when(stageExact(4).and(aboveSafeHeight(4)),
+            // 阶段4：高于安全高度 → 空气
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()),
                     setBlock(Blocks.AIR)),
-            // 阶段5：高于阶段5安全高度 → 空气
-            when(stageExact(5).and(aboveSafeHeight(5)),
+            // 阶段5：高于安全高度 → 空气
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
                     setBlock(Blocks.AIR))
     );
 

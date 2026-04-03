@@ -17,7 +17,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * 太阳阶段切换处理器（原 StartProcedure）。
+ * 太阳阶段切换处理器。
  * 每 tick 检查 dayTime 是否触发阶段变化，并应用相应游戏规则。
  */
 @Mod.EventBusSubscriber
@@ -46,15 +46,15 @@ public class StageTickHandler {
 
     private static void applyPhaseRules(LevelAccessor world, SolarStage phase) {
         int randomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase);
-        boolean allowWeather = phase.getEruptionLevel() <= 2;
-        boolean allowFreeze = phase.getEruptionLevel() <= 2;
+        boolean allowWeather = !phase.isBefore(SolarStage.STAGE_3);
+        boolean allowFreeze = !phase.isAtLeast(SolarStage.STAGE_6);
 
         world.getLevelData().getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(randomTickingLevel, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(allowWeather, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_FREEZE_DAMAGE).set(allowFreeze, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WATER_SOURCE_CONVERSION).set(allowWeather, world.getServer());
 
-        if (phase.getEruptionLevel() >= 3 && !phase.isCollapsePhase() && world instanceof ServerLevel _level) {
+        if (phase.isEruptionPhase() && phase.isAtLeast(SolarStage.STAGE_3) && world instanceof ServerLevel _level) {
             _level.getServer().getCommands().performPrefixedCommand(
                     new CommandSourceStack(CommandSource.NULL, new Vec3(0, 0, 0), Vec2.ZERO, _level, 4, "",
                     Component.literal(""), _level.getServer(), null).withSuppressedOutput(),

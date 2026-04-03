@@ -2,9 +2,11 @@ package com.supheria.solar_apocalypse_core.transforms.misc;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformConditions.stageIsEruptionPhase;
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.when;
 
 /**
@@ -13,7 +15,7 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class EndFrameClear {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            when((world, x, y, z, stage) -> stage < 6, (world, x, y, z) -> {
+            when(stageIsEruptionPhase(), (world, x, y, z) -> {
                 BlockPos pos = BlockPos.containing(x, y, z);
                 if (world.getBlockState(pos).getBlock().getStateDefinition().getProperty("eye")
                         instanceof BooleanProperty prop

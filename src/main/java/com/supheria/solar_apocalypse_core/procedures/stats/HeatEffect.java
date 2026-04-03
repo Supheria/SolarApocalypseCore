@@ -5,7 +5,6 @@ import com.supheria.solar_apocalypse_core.init.SapModItems;
 import com.supheria.solar_apocalypse_core.init.SapModMobEffects;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
-import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -39,7 +38,7 @@ public class HeatEffect {
     public static void execute(LevelAccessor world, double x, double y, double z, Entity entity) {
         if (entity == null)
             return;
-        int stage = SapModVariables.MapVariables.get(world).solarStage.getEruptionLevel();
+        var stage = SapModVariables.MapVariables.get(world).solarStage;
         if (entity.getPersistentData().getDouble("SapStack") >= 200 && entity.getPersistentData().getDouble("WaterStack") <= 0
                 && (entity instanceof LivingEntity _livEnt && _livEnt.hasEffect(SapModMobEffects.DEHYDRATION.get()) ? _livEnt.getEffect(SapModMobEffects.DEHYDRATION.get()).getDuration() : 0) < entity.getPersistentData().getDouble("SapStack")) {
             if (entity instanceof LivingEntity _entity && !_entity.level().isClientSide())
@@ -142,14 +141,14 @@ public class HeatEffect {
                 entity.setSecondsOnFire(1);
                 entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
             }
-            if (y >= StageHeightConfig.getSapHeight(stage)) {
+            if (y >= StageHeightConfig.getCozyHeight(stage)) {
                 if (entity.getPersistentData().getDouble("SapStack") < 1200 && entity.getPersistentData().getDouble("WaterStack") <= 0) {
                     entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
                 }
             }
         }
         if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_2 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))
-                && (y < StageHeightConfig.getSapHeight(stage) || world.getLevelData().isRaining() || entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
+                && (y < StageHeightConfig.getCozyHeight(stage) || world.getLevelData().isRaining() || entity.isInWaterRainOrBubble() || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get()
                 || (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == SapModItems.UV_UMBRELLA.get())
                 || !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
             if (entity.getPersistentData().getDouble("SapStack") > 0) {
@@ -175,17 +174,17 @@ public class HeatEffect {
                 return false;
             }
         }.checkGamemode(entity)) && world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))) && !entity.isInWaterRainOrBubble()) {
-            if (y >= StageHeightConfig.getExtraDamageHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
+            if (y >= StageHeightConfig.getSafeHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
                 entity.setSecondsOnFire(2);
                 entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
             }
-            if (y >= StageHeightConfig.getSapHeight(stage)) {
+            if (y >= StageHeightConfig.getCozyHeight(stage)) {
                 if (entity.getPersistentData().getDouble("SapStack") < 1200 && entity.getPersistentData().getDouble("WaterStack") <= 0) {
                     entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
                 }
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_3 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_3 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getCozyHeight(stage) || entity.isInWaterRainOrBubble())
                 || !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
             if (entity.getPersistentData().getDouble("SapStack") > 0) {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
@@ -210,17 +209,17 @@ public class HeatEffect {
                 return false;
             }
         }.checkGamemode(entity)) && world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))) && !entity.isInWaterRainOrBubble()) {
-            if (y >= StageHeightConfig.getExtraDamageHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
+            if (y >= StageHeightConfig.getSafeHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
                 entity.setSecondsOnFire(3);
                 entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
             }
-            if (y >= StageHeightConfig.getSapHeight(stage)) {
+            if (y >= StageHeightConfig.getCozyHeight(stage)) {
                 if (entity.getPersistentData().getDouble("SapStack") < 1200 && entity.getPersistentData().getDouble("WaterStack") <= 0) {
                     entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") + 1));
                 }
             }
         }
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_4 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getSapHeight(stage) || entity.isInWaterRainOrBubble())
+        if (SapModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_4 && (!world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z)) && (y < StageHeightConfig.getCozyHeight(stage) || entity.isInWaterRainOrBubble())
                 || !world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))))) {
             if (entity.getPersistentData().getDouble("SapStack") > 0) {
                 entity.getPersistentData().putDouble("SapStack", (entity.getPersistentData().getDouble("SapStack") - 1));
@@ -245,7 +244,7 @@ public class HeatEffect {
                 return false;
             }
         }.checkGamemode(entity)) && world.getBiome(BlockPos.containing(x, y, z)).is(TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"))) && !entity.isInWaterRainOrBubble()) {
-            if (y >= StageHeightConfig.getExtraDamageHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
+            if (y >= StageHeightConfig.getSafeHeight(stage) || world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
                 entity.setSecondsOnFire(4);
                 entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
             }

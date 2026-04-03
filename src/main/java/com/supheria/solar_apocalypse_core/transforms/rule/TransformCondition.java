@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.transforms.rule;
 
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.world.level.LevelAccessor;
 
 /**
@@ -22,7 +23,7 @@ public interface TransformCondition {
      * @param z     方块 Z 坐标
      * @param stage 当前太阳阶段（已从 SapModVariables 读取）
      */
-    boolean test(LevelAccessor world, double x, double y, double z, int stage);
+    boolean test(LevelAccessor world, double x, double y, double z, SolarStage stage);
 
     /** 逻辑与：当前条件 AND 另一条件都满足时成立。 */
     default TransformCondition and(TransformCondition other) {

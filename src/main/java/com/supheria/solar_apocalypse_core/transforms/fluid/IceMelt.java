@@ -35,17 +35,17 @@ public class IceMelt {
                 if (block == Blocks.ICE || block == Blocks.FROSTED_ICE) {
                     // 规则A：阶段1-5，概率融化为水
                     if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage.ordinal() >= 1 && stage.ordinal() < 6) {
+                            && stage.isAtLeast(SolarStage.STAGE_1) && stage.isBefore(SolarStage.STAGE_6)) {
                         world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
                     }
                     // 规则B/C/D（读取调用时的当前方块状态，可能已由A变为水）
                     if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage == SolarStage.STAGE_2 && y >= StageHeightConfig.getSafeHeight(2)) {
+                            && stage == SolarStage.STAGE_2 && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_2)) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                     } else if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
                             && stage == SolarStage.STAGE_2 && y < 63 && y >= 8) {
                         world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
-                    } else if (stage.ordinal() >= 3 && stage.ordinal() < 6 && y >= StageHeightConfig.getSafeHeight(3)) {
+                    } else if (stage.isAtLeast(SolarStage.STAGE_3) && stage.isBefore(SolarStage.STAGE_6) && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_3)) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.AIR.defaultBlockState(),
@@ -59,20 +59,20 @@ public class IceMelt {
                     if (Mth.nextDouble(RandomSource.create(), 0, 15) <= (world.dayTime() / 24000) / 1.5
                             && stage == SolarStage.STAGE_2) {
                         world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
-                    } else if (stage == SolarStage.STAGE_3 && y >= StageHeightConfig.getSafeHeight(2)) {
+                    } else if (stage == SolarStage.STAGE_3 && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_2)) {
                         world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.WATER.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.PACKED_ICE,
                                 BlockSpreadUtils.OFFSETS_4H);
                     } else if (stage == SolarStage.STAGE_3
-                            && y < StageHeightConfig.getSafeHeight(2) && y >= StageHeightConfig.getSafeHeight(4)) {
+                            && y < StageHeightConfig.getSafeHeight(SolarStage.STAGE_2) && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_4)) {
                         world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.ICE.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.PACKED_ICE,
                                 BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage.ordinal() >= 4 && stage.ordinal() < 6 && y >= 8) {
+                    } else if (stage.isAtLeast(SolarStage.STAGE_4) && stage.isBefore(SolarStage.STAGE_6) && y >= 8) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.AIR.defaultBlockState(),
@@ -89,13 +89,13 @@ public class IceMelt {
                                 Blocks.PACKED_ICE.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.BLUE_ICE,
                                 BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage.ordinal() >= 4 && stage.ordinal() < 6 && y >= 63) {
+                    } else if (stage.isAtLeast(SolarStage.STAGE_4) && stage.isBefore(SolarStage.STAGE_6) && y >= 63) {
                         world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.PACKED_ICE.defaultBlockState(),
                                 bs -> bs.getBlock() == Blocks.BLUE_ICE,
                                 BlockSpreadUtils.OFFSETS_8H);
-                    } else if (stage.ordinal() >= 4 && stage.ordinal() < 6 && y >= StageHeightConfig.getSafeHeight(4)) {
+                    } else if (stage.isAtLeast(SolarStage.STAGE_4) && stage.isBefore(SolarStage.STAGE_6) && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_4)) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         BlockSpreadUtils.spreadNeighbors(world, x, y, z,
                                 Blocks.AIR.defaultBlockState(),

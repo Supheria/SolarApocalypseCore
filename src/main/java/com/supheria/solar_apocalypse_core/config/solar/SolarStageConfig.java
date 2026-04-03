@@ -89,31 +89,14 @@ public class SolarStageConfig {
         }
 
         /**
-         * 获取指定阶段（1-6）的随机刻度等级
-         */
-        public int getRandomTickingLevel(int stage) {
-            if (stage >= 1 && stage <= 6) {
-                return RANDOM_TICKING_LEVELS[stage - 1];
-            }
-            return 4;
-        }
-
-        /**
          * 获取指定阶段（SolarStage）的随机刻度等级
          */
         public int getRandomTickingLevel(SolarStage stage) {
             if (stage == null) {
-                return 4;
+                return RANDOM_TICKING_LEVELS[0];
             }
-            return getRandomTickingLevel(stage.getEruptionLevel());
+            return RANDOM_TICKING_LEVELS[stage.ordinal() - 1];
         }
-    }
-
-    /**
-     * 获取指定阶段的随机刻度等级
-     */
-    public static int getRandomTickingLevel(int stage) {
-        return SOLAR_STAGE_VALUES.getRandomTickingLevel(stage);
     }
 
     /**

@@ -24,7 +24,7 @@ public record TransformRule(TransformCondition condition, TransformAction action
     }
 
     /** 若条件成立则执行动作。 */
-    public void apply(LevelAccessor world, double x, double y, double z, int stage) {
+    public void apply(LevelAccessor world, double x, double y, double z, SolarStage stage) {
         if (condition.test(world, x, y, z, stage)) {
             action.execute(world, x, y, z);
         }
@@ -41,7 +41,7 @@ public record TransformRule(TransformCondition condition, TransformAction action
     public static BlockTransform rulesOf(TransformRule... rules) {
         return (world, x, y, z) -> {
             if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
-            int stage = SapModVariables.MapVariables.get(world).getSolarStage().ordinal();
+            var stage = SapModVariables.MapVariables.get(world).getSolarStage();
             for (TransformRule rule : rules) {
                 rule.apply(world, x, y, z, stage);
             }

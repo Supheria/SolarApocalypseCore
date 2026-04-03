@@ -2,6 +2,7 @@ package com.supheria.solar_apocalypse_core.transforms.stone;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.world.level.block.Block;
 
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.*;
@@ -17,11 +18,11 @@ public class StoneTo {
 
     public static BlockTransform of(Block target) {
         return TransformRule.rulesOf(
-                when(stageRange(2, 6).and(sky().or(adjacentLava())).and(aboveMinSafeHeight()).and(randomDayVariable(16000)),
+                when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky().or(adjacentLava())).and(aboveSafeHeight()).and(randomDayVariable()),
                         setBlock(target)),
-                when(stageExact(3).and(aboveSafeHeight(2)).and(randomDayVariable(16000)),
+                when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()).and(randomDayVariable()),
                         setBlock(target)),
-                when(stageRange(4, 6).and(aboveSafeHeight(4)),
+                when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
                         setBlock(target))
         );
     }

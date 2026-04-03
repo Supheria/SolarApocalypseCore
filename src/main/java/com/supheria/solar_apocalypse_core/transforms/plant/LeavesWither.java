@@ -6,6 +6,7 @@ import com.supheria.solar_apocalypse_core.transforms.rule.TransformAction;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformCondition;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -77,49 +78,44 @@ public class LeavesWither {
                     });
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5（非枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + dayTime>=48000 + 概率 → 枯萎树叶
-            when(stageRange(1, 6).and(NOT_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
-                            .and(dayTimeMin(48000))
-                            .and((world, x, y, z, stage) ->
-                                    Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000 + 3),
+            // 阶段1-5（非枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 慢速概率 → 枯萎树叶
+            when(stageIsEruptionPhase().and(NOT_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
+                            .and(daytime()).and(randomDayWoodSlow()),
                     setBlock(SapModBlocks.WITHERED_LEAVES.get())),
 
-            // 阶段2-5（非枯萎叶）：白天 + 不下雨 + dayTime>=240000 + 高于阶段2安全高度 + 概率 → 枯萎树叶
-            when(stageRange(2, 6).and(NOT_WITHERED).and(SOFT_BASE_2).and(dayTimeMin(240000))
-                            .and(aboveSafeHeight(2))
-                            .and((world, x, y, z, stage) ->
-                                    Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000 / 3 + 5),
+            // 阶段2-5（非枯萎叶）：白天 + 不下雨 + 高于安全高度 → 枯萎树叶
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(NOT_WITHERED).and(SOFT_BASE_2)
+                            .and(aboveSafeHeight()).and(randomDayWood()),
                     setBlock(SapModBlocks.WITHERED_LEAVES.get())),
 
             // 阶段2-5（枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 概率 → 上方点火
-            when(stageRange(2, 6).and(IS_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
-                            .and((world, x, y, z, stage) ->
-                                    Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000 / 3 + 2),
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(IS_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
+                            .and(randomDayWood()),
                     setBlockAbove(Blocks.FIRE)),
 
-            // 阶段2（枯萎叶，y>=63）：白天 + 不下雨 + dayTime>=240000 + 慢速概率 → 点火
-            when(stageExact(2).and(IS_WITHERED).and(SOFT_BASE_2).and(dayTimeMin(240000)).and(minY(63))
+            // 阶段2（枯萎叶）：白天 + 不下雨 + 高于安全高度 + 慢速概率 → 点火
+            when(stageExact(SolarStage.STAGE_2).and(IS_WITHERED).and(SOFT_BASE_2).and(aboveSafeHeight())
                             .and(randomDayWoodSlow()),
                     setBlock(Blocks.FIRE)),
 
             // 阶段3-5（枯萎叶）：直接扩散火焰到4邻树叶
-            when(stageRange(3, 6).and(IS_WITHERED),
+            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(IS_WITHERED),
                     FIRE_4H),
 
-            // 阶段3-5（非枯萎叶，dayTime>=360000，y>=63）：扩散火焰到4邻树叶
-            when(stageRange(3, 6).and(NOT_WITHERED).and(dayTimeMin(360000)).and(minY(63)),
+            // 阶段3-5（非枯萎叶）：高于安全高度 + 概率 → 扩散火焰到4邻树叶
+            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(NOT_WITHERED).and(aboveSafeHeight()),
                     FIRE_4H),
 
-            // 阶段3-5（非枯萎叶，dayTime>=360000，8<=y<63）：50% 枯萎叶 或 50% 扩散火焰
-            when(stageRange(3, 6).and(NOT_WITHERED).and(dayTimeMin(360000)).and(minY(8)).and(minY(63).negate()),
-                    coinFlip(setBlock(SapModBlocks.WITHERED_LEAVES.get()), FIRE_4H)),
+            // 阶段3-5（非枯萎叶）：高于安全高度 → 枯萎叶
+            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(NOT_WITHERED).and(aboveSafeHeight()),
+                    setBlock(SapModBlocks.WITHERED_LEAVES.get())),
 
-            // 阶段4（y>=64）：50% 扩散火焰8H 或 50% 空气+树叶→尘土8H
-            when(stageExact(4).and(minY(64)),
+            // 阶段4：高于安全高度 → 50% 扩散火焰8H 或 50% 空气+树叶→尘土8H
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()),
                     STAGE4_FIRE_OR_DUST),
 
-            // 阶段5（y>=8）：50% 扩散火焰17 或 50% 扩散空气17
-            when(stageExact(5).and(minY(8)),
+            // 阶段5：高于安全高度 → 50% 扩散火焰17 或 50% 扩散空气17
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
                     coinFlip(FIRE_17, AIR_17))
     );
 
