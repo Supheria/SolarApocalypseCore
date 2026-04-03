@@ -4,6 +4,7 @@ import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformAction;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformCondition;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
@@ -32,11 +33,11 @@ public class WaterloggedDry {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
             // 阶段2-5：天空+晴天，概率去水
-            when(stageRange(2, 6).and(sky()).and(daytime()).and(IS_WATERLOGGED).and(randomDayRate()), DEWATERLOG),
-            // 阶段3：y>=63，直接去水
-            when(stageExact(3).and(minY(63)).and(IS_WATERLOGGED), DEWATERLOG),
-            // 阶段4-5：y>=8，直接去水
-            when(stageRange(4, 6).and(minY(8)).and(IS_WATERLOGGED), DEWATERLOG)
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky()).and(daytime()).and(IS_WATERLOGGED).and(randomDayRate()), DEWATERLOG),
+            // 阶段3：超过蒸发高度，直接去水
+            when(stageExact(SolarStage.STAGE_3).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG),
+            // 阶段4-5：超过蒸发高度，直接去水
+            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG)
     );
 
     private WaterloggedDry() {}

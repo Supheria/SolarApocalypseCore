@@ -4,7 +4,7 @@ import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -26,13 +26,27 @@ public final class TransformConditions {
     // -----------------------------------------------------------------------
 
     /** stage >= min && stage < maxExclusive */
-    public static TransformCondition stageRange(int min, int maxExclusive) {
-        return (world, x, y, z, stage) -> stage >= min && stage < maxExclusive;
+    public static TransformCondition stageRange(SolarStage min, SolarStage maxExclusive) {
+        return (world, x, y, z, stage) -> stage.isAtLeast(min) && stage.isBefore(maxExclusive);
     }
 
     /** stage == s */
-    public static TransformCondition stageExact(int s) {
+    public static TransformCondition stageExact(SolarStage s) {
         return (world, x, y, z, stage) -> stage == s;
+    }
+
+    /**
+     * 判断是否为爆发阶段（STAGE_1 - STAGE_5）
+     */
+    public static TransformCondition stageIsEruptionPhase() {
+        return (world, x, y, z, stage) -> stage != SolarStage.NONE && stage != SolarStage.STAGE_6;
+    }
+
+    /**
+     * 判断是否为坍缺阶段（STAGE_6）
+     */
+    public static TransformCondition stageIsCollapsePhase() {
+        return (world, x, y, z, stage) -> stage == SolarStage.STAGE_6;
     }
 
     // -----------------------------------------------------------------------
@@ -90,13 +104,8 @@ public final class TransformConditions {
     }
 
     /** y >= StageHeightConfig.getSafeHeight(forStage) - lazy evaluation */
-    public static TransformCondition aboveSafeHeight(int forStage) {
-        return (world, x, y, z, stage) -> y >= StageHeightConfig.getSafeHeight(forStage);
-    }
-
-    /** y >= StageHeightConfig.getExtraDamageHeight(forStage) - lazy evaluation */
-    public static TransformCondition aboveExtraDamageHeight(int forStage) {
-        return (world, x, y, z, stage) -> y >= StageHeightConfig.getExtraDamageHeight(forStage);
+    public static TransformCondition aboveSafeHeight() {
+        return (world, x, y, z, stage) -> y >= StageHeightConfig.getSafeHeight(stage);
     }
 
     /**
@@ -106,8 +115,8 @@ public final class TransformConditions {
     public static TransformCondition aboveMinSafeHeight() {
         return (world, x, y, z, stage) -> {
             int minH = Math.min(
-                    Math.min(StageHeightConfig.getSafeHeight(2), StageHeightConfig.getSafeHeight(3)),
-                    Math.min(StageHeightConfig.getSafeHeight(4), StageHeightConfig.getSafeHeight(5)));
+                    Math.min(StageHeightConfig.getSafeHeight(SolarStage.STAGE_2), StageHeightConfig.getSafeHeight(SolarStage.STAGE_3)),
+                    Math.min(StageHeightConfig.getSafeHeight(SolarStage.STAGE_4), StageHeightConfig.getSafeHeight(SolarStage.STAGE_5)));
             return y >= minH;
         };
     }
@@ -138,10 +147,10 @@ public final class TransformConditions {
      * nextDouble(0, dayTime/24000 + 5) <= dayTime/thresholdDivisor
      * （石头/卵石 TC 的概率公式）
      */
-    public static TransformCondition randomDayVariable(double thresholdDivisor) {
+    public static TransformCondition randomDayVariable() {
         return (world, x, y, z, stage) ->
                 Mth.nextDouble(RandomSource.create(), 0, world.dayTime() / 24000.0 + 5)
-                        <= world.dayTime() / thresholdDivisor;
+                        <= world.dayTime() / 16000d;
     }
 
     /**
@@ -208,12 +217,6 @@ public final class TransformConditions {
                 Mth.nextDouble(RandomSource.create(), 0, 2) <= 1;
     }
 
-    /** 当前世界处于坍缩阶段（SolarPhase.COLLAPSE）。 */
-    public static TransformCondition collapsePhase() {
-        return (world, x, y, z, stage) ->
-                SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.COLLAPSE;
-    }
-
     /**
      * 坍缩阶段的概率转换条件，概率由配置项 collapseBlockTransformRate 决定：
      * probability = min(1.0, transformRate / 2.0)
@@ -236,14 +239,14 @@ public final class TransformConditions {
      * y >= min(getSafeHeight(stageA), getSafeHeight(stageB)) - lazy evaluation。
      * 用于砾石→岩浆阶段4-5：取两阶段安全高度的较小值，保证一致的触发下限。
      */
-    public static TransformCondition aboveMinOf(int stageA, int stageB) {
+    public static TransformCondition aboveMinOf(SolarStage stageA, SolarStage stageB) {
         return (world, x, y, z, stage) ->
                 y >= Math.min(StageHeightConfig.getSafeHeight(stageA), StageHeightConfig.getSafeHeight(stageB));
     }
 
     /** y > StageHeightConfig.getWaterEvapHeight(stage)（水蒸发高度阈值，严格大于） */
-    public static TransformCondition aboveWaterEvapHeight() {
-        return (world, x, y, z, stage) -> y > StageHeightConfig.getWaterEvapHeight(stage);
+    public static TransformCondition aboveWaterEvaporateHeight() {
+        return (world, x, y, z, stage) -> y > StageHeightConfig.getSafeHeight(stage);
     }
 
     private TransformConditions() {}

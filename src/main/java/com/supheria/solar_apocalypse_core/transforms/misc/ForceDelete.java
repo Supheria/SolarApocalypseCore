@@ -5,6 +5,7 @@ import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
 import net.minecraft.world.level.block.Blocks;
 
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.setBlock;
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformConditions.stageIsEruptionPhase;
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.when;
 
 /**
@@ -13,7 +14,7 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class ForceDelete {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            when((world, x, y, z, stage) -> stage < 6, setBlock(Blocks.AIR))
+            when(stageIsEruptionPhase(), setBlock(Blocks.AIR))
     );
 
     private ForceDelete() {}

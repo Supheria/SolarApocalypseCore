@@ -1,7 +1,8 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.resources.ResourceLocation;
@@ -60,31 +61,31 @@ public abstract class LevelRendererMixin {
 
     @Inject(method="renderSky", at = @At("HEAD"))
     private void onRendersky(PoseStack p_202424_, Matrix4f p_254034_, float p_202426_, Camera p_202427_, boolean p_202428_, Runnable p_202429_, CallbackInfo ci){
-        int solarFlare = (int) SapModVariables.MapVariables.get(world).SolarFlare;
-        SolarPhase currentPhase = SapModVariables.MapVariables.get(world).getCurrentPhase();
+        SolarStage solarFlare = SapModVariables.MapVariables.get(world).getSolarStage();
+        SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
 
         // 太阳纹理根据阶段变化
-        if (solarFlare == 1){
+        if (solarFlare == SolarStage.STAGE_1){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step1.png");
         }
-        if (solarFlare == 2){
+        if (solarFlare == SolarStage.STAGE_2){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step2.png");
         }
-        if (solarFlare == 3){
+        if (solarFlare == SolarStage.STAGE_3){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step3.png");
         }
-        if (solarFlare == 4){
+        if (solarFlare == SolarStage.STAGE_4){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step4.png");
         }
-        if (solarFlare == 5){
+        if (solarFlare == SolarStage.STAGE_5){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step5.png");
         }
-        if (solarFlare == 6){
+        if (solarFlare == SolarStage.STAGE_6){
             SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step6.png");
         }
 
         // 第六阶段白天降低光照
-        if (currentPhase == SolarPhase.COLLAPSE) {
+        if (currentPhase == SolarStage.STAGE_6) {
             if (world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 long dayTime = serverLevel.dayTime();
                 long timeOfDay = dayTime % 24000;
@@ -105,13 +106,13 @@ public abstract class LevelRendererMixin {
         originalCelestialMatrix = new Matrix4f(in);
         Matrix4f copy = new Matrix4f(in);
 
-        int flare = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+        SolarStage flare = SapModVariables.MapVariables.get(world).getSolarStage();
         int lunar = (int) SapModVariables.MapVariables.get(world).LunarToday;
 
         float scale;
-        if (flare == 6) {
+        if (flare == SolarStage.STAGE_6) {
             scale = 1.0F;
-        } else if (flare == 5 || lunar >= 28) {
+        } else if (flare == SolarStage.STAGE_5 || lunar >= 28) {
             scale = 13.0F;
         } else {
             scale = LUNAR_SCALE_MAP.getOrDefault(lunar, 1.0F);
@@ -136,8 +137,8 @@ public abstract class LevelRendererMixin {
     private float getCollapseDayBrightnessFactor() {
         if (world == null) return 1.0f;
 
-        SolarPhase currentPhase = SapModVariables.MapVariables.get(world).getCurrentPhase();
-        if (currentPhase != SolarPhase.COLLAPSE) {
+        SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
+        if (currentPhase != SolarStage.STAGE_6) {
             return 1.0f;
         }
 

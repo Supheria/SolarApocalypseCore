@@ -1,7 +1,8 @@
 package com.supheria.solar_apocalypse_core.client;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.Mod;
@@ -27,8 +28,8 @@ public class CollapsePhaseState {
 		if (event.phase == TickEvent.Phase.END) {
 			Minecraft minecraft = Minecraft.getInstance();
 			if (minecraft.level != null) {
-				SolarPhase currentPhase = SapModVariables.MapVariables.get(minecraft.level).getCurrentPhase();
-				isCollapsePhase = (currentPhase == SolarPhase.COLLAPSE);
+				SolarStage currentPhase = SapModVariables.MapVariables.get(minecraft.level).getCurrentStage();
+				isCollapsePhase = (currentPhase == SolarStage.STAGE_6);
 
 				// 检查是否为白天
 				long dayTime = minecraft.level.dayTime();

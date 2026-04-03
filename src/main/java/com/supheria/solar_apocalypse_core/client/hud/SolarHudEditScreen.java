@@ -1,16 +1,13 @@
 package com.supheria.solar_apocalypse_core.client.hud;
 
+import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
-import net.minecraft.client.Minecraft;
 
 /**
  * HUD 编辑界面
@@ -32,7 +29,7 @@ public class SolarHudEditScreen extends Screen {
     private boolean isDetailedMode;
 
     private long sampleDay = 27;
-    private SolarPhase samplePhase = SolarPhase.CRITICAL;
+    private SolarStage samplePhase = SolarStage.STAGE_4;
     private float sampleProgress = 0.75f;
 
     private Button toggleModeButton;
@@ -196,16 +193,8 @@ public class SolarHudEditScreen extends Screen {
     /**
      * 获取阶段的显示名称（中文）
      */
-    private String getPhaseDisplayName(SolarPhase phase) {
-        return switch (phase) {
-            case WARMING -> "升温期";
-            case ACCELERATION -> "加速期";
-            case PEAK -> "峰值期";
-            case CRITICAL -> "危机期";
-            case ULTIMATE -> "终极期";
-            case COLLAPSE -> "坍缩";
-            default -> "无";
-        };
+    private String getPhaseDisplayName(SolarStage phase) {
+        return phase.getDisplayName().getString();
     }
 
     @Override

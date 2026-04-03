@@ -39,6 +39,9 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
     @Unique
     protected BlockTransform sap$Nprocedure;
 
+    @Unique
+    private static final ThreadLocal<Boolean> sap$isExecutingOnPlace = ThreadLocal.withInitial(() -> false);
+
     protected BlockStateBaseMixin(Block p_61117_, ImmutableMap<Property<?>, Comparable<?>> p_61118_, MapCodec<BlockState> p_61119_) {
         super(p_61117_, p_61118_, p_61119_);
     }
@@ -66,11 +69,16 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
     }
     @Inject(method = "onPlace", at = @At("TAIL"), cancellable = true)
     private void onPlace(Level level, BlockPos pos, BlockState p_60699_, boolean p_60700_, CallbackInfo callbackInfo) {
-        if (this.sap$Nprocedure != null) {
-            int x = pos.getX();
-            int y = pos.getY();
-            int z = pos.getZ();
-            this.sap$Nprocedure.call(level, x, y, z);
+        if (this.sap$Nprocedure != null && !sap$isExecutingOnPlace.get()) {
+            sap$isExecutingOnPlace.set(true);
+            try {
+                int x = pos.getX();
+                int y = pos.getY();
+                int z = pos.getZ();
+                this.sap$Nprocedure.call(level, x, y, z);
+            } finally {
+                sap$isExecutingOnPlace.set(false);
+            }
         }
 
         if (!this.sap$isOriginalonPlace) {

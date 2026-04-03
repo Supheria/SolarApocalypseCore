@@ -6,11 +6,11 @@
 	"mixins": [
 		"BlockStateBaseMixin",
 		"LevelRendererMixin",
-		"MobSpawnRulesMixin",
-		"UndeadMobBurnMixin",
-		"SkeletonBurnMixin",
+		"LightLevelMixin",
+		"HostileMobBurnMixin",
 		"SnowLayerMixin",
-		"BiomeGetTemperatureMixin"
+		"BiomeGetTemperatureMixin",
+		"MobSpawnRulesMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

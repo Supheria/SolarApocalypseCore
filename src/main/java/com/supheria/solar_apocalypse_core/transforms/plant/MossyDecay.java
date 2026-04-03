@@ -4,6 +4,7 @@ import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformAction;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformCondition;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -42,20 +43,20 @@ public class MossyDecay {
     private static final TransformCondition SOFT_BASE = daytime().and(sky()).and(noRain());
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5：白天 + 天空 + 不下雨 + dayTime>=48000 + 概率触发 → 去苔
-            when(stageRange(1, 6).and(SOFT_BASE).and(dayTimeMin(48000)).and(randomDayRate()),
+            // 阶段1-5：白天 + 天空 + 不下雨 概率触发 → 去苔
+            when(stageIsEruptionPhase().and(SOFT_BASE).and(randomDayRate()),
                     REMOVE_MOSS),
-            // 阶段2：白天 + y>=63 + 概率触发 → 去苔
-            when(stageExact(2).and(daytime()).and(minY(63)).and(randomDayRate()),
+            // 阶段2：白天 + 高于安全高度 + 概率触发 → 去苔
+            when(stageExact(SolarStage.STAGE_2).and(daytime()).and(aboveSafeHeight()).and(randomDayRate()),
                     REMOVE_MOSS),
-            // 阶段3：y>=63 → 去苔
-            when(stageExact(3).and(minY(63)),
+            // 阶段3：高于安全高度 → 去苔
+            when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                     REMOVE_MOSS),
-            // 阶段4：y>=32 → 去苔
-            when(stageExact(4).and(minY(32)),
+            // 阶段4：高于安全高度 → 去苔
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()),
                     REMOVE_MOSS),
-            // 阶段5：y>=8 → 去苔
-            when(stageExact(5).and(minY(8)),
+            // 阶段5：高于安全高度 → 去苔
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
                     REMOVE_MOSS)
     );
 
