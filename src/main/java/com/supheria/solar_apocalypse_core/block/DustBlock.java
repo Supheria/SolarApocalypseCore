@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.block;
 
 import com.supheria.solar_apocalypse_core.init.SapModBlocks;
-import com.supheria.solar_apocalypse_core.procedures.DustLostProcedure;
+import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -52,6 +52,6 @@ public class DustBlock extends FallingBlock {
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
-        DustLostProcedure.execute(level, x, y, z);
+        DirtChain.DUST.call(level, x, y, z);
     }
 }

@@ -17,7 +17,7 @@ import net.minecraft.client.Minecraft;
 import java.util.List;
 import java.util.Collections;
 
-import com.supheria.solar_apocalypse_core.procedures.CrushedDirtTCSandProcedure;
+import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
 import com.supheria.solar_apocalypse_core.init.SapModBlocks;
 
 public class CrushedDirtBlock extends FallingBlock {
@@ -46,6 +46,6 @@ public class CrushedDirtBlock extends FallingBlock {
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();
-		CrushedDirtTCSandProcedure.execute(level, x, y, z);
+		DirtChain.CRUSHED_DIRT.call(level, x, y, z);
 	}
 }

@@ -1,7 +1,7 @@
 
 package com.supheria.solar_apocalypse_core.block;
 
-import com.supheria.solar_apocalypse_core.procedures.WitheredLeavesBlockFProcedure;
+import com.supheria.solar_apocalypse_core.transforms.plant.LeavesWither;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -62,6 +62,6 @@ public class WitheredLeavesBlock extends LeavesBlock {
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();
-		WitheredLeavesBlockFProcedure.execute(level, x, y, z);
+		LeavesWither.TRANSFORM.call(level, x, y, z);
 	}
 }
