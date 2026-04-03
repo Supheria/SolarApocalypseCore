@@ -4,7 +4,7 @@ import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -206,12 +206,6 @@ public final class TransformConditions {
     public static TransformCondition random50() {
         return (world, x, y, z, stage) ->
                 Mth.nextDouble(RandomSource.create(), 0, 2) <= 1;
-    }
-
-    /** 当前世界处于坍缩阶段（SolarPhase.COLLAPSE）。 */
-    public static TransformCondition collapsePhase() {
-        return (world, x, y, z, stage) ->
-                SapModVariables.MapVariables.get(world).getCurrentPhase() == SolarPhase.COLLAPSE;
     }
 
     /**

@@ -21,7 +21,7 @@ public class IceMelt {
     private static void transform(LevelAccessor world, double x, double y, double z) {
         if (world.getBlockState(BlockPos.containing(x, y, z)).getBlock() == Blocks.LAVA) return;
 
-        int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+        int stage = (int) SapModVariables.MapVariables.get(world).solarStage;
         BlockPos pos = BlockPos.containing(x, y, z);
 
         if (BlockSpreadUtils.isOverworld(world, x, y, z)) {

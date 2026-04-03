@@ -1,12 +1,11 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -28,10 +27,10 @@ public abstract class MobSpawnRulesMixin {
 			RandomSource random,
 			CallbackInfoReturnable<Boolean> cir) {
 
-		SolarPhase currentPhase = SapModVariables.MapVariables.get(level).getCurrentPhase();
+		int currentPhase = SapModVariables.MapVariables.get(level).getCurrentStage();
 
 		// 只在COLLAPSE阶段处理
-		if (currentPhase != SolarPhase.COLLAPSE) {
+		if (currentPhase != SolarStageHelper.STAGE_6) {
 			return;
 		}
 

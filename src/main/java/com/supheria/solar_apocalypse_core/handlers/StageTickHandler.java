@@ -2,8 +2,7 @@ package com.supheria.solar_apocalypse_core.handlers;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
-import com.supheria.solar_apocalypse_core.world.SolarPhaseHelper;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -34,34 +33,34 @@ public class StageTickHandler {
         long dayTime = world.dayTime();
         SapModVariables.MapVariables mapVars = SapModVariables.MapVariables.get(world);
 
-        SolarPhase targetPhase = SolarPhaseHelper.getPhaseByDayTime(dayTime);
-        SolarPhase currentPhase = mapVars.getCurrentPhase();
+        int targetPhase = SolarStageHelper.getPhaseByDayTime(dayTime);
+        int currentPhase = mapVars.getCurrentStage();
 
         if (currentPhase != targetPhase) {
-            mapVars.setPhase(targetPhase);
+            mapVars.setCurrentStage(targetPhase);
             mapVars.syncData(world);
             applyPhaseRules(world, targetPhase);
         }
     }
 
-    private static void applyPhaseRules(LevelAccessor world, SolarPhase phase) {
-        int randomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase.ordinal());
-        boolean allowWeather = phase.ordinal() <= 2;
-        boolean allowFreeze = phase.ordinal() <= 2;
+    private static void applyPhaseRules(LevelAccessor world, int phase) {
+        int randomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase);
+        boolean allowWeather = phase <= 2;
+        boolean allowFreeze = phase <= 2;
 
         world.getLevelData().getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(randomTickingLevel, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(allowWeather, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_FREEZE_DAMAGE).set(allowFreeze, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WATER_SOURCE_CONVERSION).set(allowWeather, world.getServer());
 
-        if (phase.ordinal() >= 3 && phase != SolarPhase.COLLAPSE && world instanceof ServerLevel _level) {
+        if (phase >= 3 && phase != SolarStageHelper.STAGE_6 && world instanceof ServerLevel _level) {
             _level.getServer().getCommands().performPrefixedCommand(
                     new CommandSourceStack(CommandSource.NULL, new Vec3(0, 0, 0), Vec2.ZERO, _level, 4, "",
                     Component.literal(""), _level.getServer(), null).withSuppressedOutput(),
                     "weather clear");
         }
 
-        if (phase == SolarPhase.COLLAPSE) {
+        if (phase == SolarStageHelper.STAGE_6) {
             world.getLevelData().setRaining(true);
         }
     }

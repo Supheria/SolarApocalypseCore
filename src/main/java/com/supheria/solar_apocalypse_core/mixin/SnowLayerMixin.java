@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.LevelReader;
@@ -26,10 +26,10 @@ public abstract class SnowLayerMixin {
 			CallbackInfoReturnable<Boolean> cir) {
 		// 检查是否在COLLAPSE阶段
 		if (world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-			SolarPhase currentPhase = SapModVariables.MapVariables.get(serverLevel).getCurrentPhase();
+			int currentPhase = SapModVariables.MapVariables.get(serverLevel).getCurrentStage();
 
 			// 在COLLAPSE阶段，积雪总是可以存在
-			if (currentPhase == SolarPhase.COLLAPSE) {
+			if (currentPhase == SolarStageHelper.STAGE_6) {
 				cir.setReturnValue(true);
 			}
 		}

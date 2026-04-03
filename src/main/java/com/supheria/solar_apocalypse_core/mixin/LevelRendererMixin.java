@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.resources.ResourceLocation;
@@ -60,8 +60,8 @@ public abstract class LevelRendererMixin {
 
     @Inject(method="renderSky", at = @At("HEAD"))
     private void onRendersky(PoseStack p_202424_, Matrix4f p_254034_, float p_202426_, Camera p_202427_, boolean p_202428_, Runnable p_202429_, CallbackInfo ci){
-        int solarFlare = (int) SapModVariables.MapVariables.get(world).SolarFlare;
-        SolarPhase currentPhase = SapModVariables.MapVariables.get(world).getCurrentPhase();
+        int solarFlare = (int) SapModVariables.MapVariables.get(world).solarStage;
+        int currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
 
         // 太阳纹理根据阶段变化
         if (solarFlare == 1){
@@ -84,7 +84,7 @@ public abstract class LevelRendererMixin {
         }
 
         // 第六阶段白天降低光照
-        if (currentPhase == SolarPhase.COLLAPSE) {
+        if (currentPhase == SolarStageHelper.STAGE_6) {
             if (world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 long dayTime = serverLevel.dayTime();
                 long timeOfDay = dayTime % 24000;
@@ -105,7 +105,7 @@ public abstract class LevelRendererMixin {
         originalCelestialMatrix = new Matrix4f(in);
         Matrix4f copy = new Matrix4f(in);
 
-        int flare = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+        int flare = (int) SapModVariables.MapVariables.get(world).solarStage;
         int lunar = (int) SapModVariables.MapVariables.get(world).LunarToday;
 
         float scale;
@@ -136,8 +136,8 @@ public abstract class LevelRendererMixin {
     private float getCollapseDayBrightnessFactor() {
         if (world == null) return 1.0f;
 
-        SolarPhase currentPhase = SapModVariables.MapVariables.get(world).getCurrentPhase();
-        if (currentPhase != SolarPhase.COLLAPSE) {
+        int currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
+        if (currentPhase != SolarStageHelper.STAGE_6) {
             return 1.0f;
         }
 

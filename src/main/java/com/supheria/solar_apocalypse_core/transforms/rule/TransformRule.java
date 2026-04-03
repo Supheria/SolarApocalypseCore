@@ -40,7 +40,7 @@ public record TransformRule(TransformCondition condition, TransformAction action
     public static BlockTransform rulesOf(TransformRule... rules) {
         return (world, x, y, z) -> {
             if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
-            int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+            int stage = (int) SapModVariables.MapVariables.get(world).solarStage;
             for (TransformRule rule : rules) {
                 rule.apply(world, x, y, z, stage);
             }

@@ -39,14 +39,14 @@ public class EntityFireHandler {
         if (entity instanceof Player)
             return;
         if (entity instanceof Snowball
-                && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+                && SapModVariables.MapVariables.get(world).solarStage < 6) {
             entity.setSecondsOnFire(1);
             SolarApocalypseCoreMod.queueServerWork(20, () -> {
                 entity.remove(Entity.RemovalReason.KILLED);
             });
         }
         if (entity instanceof Projectile
-                && SapModVariables.MapVariables.get(world).SolarFlare < 6) {
+                && SapModVariables.MapVariables.get(world).solarStage < 6) {
             if (!(entity instanceof Snowball)) {
                 entity.setSecondsOnFire(5);
                 SolarApocalypseCoreMod.queueServerWork(100, () -> {
@@ -55,9 +55,9 @@ public class EntityFireHandler {
             }
         }
         if (!(entity instanceof Projectile)) {
-            int stage = (int) SapModVariables.MapVariables.get(world).SolarFlare;
+            int stage = (int) SapModVariables.MapVariables.get(world).solarStage;
             SolarApocalypseCoreMod.queueServerWork(1, () -> {
-                if (SapModVariables.MapVariables.get(world).SolarFlare == 2
+                if (SapModVariables.MapVariables.get(world).solarStage == 2
                         && !(SapModVariables.MapVariables.get(world).TodayTime > 12566 && SapModVariables.MapVariables.get(world).TodayTime < 23450)
                         && !world.getLevelData().isRaining()) {
                     if (world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
@@ -96,7 +96,7 @@ public class EntityFireHandler {
                         });
                     }
                 }
-                if (SapModVariables.MapVariables.get(world).SolarFlare >= 3 && SapModVariables.MapVariables.get(world).SolarFlare < 6
+                if (SapModVariables.MapVariables.get(world).solarStage >= 3 && SapModVariables.MapVariables.get(world).solarStage < 6
                         && world.canSeeSkyFromBelowWater(BlockPos.containing(x, y + 1, z))) {
                     entity.setSecondsOnFire(5);
                     SolarApocalypseCoreMod.queueServerWork(5, () -> {

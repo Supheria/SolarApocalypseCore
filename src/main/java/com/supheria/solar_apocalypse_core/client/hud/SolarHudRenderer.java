@@ -1,18 +1,16 @@
 package com.supheria.solar_apocalypse_core.client.hud;
 
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.Level;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarPhase;
-import com.supheria.solar_apocalypse_core.world.SolarPhaseHelper;
 
 /**
  * HUD 渲染器
@@ -48,8 +46,8 @@ public class SolarHudRenderer {
         long today = dayTime / 24000;
 
         SapModVariables.MapVariables mapVars = SapModVariables.MapVariables.get(level);
-        SolarPhase currentPhase = mapVars.getCurrentPhase();
-        float progress = SolarPhaseHelper.getPhaseProgress(dayTime, currentPhase);
+        int currentPhase = mapVars.getCurrentStage();
+        float progress = SolarStageHelper.getPhaseProgress(dayTime, currentPhase);
 
         // 获取配置信息
         int posX = SolarHudConfig.getHudX();
@@ -67,7 +65,7 @@ public class SolarHudRenderer {
      * 精简模式：显示一行信息
      * 格式：第27天 · 危机期
      */
-    private static void renderCompactMode(GuiGraphics guiGraphics, int posX, int posY, long today, SolarPhase phase) {
+    private static void renderCompactMode(GuiGraphics guiGraphics, int posX, int posY, long today, int phase) {
         String dayText = String.format("第%d天", today);
         String phaseText = getPhaseDisplayName(phase);
         String compactText = dayText + " · " + phaseText;
@@ -82,7 +80,7 @@ public class SolarHudRenderer {
      *   危机期
      *   [████████░░] 78% → 终极期
      */
-    private static void renderDetailedMode(GuiGraphics guiGraphics, int posX, int posY, long today, SolarPhase phase, float progress) {
+    private static void renderDetailedMode(GuiGraphics guiGraphics, int posX, int posY, long today, int phase, float progress) {
         Minecraft minecraft = Minecraft.getInstance();
 
         // 第一行：天数
@@ -116,7 +114,7 @@ public class SolarHudRenderer {
         guiGraphics.drawString(minecraft.font, percentText, posX + PROGRESS_BAR_WIDTH + 5, barY + 1, TEXT_COLOR, false);
 
         // 下一阶段信息
-        SolarPhase nextPhase = getNextPhase(phase);
+        int nextPhase = getNextPhase(phase);
         if (nextPhase != phase) {
             String arrowAndPhase = " → " + getPhaseDisplayName(nextPhase);
             guiGraphics.drawString(minecraft.font, arrowAndPhase, posX + PROGRESS_BAR_WIDTH + 40, barY + 1, 0xFFAAAAAA, false);
@@ -126,24 +124,16 @@ public class SolarHudRenderer {
     /**
      * 获取阶段的显示名称（中文）
      */
-    private static String getPhaseDisplayName(SolarPhase phase) {
-        return switch (phase) {
-            case WARMING -> "升温期";
-            case ACCELERATION -> "加速期";
-            case PEAK -> "峰值期";
-            case CRITICAL -> "危机期";
-            case ULTIMATE -> "终极期";
-            case COLLAPSE -> "坍缩";
-            default -> "无";
-        };
+    private static String getPhaseDisplayName(int phase) {
+        return SolarStageHelper.getDisplayName(phase);
     }
 
     /**
      * 获取下一个阶段
      */
-    private static SolarPhase getNextPhase(SolarPhase current) {
-        if (current.ordinal() < SolarPhase.values().length - 1) {
-            return SolarPhase.values()[current.ordinal() + 1];
+    private static int getNextPhase(int current) {
+        if (current < SolarStageHelper.STAGE_6) {
+            return current + 1;
         }
         return current;
     }
