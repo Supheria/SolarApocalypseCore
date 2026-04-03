@@ -46,13 +46,14 @@ public class StageTickHandler {
 
     private static void applyPhaseRules(LevelAccessor world, SolarStage phase) {
         int randomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase);
-        boolean allowWeather = !phase.isBefore(SolarStage.STAGE_3);
-        boolean allowFreeze = !phase.isAtLeast(SolarStage.STAGE_6);
+        boolean allowWeather = phase.isBefore(SolarStage.STAGE_3);
+        boolean allowFreeze = phase.isAtLeast(SolarStage.STAGE_6);
+        boolean allowWaterSource = phase.isBefore(SolarStage.STAGE_3) || phase.isAtLeast(SolarStage.STAGE_6);
 
         world.getLevelData().getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(randomTickingLevel, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(allowWeather, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_FREEZE_DAMAGE).set(allowFreeze, world.getServer());
-        world.getLevelData().getGameRules().getRule(GameRules.RULE_WATER_SOURCE_CONVERSION).set(allowWeather, world.getServer());
+        world.getLevelData().getGameRules().getRule(GameRules.RULE_WATER_SOURCE_CONVERSION).set(allowWaterSource, world.getServer());
 
         if (phase.isEruptionPhase() && phase.isAtLeast(SolarStage.STAGE_3) && world instanceof ServerLevel _level) {
             _level.getServer().getCommands().performPrefixedCommand(
