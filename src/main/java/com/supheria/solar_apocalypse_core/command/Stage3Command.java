@@ -14,7 +14,7 @@ import net.minecraft.commands.Commands;
 import com.supheria.solar_apocalypse_core.procedures.commands.SetStage3;
 
 @Mod.EventBusSubscriber
-public class Step3Command {
+public class Stage3Command {
 	@SubscribeEvent
 	public static void registerCommand(RegisterCommandsEvent event) {
 		event.getDispatcher().register(Commands.literal("solar_stage3").requires(s -> s.hasPermission(3)).executes(arguments -> {

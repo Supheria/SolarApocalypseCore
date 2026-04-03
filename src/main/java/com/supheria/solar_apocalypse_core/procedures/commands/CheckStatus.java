@@ -6,7 +6,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
 
-public class TestAction {
+public class CheckStatus {
 
     public static void execute(LevelAccessor world, Entity entity) {
         if (entity == null)
