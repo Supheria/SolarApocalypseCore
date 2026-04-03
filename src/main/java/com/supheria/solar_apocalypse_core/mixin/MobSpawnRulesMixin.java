@@ -2,58 +2,43 @@ package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
-import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * 修改mob生成规则
- * 在第六阶段允许僵尸等不死生物在白天生成
+ * 在第六阶段（恒冬期）白天绕过光照检查，允许所有 Monster 子类在地表生成
+ * 注入 isDarkEnoughToSpawn，仅跳过光照判断，难度检查（Peaceful）在上层 checkMonsterSpawnRules 保留
  */
-@Mixin(Mob.class)
-public abstract class MobSpawnRulesMixin {
+@Mixin(Monster.class)
+public class MobSpawnRulesMixin {
 
-	@Inject(method = "checkMobSpawnRules", at = @At("HEAD"), cancellable = true)
-	private static void onCheckMobSpawnRules(
-			EntityType<?> entityType,
-			LevelAccessor level,
-			net.minecraft.world.entity.MobSpawnType spawnType,
-			net.minecraft.core.BlockPos blockPos,
+	@Inject(method = "isDarkEnoughToSpawn", at = @At("HEAD"), cancellable = true)
+	private static void allowDaytimeSpawnInStage6(
+			ServerLevelAccessor level,
+			BlockPos pos,
 			RandomSource random,
 			CallbackInfoReturnable<Boolean> cir) {
 
-		SolarStage currentPhase = SapModVariables.MapVariables.get(level).getCurrentStage();
+		if (!(level instanceof ServerLevel serverLevel)) {
+			return;
+		}
 
-		// 只在COLLAPSE阶段处理
-		if (currentPhase != SolarStage.STAGE_6) {
+		SolarStage stage = SapModVariables.MapVariables.get(serverLevel).getCurrentStage();
+		if (stage != SolarStage.STAGE_6) {
 			return;
 		}
 
 		// 检查是否为白天
-		if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-			long dayTime = serverLevel.dayTime();
-			long timeOfDay = dayTime % 24000;
-			boolean isDaytime = timeOfDay < 12000;
-
-			// 白天允许不死生物（僵尸等）生成
-			if (isDaytime && isUndeadMob(entityType)) {
-				cir.setReturnValue(true);
-			}
+		// 允许白天生成敌对生物
+		if (serverLevel.dayTime() % 24000 < 12000) {
+			cir.setReturnValue(true);
 		}
-	}
-
-	/**
-	 * 检查是否为不死系mob
-	 */
-	private static boolean isUndeadMob(EntityType<?> entityType) {
-		String name = entityType.toString().toLowerCase();
-		return name.contains("zombie") || name.contains("skeleton") || name.contains("wither") ||
-				name.contains("husk") || name.contains("drowned");
 	}
 }
