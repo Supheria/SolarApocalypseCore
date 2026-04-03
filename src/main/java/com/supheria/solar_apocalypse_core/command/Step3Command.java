@@ -11,13 +11,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.commands.Commands;
 
-import com.supheria.solar_apocalypse_core.procedures.commands.Set3Procedure;
+import com.supheria.solar_apocalypse_core.procedures.commands.SetStage3;
 
 @Mod.EventBusSubscriber
 public class Step3Command {
 	@SubscribeEvent
 	public static void registerCommand(RegisterCommandsEvent event) {
-		event.getDispatcher().register(Commands.literal("sapstep3").requires(s -> s.hasPermission(3)).executes(arguments -> {
+		event.getDispatcher().register(Commands.literal("solar_stage3").requires(s -> s.hasPermission(3)).executes(arguments -> {
 			ServerLevel world = arguments.getSource().getLevel();
 			double x = arguments.getSource().getPosition().x();
 			double y = arguments.getSource().getPosition().y();
@@ -27,7 +27,7 @@ public class Step3Command {
 				entity = FakePlayerFactory.getMinecraft(world);
 			Direction direction = entity.getDirection();
 
-			Set3Procedure.execute(world, x, y, z, entity);
+			SetStage3.execute(world, x, y, z, entity);
 			return 0;
 		}));
 	}

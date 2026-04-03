@@ -4,7 +4,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffect;
 
-import com.supheria.solar_apocalypse_core.procedures.stats.DehydrationActiveProcedure;
+import com.supheria.solar_apocalypse_core.procedures.stats.DehydrationEffect;
 
 public class DehydrationMobEffect extends MobEffect {
 	public DehydrationMobEffect() {
@@ -23,7 +23,7 @@ public class DehydrationMobEffect extends MobEffect {
 
 	@Override
 	public void applyEffectTick(LivingEntity entity, int amplifier) {
-		DehydrationActiveProcedure.execute(entity.level(), entity);
+		DehydrationEffect.execute(entity.level(), entity);
 	}
 
 	@Override

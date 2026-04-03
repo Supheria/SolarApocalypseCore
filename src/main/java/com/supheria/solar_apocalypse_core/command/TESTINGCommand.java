@@ -11,13 +11,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.commands.Commands;
 
-import com.supheria.solar_apocalypse_core.procedures.commands.TestProcedure;
+import com.supheria.solar_apocalypse_core.procedures.commands.TestAction;
 
 @Mod.EventBusSubscriber
 public class TESTINGCommand {
 	@SubscribeEvent
 	public static void registerCommand(RegisterCommandsEvent event) {
-		event.getDispatcher().register(Commands.literal("sapcheck")
+		event.getDispatcher().register(Commands.literal("solar_check")
 
 				.executes(arguments -> {
 					ServerLevel world = arguments.getSource().getLevel();
@@ -29,7 +29,7 @@ public class TESTINGCommand {
 						entity = FakePlayerFactory.getMinecraft(world);
 					Direction direction = entity.getDirection();
 
-					TestProcedure.execute(world, entity);
+					TestAction.execute(world, entity);
 					return 0;
 				}));
 	}

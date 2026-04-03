@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.block;
 
 
-import com.supheria.solar_apocalypse_core.procedures.SunKeepProcedure;
+import com.supheria.solar_apocalypse_core.handlers.SunBlockInteraction;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -71,7 +71,7 @@ public class MeasuringInstrumentBlock extends Block {
         double hitY = hit.getLocation().y;
         double hitZ = hit.getLocation().z;
         Direction direction = hit.getDirection();
-        SunKeepProcedure.execute(world, x, y, z, entity);
+        SunBlockInteraction.execute(world, x, y, z, entity);
         return InteractionResult.SUCCESS;
     }
 }

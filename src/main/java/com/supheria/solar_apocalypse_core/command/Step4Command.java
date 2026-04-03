@@ -11,13 +11,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.commands.Commands;
 
-import com.supheria.solar_apocalypse_core.procedures.commands.Set4Procedure;
+import com.supheria.solar_apocalypse_core.procedures.commands.SetStage4;
 
 @Mod.EventBusSubscriber
 public class Step4Command {
 	@SubscribeEvent
 	public static void registerCommand(RegisterCommandsEvent event) {
-		event.getDispatcher().register(Commands.literal("sapstep4").requires(s -> s.hasPermission(3)).executes(arguments -> {
+		event.getDispatcher().register(Commands.literal("solar_stage4").requires(s -> s.hasPermission(3)).executes(arguments -> {
 			ServerLevel world = arguments.getSource().getLevel();
 			double x = arguments.getSource().getPosition().x();
 			double y = arguments.getSource().getPosition().y();
@@ -27,7 +27,7 @@ public class Step4Command {
 				entity = FakePlayerFactory.getMinecraft(world);
 			Direction direction = entity.getDirection();
 
-			Set4Procedure.execute(world, x, y, z, entity);
+			SetStage4.execute(world, x, y, z, entity);
 			return 0;
 		}));
 	}

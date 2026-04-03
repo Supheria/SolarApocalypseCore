@@ -4,10 +4,12 @@ import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.init.*;
-import com.supheria.solar_apocalypse_core.procedures.*;
-import com.supheria.solar_apocalypse_core.procedures.stones.LavaTCObsidianProcedure;
-import com.supheria.solar_apocalypse_core.procedures.stones.StoneChainProcedures;
-import com.supheria.solar_apocalypse_core.procedures.stones.StoneTCProcedure;
+import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
+import com.supheria.solar_apocalypse_core.transforms.fluid.*;
+import com.supheria.solar_apocalypse_core.transforms.misc.*;
+import com.supheria.solar_apocalypse_core.transforms.plant.*;
+import com.supheria.solar_apocalypse_core.transforms.stone.*;
+import com.supheria.solar_apocalypse_core.transforms.wood.*;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.*;
@@ -105,7 +107,7 @@ public class SolarApocalypseCoreMod {
                 && !ref.is(BlockTags.NEEDS_DIAMOND_TOOL);
     }
 
-    public static Procedure getProcedure(BlockState blockState) {
+    public static BlockTransform getBlockTransform(BlockState blockState) {
         Block block = blockState.getBlock();
         Reference<Block> ref = block.builtInRegistryHolder();
 
@@ -145,14 +147,14 @@ public class SolarApocalypseCoreMod {
                 && !(block instanceof SculkCatalystBlock)
                 && !(block instanceof SculkShriekerBlock)
                 && !(block instanceof LeavesBlock)) {
-            return SimpleDeleteProcedure::execute;
+            return SimpleDecay.TRANSFORM;
         }
         // 小型植物（树苗、竹子）
         if ((ref.is(BlockTags.SAPLINGS)
                 || block instanceof BambooSaplingBlock
                 || block instanceof BambooStalkBlock)
                 && !ref.is(BlockTags.LEAVES) && notExcluded(ref)) {
-            return SmallPlantDeleteProcedure::execute;
+            return SmallPlantDecay.TRANSFORM;
         }
         // 木制可燃类（原木、木板、竹块、羊毛等）
         if ((ref.is(BlockTags.LOGS)
@@ -169,7 +171,7 @@ public class SolarApocalypseCoreMod {
                 || ref.is(BlockTags.WOOL)
                 || ref.is(BlockTags.WOOL_CARPETS))
                 && notExcluded(ref) && !ref.is(BlockTags.LEAVES)) {
-            return WoodBlockFProcedure::execute;
+            return WoodBurn.TRANSFORM;
         }
         // 树叶
         if ((ref.is(BlockTags.LEAVES)
@@ -177,41 +179,41 @@ public class SolarApocalypseCoreMod {
                 || block instanceof CherryLeavesBlock
                 || block instanceof MangroveLeavesBlock)
                 && notExcluded(ref)) {
-            return WitheredLeavesBlockFProcedure::execute;
+            return LeavesWither.TRANSFORM;
         }
         // 苔藓石
-        if (ref.is(SapModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDeleteProcedure::execute;
+        if (ref.is(SapModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDecay.TRANSFORM;
         // 草方块
-        if (ref.is(SapModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChainProcedures.GRASS_BLOCK;
+        if (ref.is(SapModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChain.GRASS_BLOCK;
         // 泥土
-        if (ref.is(SapModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChainProcedures.DIRT;
+        if (ref.is(SapModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChain.DIRT;
         // 粗泥土
-        if (ref.is(SapModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChainProcedures.COARSE_DIRT;
+        if (ref.is(SapModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChain.COARSE_DIRT;
         // 沙子
-        if (ref.is(BlockTags.SAND) && notExcluded(ref)) return DirtChainProcedures.SAND;
+        if (ref.is(BlockTags.SAND) && notExcluded(ref)) return DirtChain.SAND;
         // 粉尘
-        if (ref.is(SapModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChainProcedures.DUST;
+        if (ref.is(SapModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChain.DUST;
         // 冰类
-        if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMeltProcedure::execute;
+        if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMelt.TRANSFORM;
         // 水
-        if (ref.is(FluidTags.WATER.location()) && notExcluded(ref)) return WaterEvaporateProcedure::execute;
+        if (ref.is(FluidTags.WATER.location()) && notExcluded(ref)) return WaterEvaporate.TRANSFORM;
         // 含水方块（当前处于含水状态）
         if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)
                 && blockState.getValue(BlockStateProperties.WATERLOGGED)
                 && notExcluded(ref)) {
-            return WaterTagDeleteProcedure::execute;
+            return WaterloggedDry.TRANSFORM;
         }
         // 气泡柱
-        if (block instanceof BubbleColumnBlock && notExcluded(ref)) return BubbleEvaporateProcedure::execute;
+        if (block instanceof BubbleColumnBlock && notExcluded(ref)) return BubbleEvaporate.TRANSFORM;
         // 海绵
         if ((block instanceof SpongeBlock || block instanceof WetSpongeBlock)
                 && notExcluded(ref)) {
-            return SpongeDeleteProcedure::execute;
+            return SpongeDry.TRANSFORM;
         }
         // TNT
-        if (ref.is(SapModTags.Blocks.TNT) && notExcluded(ref)) return TNTFProcedure::execute;
+        if (ref.is(SapModTags.Blocks.TNT) && notExcluded(ref)) return TntIgnite.TRANSFORM;
         // 花盆
-        if (ref.is(BlockTags.FLOWER_POTS) && notExcluded(ref)) return FlowerPotFProcedure::execute;
+        if (ref.is(BlockTags.FLOWER_POTS) && notExcluded(ref)) return FlowerPotDecay.TRANSFORM;
         // 石头系（镐可挖掘，排除特殊矿石与存储块）
         if (ref.is(BlockTags.MINEABLE_WITH_PICKAXE) && notExcluded(ref)
                 && !ref.is(SapModTags.Blocks.SIMPLE_DELETE)
@@ -232,44 +234,44 @@ public class SolarApocalypseCoreMod {
                     || ref.is(Tags.Blocks.ORE_BEARING_GROUND_DEEPSLATE)
                     || ref.is(Tags.Blocks.ORES_IN_GROUND_DEEPSLATE)
                     || ref.is(SapModTags.Blocks.DEEPSLATE)) {
-                if (ref.is(BlockTags.STAIRS)) return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE_STAIRS);
-                if (ref.is(BlockTags.SLABS))  return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE_SLAB);
-                if (ref.is(BlockTags.WALLS))  return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE_WALL);
-                return StoneTCProcedure.of(Blocks.COBBLED_DEEPSLATE);
+                if (ref.is(BlockTags.STAIRS)) return StoneTo.of(Blocks.COBBLED_DEEPSLATE_STAIRS);
+                if (ref.is(BlockTags.SLABS))  return StoneTo.of(Blocks.COBBLED_DEEPSLATE_SLAB);
+                if (ref.is(BlockTags.WALLS))  return StoneTo.of(Blocks.COBBLED_DEEPSLATE_WALL);
+                return StoneTo.of(Blocks.COBBLED_DEEPSLATE);
             }
             // 普通石头系列
-            if (ref.is(BlockTags.STAIRS)) return StoneTCProcedure.of(Blocks.COBBLESTONE_STAIRS);
-            if (ref.is(BlockTags.SLABS))  return StoneTCProcedure.of(Blocks.COBBLESTONE_SLAB);
-            if (ref.is(BlockTags.WALLS))  return StoneTCProcedure.of(Blocks.COBBLESTONE_WALL);
-            return StoneTCProcedure.of(Blocks.COBBLESTONE);
+            if (ref.is(BlockTags.STAIRS)) return StoneTo.of(Blocks.COBBLESTONE_STAIRS);
+            if (ref.is(BlockTags.SLABS))  return StoneTo.of(Blocks.COBBLESTONE_SLAB);
+            if (ref.is(BlockTags.WALLS))  return StoneTo.of(Blocks.COBBLESTONE_WALL);
+            return StoneTo.of(Blocks.COBBLESTONE);
         }
         // 卵石
-        if (ref.is(SapModTags.Blocks.COBBLESTONE) && notExcluded(ref)) return StoneChainProcedures.COBBLESTONE;
+        if (ref.is(SapModTags.Blocks.COBBLESTONE) && notExcluded(ref)) return StoneChain.COBBLESTONE;
         // 砾石
-        if (ref.is(Tags.Blocks.GRAVEL) && notExcluded(ref)) return StoneChainProcedures.GRAVEL;
+        if (ref.is(Tags.Blocks.GRAVEL) && notExcluded(ref)) return StoneChain.GRAVEL;
         // 熔岩（第六阶段转化为黑曜石）
         if (block == Blocks.LAVA && !ref.is(SapModTags.Blocks.FIRE_RESISTANCE)) {
-            return LavaTCObsidianProcedure::execute;
+            return LavaToObsidian.TRANSFORM;
         }
         // 砂岩
-        if (ref.is(SapModTags.Blocks.SANDSTONE) && notExcluded(ref)) return DirtChainProcedures.CRUSHED_DIRT;
+        if (ref.is(SapModTags.Blocks.SANDSTONE) && notExcluded(ref)) return DirtChain.CRUSHED_DIRT;
         // 黏土
-        if (ref.is(SapModTags.Blocks.CLAY) && notExcluded(ref)) return StoneChainProcedures.CLAY;
+        if (ref.is(SapModTags.Blocks.CLAY) && notExcluded(ref)) return StoneChain.CLAY;
         // 传送门
-        if (ref.is(BlockTags.PORTALS)) return DeleteUnconditionallyProcedure::execute;
+        if (ref.is(BlockTags.PORTALS)) return ForceDelete.TRANSFORM;
         // 末地传送门框架
-        if (block instanceof EndPortalFrameBlock) return EndFrameTagDeleteProcedure::execute;
+        if (block instanceof EndPortalFrameBlock) return EndFrameClear.TRANSFORM;
         return null;
     }
 
-    public static Procedure getNProcedure(BlockState blockState) {
+    public static BlockTransform getNBlockTransform(BlockState blockState) {
         Block block = blockState.getBlock();
         Reference<Block> ref = block.builtInRegistryHolder();
 
         // 传送门（优先处理，避免被其他规则捕获）
-        if (ref.is(BlockTags.PORTALS)) return DeleteUnconditionallyProcedure::execute;
+        if (ref.is(BlockTags.PORTALS)) return ForceDelete.TRANSFORM;
         // 末地传送门框架
-        if (block instanceof EndPortalFrameBlock) return EndFrameTagDeleteProcedure::execute;
+        if (block instanceof EndPortalFrameBlock) return EndFrameClear.TRANSFORM;
         // 简单删除类（杂草、花朵、旗帜、蜡烛、床、珊瑚等）
         if ((ref.is(SapModTags.Blocks.SIMPLE_DELETE)
                 || ref.is(BlockTags.REPLACEABLE_BY_TREES)
@@ -306,14 +308,14 @@ public class SolarApocalypseCoreMod {
                 && !(block instanceof SculkCatalystBlock)
                 && !(block instanceof SculkShriekerBlock)
                 && !(block instanceof LeavesBlock)) {
-            return SimpleDeleteProcedure::execute;
+            return SimpleDecay.TRANSFORM;
         }
         // 小型植物（树苗、竹子）
         if ((ref.is(BlockTags.SAPLINGS)
                 || block instanceof BambooSaplingBlock
                 || block instanceof BambooStalkBlock)
                 && !ref.is(BlockTags.LEAVES) && notExcluded(ref)) {
-            return SmallPlantDeleteProcedure::execute;
+            return SmallPlantDecay.TRANSFORM;
         }
         // 木制可燃类（原木、木板、竹块、羊毛等）
         if ((ref.is(BlockTags.LOGS)
@@ -330,7 +332,7 @@ public class SolarApocalypseCoreMod {
                 || ref.is(BlockTags.WOOL)
                 || ref.is(BlockTags.WOOL_CARPETS))
                 && notExcluded(ref) && !ref.is(BlockTags.LEAVES)) {
-            return WoodBlockFProcedure::execute;
+            return WoodBurn.TRANSFORM;
         }
         // 树叶
         if ((ref.is(BlockTags.LEAVES)
@@ -338,32 +340,32 @@ public class SolarApocalypseCoreMod {
                 || block instanceof CherryLeavesBlock
                 || block instanceof MangroveLeavesBlock)
                 && notExcluded(ref)) {
-            return WitheredLeavesBlockFProcedure::execute;
+            return LeavesWither.TRANSFORM;
         }
         // 苔藓石
-        if (ref.is(SapModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDeleteProcedure::execute;
+        if (ref.is(SapModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDecay.TRANSFORM;
         // 草方块
-        if (ref.is(SapModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChainProcedures.GRASS_BLOCK;
+        if (ref.is(SapModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChain.GRASS_BLOCK;
         // 泥土
-        if (ref.is(SapModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChainProcedures.DIRT;
+        if (ref.is(SapModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChain.DIRT;
         // 粗泥土
-        if (ref.is(SapModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChainProcedures.COARSE_DIRT;
+        if (ref.is(SapModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChain.COARSE_DIRT;
         // 沙子
-        if (ref.is(BlockTags.SAND) && notExcluded(ref)) return DirtChainProcedures.SAND;
+        if (ref.is(BlockTags.SAND) && notExcluded(ref)) return DirtChain.SAND;
         // 粉尘
-        if (ref.is(SapModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChainProcedures.DUST;
+        if (ref.is(SapModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChain.DUST;
         // 冰类
-        if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMeltProcedure::execute;
+        if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMelt.TRANSFORM;
         // 水
-        if (ref.is(FluidTags.WATER.location()) && notExcluded(ref)) return WaterEvaporateProcedure::execute;
+        if (ref.is(FluidTags.WATER.location()) && notExcluded(ref)) return WaterEvaporate.TRANSFORM;
         // 含水方块（当前处于含水状态）
         if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)
                 && blockState.getValue(BlockStateProperties.WATERLOGGED)
                 && notExcluded(ref)) {
-            return WaterTagDeleteProcedure::execute;
+            return WaterloggedDry.TRANSFORM;
         }
         // 气泡柱
-        if (block instanceof BubbleColumnBlock && notExcluded(ref)) return BubbleEvaporateProcedure::execute;
+        if (block instanceof BubbleColumnBlock && notExcluded(ref)) return BubbleEvaporate.TRANSFORM;
         return null;
     }
 
