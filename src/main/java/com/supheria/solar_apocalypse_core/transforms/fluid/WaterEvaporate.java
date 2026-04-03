@@ -20,7 +20,7 @@ public class WaterEvaporate {
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky()).and(daytime()).and(aboveWaterEvaporateHeight()).and(randomDayRate()),
                     spreadWater(BlockSpreadUtils.OFFSETS_17)),
             // 阶段3：晴天且超过蒸发高度，额外spread17
-            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(daytime()).and(aboveWaterEvaporateHeight()),
+            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(aboveWaterEvaporateHeight()),
                     spreadWater(BlockSpreadUtils.OFFSETS_17)),
             // 阶段4：晴天且超过蒸发高度，5×5×4层大范围蒸发
             when(stageExact(SolarStage.STAGE_4).and(daytime()).and(aboveWaterEvaporateHeight()),
