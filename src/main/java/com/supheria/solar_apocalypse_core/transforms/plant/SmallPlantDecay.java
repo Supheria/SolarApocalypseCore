@@ -26,9 +26,6 @@ public class SmallPlantDecay {
                     setBlock(Blocks.AIR)),
             // 阶段4-5：高于安全高度 → 空气
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
-                    setBlock(Blocks.AIR)),
-            // 阶段6：露天 → 空气
-            when(stageExact(SolarStage.STAGE_6).and(sky()),
                     setBlock(Blocks.AIR))
     );
 

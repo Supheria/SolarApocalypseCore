@@ -57,9 +57,6 @@ public class MossyDecay {
                     REMOVE_MOSS),
             // 阶段5：高于安全高度 → 去苔
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
-                    REMOVE_MOSS),
-            // 阶段6：露天 → 去苔
-            when(stageExact(SolarStage.STAGE_6).and(sky()),
                     REMOVE_MOSS)
     );
 

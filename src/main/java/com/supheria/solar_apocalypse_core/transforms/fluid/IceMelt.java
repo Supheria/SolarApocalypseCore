@@ -55,10 +55,6 @@ public class IceMelt {
 
             // 阶段5：无论白天/夜晚，高于安全高度，直接消除+spread17所有冰类
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
-                    removeIce(BlockSpreadUtils.OFFSETS_17)),
-
-            // 阶段6：无论白天/夜晚，露天，直接消除+spread17所有冰类
-            when(stageExact(SolarStage.STAGE_6).and(sky()),
                     removeIce(BlockSpreadUtils.OFFSETS_17))
     );
 

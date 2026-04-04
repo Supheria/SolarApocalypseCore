@@ -37,9 +37,7 @@ public class WaterloggedDry {
             // 阶段3：超过蒸发高度，直接去水
             when(stageExact(SolarStage.STAGE_3).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG),
             // 阶段4-5：超过蒸发高度，直接去水
-            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG),
-            // 阶段6：露天，直接去水
-            when(stageExact(SolarStage.STAGE_6).and(sky()).and(IS_WATERLOGGED), DEWATERLOG)
+            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG)
     );
 
     private WaterloggedDry() {}

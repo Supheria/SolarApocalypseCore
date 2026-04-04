@@ -27,9 +27,6 @@ public class WaterEvaporate {
                     spreadWater(BlockSpreadUtils.OFFSETS_WATER_5X5_4)),
             // 阶段5：超过蒸发高度，5×5×10层超大范围蒸发（无需晴天）
             when(stageExact(SolarStage.STAGE_5).and(aboveWaterEvaporateHeight()),
-                    spreadWater(BlockSpreadUtils.OFFSETS_WATER_5X5_10)),
-            // 阶段6：露天，5×5×10层超大范围蒸发（无需晴天）
-            when(stageExact(SolarStage.STAGE_6).and(sky()),
                     spreadWater(BlockSpreadUtils.OFFSETS_WATER_5X5_10))
     );
 

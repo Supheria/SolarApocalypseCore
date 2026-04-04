@@ -116,11 +116,7 @@ public class LeavesWither {
 
             // 阶段5：高于安全高度 → 50% 扩散火焰17 或 50% 扩散空气17
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
-                    coinFlip(FIRE_17, AIR_17)),
-
-            // 阶段6：露天 -> 消失
-            when(stageExact(SolarStage.STAGE_6).and(sky()),
-                    setBlock(Blocks.AIR))
+                    coinFlip(FIRE_17, AIR_17))
     );
 
     private LeavesWither() {}
