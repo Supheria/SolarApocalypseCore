@@ -10,7 +10,8 @@
 		"HostileMobBurnMixin",
 		"SnowLayerMixin",
 		"BiomeGetTemperatureMixin",
-		"MobSpawnRulesMixin"
+		"MobSpawnRulesMixin",
+		"ThirstHelperSolarMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
