@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * 在COLLAPSE阶段修改生物群系温度
- * 所有地方都返回寒冷温度，使Minecraft认为是下雪的环境
+ * 在COLLAPSE阶段修改生物群系温度和降水量
+ * 所有地方都返回寒冷温度和降雪，使Minecraft认为是下雪的环境
  */
 @OnlyIn(Dist.CLIENT)
 @Mixin(Biome.class)
@@ -26,13 +26,23 @@ public abstract class BiomeGetTemperatureMixin {
 	private void onGetTemperature(BlockPos pos, CallbackInfoReturnable<Float> cir) {
 		try {
 			if (CollapsePhaseState.isInCollapse()) {
-				// 返回一个很低的温度值（寒冷生物群系）
-				// 在Minecraft中，温度 < 0.15 会导致下雪而不是下雨
 				cir.setReturnValue(-0.5f);
 			}
 		} catch (Exception e) {
-			// 如果出错，允许原方法继续执行，不影响游戏运行
-			// 避免mixin导致的连锁故障
+		}
+	}
+
+	/**
+	 * 拦截hasPrecipitation方法
+	 * 在COLLAPSE阶段强制返回true，使所有生物群系都能产生降水
+	 */
+	@Inject(method = "hasPrecipitation()Z", at = @At("HEAD"), cancellable = true)
+	private void onHasPrecipitation(CallbackInfoReturnable<Boolean> cir) {
+		try {
+			if (CollapsePhaseState.isInCollapse()) {
+				cir.setReturnValue(true);
+			}
+		} catch (Exception e) {
 		}
 	}
 }
