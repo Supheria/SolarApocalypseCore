@@ -78,11 +78,6 @@ public final class TransformConditions {
         };
     }
 
-    /** world.dayTime() >= minTicks */
-    public static TransformCondition dayTimeMin(long minTicks) {
-        return (world, x, y, z, stage) -> world.dayTime() >= minTicks;
-    }
-
     /** 六面相邻有岩浆 */
     public static TransformCondition adjacentLava() {
         return (world, x, y, z, stage) -> BlockSpreadUtils.hasAdjacentLava(world, x, y, z);
@@ -98,27 +93,14 @@ public final class TransformConditions {
     // 高度 (Height)
     // -----------------------------------------------------------------------
 
-    /** y >= threshold */
-    public static TransformCondition minY(double threshold) {
-        return (world, x, y, z, stage) -> y >= threshold;
-    }
-
-    /** y >= StageHeightConfig.getSafeHeight(forStage) - lazy evaluation */
+    /** y >= StageHeightConfig.getSafeHeight(forStage) */
     public static TransformCondition aboveSafeHeight() {
         return (world, x, y, z, stage) -> y >= StageHeightConfig.getSafeHeight(stage);
     }
 
-    /**
-     * y >= min(getSafeHeight(2..5)) - lazy evaluation。
-     * 用于石头 TC 阶段2-5：取各阶段安全高度的最小值。
-     */
-    public static TransformCondition aboveMinSafeHeight() {
-        return (world, x, y, z, stage) -> {
-            int minH = Math.min(
-                    Math.min(StageHeightConfig.getSafeHeight(SolarStage.STAGE_2), StageHeightConfig.getSafeHeight(SolarStage.STAGE_3)),
-                    Math.min(StageHeightConfig.getSafeHeight(SolarStage.STAGE_4), StageHeightConfig.getSafeHeight(SolarStage.STAGE_5)));
-            return y >= minH;
-        };
+    /** y >= StageHeightConfig.getCozyHeight(forStage) */
+    public static TransformCondition aboveCozyHeight() {
+        return (world, x, y, z, stage) -> y >= StageHeightConfig.getCozyHeight(stage);
     }
 
     // -----------------------------------------------------------------------
@@ -247,6 +229,11 @@ public final class TransformConditions {
     /** y > StageHeightConfig.getWaterEvapHeight(stage)（水蒸发高度阈值，严格大于） */
     public static TransformCondition aboveWaterEvaporateHeight() {
         return (world, x, y, z, stage) -> y > StageHeightConfig.getSafeHeight(stage);
+    }
+
+    /** y >= threshold (冰融化高度条件) */
+    public static TransformCondition minIceHeight(double threshold) {
+        return (world, x, y, z, stage) -> y >= threshold;
     }
 
     private TransformConditions() {}

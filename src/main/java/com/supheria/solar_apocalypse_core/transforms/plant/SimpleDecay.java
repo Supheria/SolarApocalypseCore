@@ -29,6 +29,9 @@ public class SimpleDecay {
                     setBlock(Blocks.AIR)),
             // 阶段5：高于安全高度 → 空气
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
+                    setBlock(Blocks.AIR)),
+            // 阶段6：露天 → 空气
+            when(stageExact(SolarStage.STAGE_6).and(aboveSafeHeight()),
                     setBlock(Blocks.AIR))
     );
 

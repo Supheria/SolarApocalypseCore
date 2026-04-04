@@ -77,5 +77,36 @@ public final class TransformActions {
         return (world, x, y, z) -> BlockSpreadUtils.spreadWater(world, x, y, z, offsets);
     }
 
+    /** 替换中心并向4方向水平邻居扩散（冰类扩散）。 */
+    public static TransformAction spreadIce4H(BlockState target) {
+        return (world, x, y, z) ->
+                BlockSpreadUtils.spreadBlock(world, x, y, z, target, bs -> bs.is(net.minecraft.tags.BlockTags.ICE), BlockSpreadUtils.OFFSETS_4H);
+    }
+
+    /** 替换中心并向8方向水平邻居扩散（冰类扩散）。 */
+    public static TransformAction spreadIce8H(BlockState target) {
+        return (world, x, y, z) ->
+                BlockSpreadUtils.spreadBlock(world, x, y, z, target, bs -> bs.is(net.minecraft.tags.BlockTags.ICE), BlockSpreadUtils.OFFSETS_8H);
+    }
+
+    /** 替换中心并向17格扩散（冰类扩散）。 */
+    public static TransformAction spreadIce17(BlockState target) {
+        return (world, x, y, z) ->
+                BlockSpreadUtils.spreadBlock(world, x, y, z, target, bs -> bs.is(net.minecraft.tags.BlockTags.ICE), BlockSpreadUtils.OFFSETS_17);
+    }
+
+    /** 替换中心并向5×5扩散（冰类扩散）。 */
+    public static TransformAction spreadIce5x5(BlockState target) {
+        return (world, x, y, z) ->
+                BlockSpreadUtils.spreadBlock(world, x, y, z, target, bs -> bs.is(net.minecraft.tags.BlockTags.ICE), BlockSpreadUtils.OFFSETS_5X5);
+    }
+
+    /** 冰类方块直接消除（设为AIR）。 */
+    public static TransformAction removeIce(int[][] offsets) {
+        return (world, x, y, z) ->
+                BlockSpreadUtils.spreadBlock(world, x, y, z, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),
+                        bs -> bs.is(net.minecraft.tags.BlockTags.ICE), offsets);
+    }
+
     private TransformActions() {}
 }

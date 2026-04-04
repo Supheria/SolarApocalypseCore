@@ -16,11 +16,11 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class TntIgnite {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5：天空+晴天+无雨+上方为空气，概率点火
+            // 阶段1-5：露天+晴天+无雨+上方为空气，概率点火
             when(stageIsEruptionPhase().and(sky()).and(noRain()).and(daytime())
                     .and(airAbove()).and(randomDayWood()),
                     setBlockAbove(Blocks.FIRE)),
-            // 阶段2：天空+晴天+无雨+上方为空气，慢速概率点火
+            // 阶段2：露天+晴天+无雨+上方为空气，慢速概率点火
             when(stageExact(SolarStage.STAGE_2).and(sky()).and(noRain()).and(daytime())
                     .and(airAbove()).and(randomDayWoodSlow()),
                     setBlockAbove(Blocks.FIRE)),

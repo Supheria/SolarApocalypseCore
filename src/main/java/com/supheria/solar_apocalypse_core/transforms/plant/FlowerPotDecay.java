@@ -30,6 +30,9 @@ public class FlowerPotDecay {
                     setBlock(Blocks.FLOWER_POT)),
             // 阶段5：高于安全高度，非花盆→花盆
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(isBlock(Blocks.FLOWER_POT).negate()),
+                    setBlock(Blocks.FLOWER_POT)),
+            // 阶段6：露天，非花盆→花盆
+            when(stageExact(SolarStage.STAGE_6).and(sky()).and(isBlock(Blocks.FLOWER_POT).negate()),
                     setBlock(Blocks.FLOWER_POT))
     );
 

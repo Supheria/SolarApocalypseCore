@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.*;
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformConditions.aboveSafeHeight;
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.when;
 
 /**
@@ -31,8 +32,8 @@ public final class DirtChain {
 
     // 草方块 → 泥土链
     public static final BlockTransform GRASS_BLOCK = TransformRule.rulesOf(
-            // 阶段1-5：白天+天空+不下雨+dayTime≥1000，概率性 → 泥土
-            when(stageIsEruptionPhase().and(SOFT_BASE).and(dayTimeMin(1000)).and(randomDaySoft()),
+            // 阶段1-5：白天+露天+不下雨，概率性 → 泥土
+            when(stageIsEruptionPhase().and(SOFT_BASE).and(randomDaySoft()),
                     setBlock(Blocks.DIRT)),
             // 阶段2-5：天空可见，立即 → 粗泥土
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky()),
@@ -44,17 +45,17 @@ public final class DirtChain {
             when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()),
                     spread8H(SapModBlocks.DUST.get().defaultBlockState(), bs -> bs.is(SapModTags.Blocks.MOIST_DIRT))),
             // 阶段5：高于 y=8，→ 空气，并向 DIRT 17邻扩散（含下层）
-            when(stageExact(SolarStage.STAGE_5).and(minY(8)),
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
                     spread17(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.DIRT)))
     );
 
     // 泥土 → 粗泥土链
     public static final BlockTransform DIRT = TransformRule.rulesOf(
             // 阶段1-5：软转换 → 粗泥土
-            when(stageIsEruptionPhase().and(SOFT_BASE).and(dayTimeMin(24000)).and(randomDaySoft()),
+            when(stageIsEruptionPhase().and(SOFT_BASE).and(randomDaySoft()),
                     setBlock(Blocks.COARSE_DIRT)),
-            // 阶段2：天空+dayTime≥168000，→ 沙子
-            when(stageExact(SolarStage.STAGE_2).and(sky()).and(dayTimeMin(168000)),
+            // 阶段2：露天，→ 沙子
+            when(stageExact(SolarStage.STAGE_2).and(sky()),
                     setBlock(Blocks.SAND)),
             // 阶段3：高于安全高度，→ 尘土，向 DIRT(mod) 4邻扩散
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
@@ -70,10 +71,10 @@ public final class DirtChain {
     // 粗泥土 → 碎泥土链
     public static final BlockTransform COARSE_DIRT = TransformRule.rulesOf(
             // 阶段1-5：软转换 → 碎泥土
-            when(stageIsEruptionPhase().and(SOFT_BASE).and(dayTimeMin(24000)).and(randomDaySoft()),
+            when(stageIsEruptionPhase().and(SOFT_BASE).and(randomDaySoft()),
                     setBlock(SapModBlocks.CRUSHED_DIRT.get())),
-            // 阶段2：天空+dayTime≥168000，→ 沙子
-            when(stageExact(SolarStage.STAGE_2).and(sky()).and(dayTimeMin(168000)),
+            // 阶段2：露天，→ 沙子
+            when(stageExact(SolarStage.STAGE_2).and(sky()),
                     setBlock(Blocks.SAND)),
             // 阶段3：高于安全高度，→ 尘土，向 HARD_DIRT 4邻扩散
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
@@ -107,7 +108,7 @@ public final class DirtChain {
 
     // 沙子 → 尘土链
     public static final BlockTransform SAND = TransformRule.rulesOf(
-            // 阶段2-5：白天+天空+上方无水+不下雨，1/10概率 → 尘土
+            // 阶段2-5：白天+露天+上方无水+不下雨，1/10概率 → 尘土
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(daytime()).and(sky()).and(noWaterAbove()).and(noRain()).and(randomOneIn10()),
                     setBlock(SapModBlocks.DUST.get())),
             // 阶段3：白天+上方无水+高于安全高度，→ 空气，向沙子17邻扩散

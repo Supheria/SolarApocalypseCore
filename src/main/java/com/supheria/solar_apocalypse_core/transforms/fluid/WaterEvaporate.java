@@ -16,7 +16,7 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class WaterEvaporate {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段2-5：有天空+晴天+超过蒸发高度，spread17蒸发水
+            // 阶段2-5：有露天+晴天+超过蒸发高度，spread17蒸发水
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky()).and(daytime()).and(aboveWaterEvaporateHeight()).and(randomDayRate()),
                     spreadWater(BlockSpreadUtils.OFFSETS_17)),
             // 阶段3：晴天且超过蒸发高度，额外spread17
@@ -27,6 +27,9 @@ public class WaterEvaporate {
                     spreadWater(BlockSpreadUtils.OFFSETS_WATER_5X5_4)),
             // 阶段5：超过蒸发高度，5×5×10层超大范围蒸发（无需晴天）
             when(stageExact(SolarStage.STAGE_5).and(aboveWaterEvaporateHeight()),
+                    spreadWater(BlockSpreadUtils.OFFSETS_WATER_5X5_10)),
+            // 阶段6：露天，5×5×10层超大范围蒸发（无需晴天）
+            when(stageExact(SolarStage.STAGE_6).and(sky()),
                     spreadWater(BlockSpreadUtils.OFFSETS_WATER_5X5_10))
     );
 

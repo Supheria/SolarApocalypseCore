@@ -1,120 +1,66 @@
 package com.supheria.solar_apocalypse_core.transforms.fluid;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
-import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
-import net.minecraft.core.BlockPos;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
+
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.*;
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformConditions.*;
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformConditions.aboveSafeHeight;
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.when;
 
 /**
  * 冰类方块融化过程。
  */
 public class IceMelt {
 
-    public static final BlockTransform TRANSFORM = IceMelt::transform;
+    public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
+            // 阶段1-5：白天+概率，冰类融化为水
+            when(stageRange(SolarStage.STAGE_1, SolarStage.STAGE_6).and(sky()).and(daytime()).and(aboveSafeHeight()).and(randomDayRate()),
+                    setBlockState(net.minecraft.world.level.block.Blocks.WATER.defaultBlockState())),
 
-    private static void transform(LevelAccessor world, double x, double y, double z) {
-        if (world.getBlockState(BlockPos.containing(x, y, z)).getBlock() == Blocks.LAVA) return;
+            // 阶段2：晴天+高于安全高度，冰类直接消除
+            when(stageExact(SolarStage.STAGE_2).and(sky()).and(daytime()).and(aboveSafeHeight()).and(randomDayRate()),
+                    removeIce(BlockSpreadUtils.OFFSETS_4H)),
+            // 阶段2：晴天+高于安全高度，冰类变水
+            when(stageExact(SolarStage.STAGE_2).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    spreadIce4H(net.minecraft.world.level.block.Blocks.WATER.defaultBlockState())),
+            // 阶段2：晴天+高于安全高度，浮冰变冰
+            when(stageExact(SolarStage.STAGE_2).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    spreadIce4H(net.minecraft.world.level.block.Blocks.ICE.defaultBlockState())),
+            // 阶段2：晴天+高于安全高度，浮冰直接消除+spread8H
+            when(stageExact(SolarStage.STAGE_2).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    removeIce(BlockSpreadUtils.OFFSETS_8H)),
 
-        SolarStage stage = SapModVariables.MapVariables.get(world).getSolarStage();
-        BlockPos pos = BlockPos.containing(x, y, z);
+            // 阶段3：晴天+高于安全高度，冰类直接消除+spread4H
+            when(stageExact(SolarStage.STAGE_3).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    removeIce(BlockSpreadUtils.OFFSETS_4H)),
+            // 阶段3：晴天+高于安全高度，蓝冰变浮冰+spread4H
+            when(stageExact(SolarStage.STAGE_3).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    spreadIce4H(net.minecraft.world.level.block.Blocks.PACKED_ICE.defaultBlockState())),
+            // 阶段3：晴天+高于安全高度，浮冰变冰+spread4H
+            when(stageExact(SolarStage.STAGE_3).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    spreadIce4H(net.minecraft.world.level.block.Blocks.ICE.defaultBlockState())),
+            // 阶段3：晴天+高于安全高度，浮冰变水+spread4H
+            when(stageExact(SolarStage.STAGE_3).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    spreadIce4H(net.minecraft.world.level.block.Blocks.WATER.defaultBlockState())),
 
-        if (BlockSpreadUtils.isOverworld(world, x, y, z)) {
-            long todayTime = (long) SapModVariables.MapVariables.get(world).TodayTime;
-            boolean daytime = !(todayTime > 12566 && todayTime < 23450);
+            // 阶段4-5：高于安全高度，冰类直接消除+spread8H
+            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    removeIce(BlockSpreadUtils.OFFSETS_8H)),
+            // 阶段4-5：高于安全高度，蓝冰变冰+spread8H
+            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(sky()).and(daytime()).and(aboveSafeHeight()),
+                    spreadIce8H(net.minecraft.world.level.block.Blocks.ICE.defaultBlockState())),
 
-            if (daytime) {
-                // --- 普通冰 / 霜冰 ---
-                var block = world.getBlockState(pos).getBlock();
-                if (block == Blocks.ICE || block == Blocks.FROSTED_ICE) {
-                    // 规则A：阶段1-5，概率融化为水
-                    if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage.isAtLeast(SolarStage.STAGE_1) && stage.isBefore(SolarStage.STAGE_6)) {
-                        world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
-                    }
-                    // 规则B/C/D（读取调用时的当前方块状态，可能已由A变为水）
-                    if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage == SolarStage.STAGE_2 && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_2)) {
-                        world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                    } else if (Mth.nextDouble(RandomSource.create(), 0, 10) <= (world.dayTime() / 24000) / 1.5
-                            && stage == SolarStage.STAGE_2 && y < 63 && y >= 8) {
-                        world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
-                    } else if (stage.isAtLeast(SolarStage.STAGE_3) && stage.isBefore(SolarStage.STAGE_6) && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_3)) {
-                        world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                        BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                                Blocks.AIR.defaultBlockState(),
-                                bs -> bs.getBlock() == Blocks.ICE || bs.getBlock() == Blocks.FROSTED_ICE,
-                                BlockSpreadUtils.OFFSETS_4H);
-                    }
-                }
+            // 阶段5：无论白天/夜晚，高于安全高度，直接消除+spread17所有冰类
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
+                    removeIce(BlockSpreadUtils.OFFSETS_17)),
 
-                // --- 浮冰 ---
-                if (world.getBlockState(pos).getBlock() == Blocks.PACKED_ICE) {
-                    if (Mth.nextDouble(RandomSource.create(), 0, 15) <= (world.dayTime() / 24000) / 1.5
-                            && stage == SolarStage.STAGE_2) {
-                        world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
-                    } else if (stage == SolarStage.STAGE_3 && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_2)) {
-                        world.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
-                        BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                                Blocks.WATER.defaultBlockState(),
-                                bs -> bs.getBlock() == Blocks.PACKED_ICE,
-                                BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage == SolarStage.STAGE_3
-                            && y < StageHeightConfig.getSafeHeight(SolarStage.STAGE_2) && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_4)) {
-                        world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
-                        BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                                Blocks.ICE.defaultBlockState(),
-                                bs -> bs.getBlock() == Blocks.PACKED_ICE,
-                                BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage.isAtLeast(SolarStage.STAGE_4) && stage.isBefore(SolarStage.STAGE_6) && y >= 8) {
-                        world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                        BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                                Blocks.AIR.defaultBlockState(),
-                                bs -> bs.getBlock() == Blocks.PACKED_ICE,
-                                BlockSpreadUtils.OFFSETS_8H);
-                    }
-                }
-
-                // --- 蓝冰 ---
-                if (world.getBlockState(pos).getBlock() == Blocks.BLUE_ICE) {
-                    if (stage == SolarStage.STAGE_3 && y >= 8) {
-                        world.setBlock(pos, Blocks.PACKED_ICE.defaultBlockState(), 3);
-                        BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                                Blocks.PACKED_ICE.defaultBlockState(),
-                                bs -> bs.getBlock() == Blocks.BLUE_ICE,
-                                BlockSpreadUtils.OFFSETS_4H);
-                    } else if (stage.isAtLeast(SolarStage.STAGE_4) && stage.isBefore(SolarStage.STAGE_6) && y >= 63) {
-                        world.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
-                        BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                                Blocks.PACKED_ICE.defaultBlockState(),
-                                bs -> bs.getBlock() == Blocks.BLUE_ICE,
-                                BlockSpreadUtils.OFFSETS_8H);
-                    } else if (stage.isAtLeast(SolarStage.STAGE_4) && stage.isBefore(SolarStage.STAGE_6) && y >= StageHeightConfig.getSafeHeight(SolarStage.STAGE_4)) {
-                        world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                        BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                                Blocks.AIR.defaultBlockState(),
-                                bs -> bs.getBlock() == Blocks.BLUE_ICE,
-                                BlockSpreadUtils.OFFSETS_8H);
-                    }
-                }
-            }
-
-            // 阶段5：无需晴天，直接消除+spread17所有冰类
-            if (stage == SolarStage.STAGE_5 && y >= 8) {
-                world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                BlockSpreadUtils.spreadNeighbors(world, x, y, z,
-                        Blocks.AIR.defaultBlockState(),
-                        bs -> bs.is(BlockTags.ICE),
-                        BlockSpreadUtils.OFFSETS_17);
-            }
-        }
-    }
+            // 阶段6：无论白天/夜晚，露天，直接消除+spread17所有冰类
+            when(stageExact(SolarStage.STAGE_6).and(sky()),
+                    removeIce(BlockSpreadUtils.OFFSETS_17))
+    );
 
     private IceMelt() {}
 }

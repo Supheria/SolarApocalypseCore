@@ -16,19 +16,19 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class WoodBurn {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5：白天 + 天空 + 不下雨 + 概率 → 空气
+            // 阶段1-5：白天 + 露天 + 不下雨 + 概率 → 空气
             when(stageIsEruptionPhase().and(daytime()).and(sky()).and(noRain()).and(randomDayWood()),
                     setBlock(Blocks.AIR)),
-            // 阶段2：白天 + 天空 + 不下雨 + 慢速概率 → 空气
+            // 阶段2：白天 + 露天 + 不下雨 + 慢速概率 → 空气
             when(stageExact(SolarStage.STAGE_2).and(daytime()).and(sky()).and(noRain()).and(randomDayWoodSlow()),
                     setBlock(Blocks.AIR)),
-            // 阶段3：高于安全高度 + 天空 + 慢速概率 → 空气
+            // 阶段3：高于安全高度 + 露天 + 慢速概率 → 空气
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()).and(sky()).and(randomDayWoodSlow()),
                     setBlock(Blocks.AIR)),
-            // 阶段4-5：高于安全高度 + 天空 + 快速概率 → 空气
+            // 阶段4-5：高于安全高度 + 露天 + 快速概率 → 空气
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()).and(sky()).and(randomDayWoodFast()),
                     setBlock(Blocks.AIR)),
-            // 阶段5：高于安全高度 + 天空 → 空气（必然触发）
+            // 阶段5：高于安全高度 + 露天 → 空气（必然触发）
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(sky()),
                     setBlock(Blocks.AIR))
     );

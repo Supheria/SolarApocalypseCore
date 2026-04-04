@@ -27,8 +27,8 @@ public final class StoneChain {
             // 阶段3-5：天空可见，概率性 → 砾石
             when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(sky()).and(randomDayVariable()),
                     setBlock(Blocks.GRAVEL)),
-            // 阶段5：y>=8 且上方为空气 → 砾石
-            when(stageExact(SolarStage.STAGE_5).and(minY(8)).and(airAbove()),
+            // 阶段5：高于安全高度， 且上方为空气 → 砾石
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(airAbove()),
                     setBlock(Blocks.GRAVEL))
     );
 
@@ -37,8 +37,8 @@ public final class StoneChain {
             // 阶段3-5：天空可见，概率性 → 陶土
             when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(sky()).and(randomDayVariable()),
                     setBlock(Blocks.TERRACOTTA)),
-            // 阶段4-5：y>=8，直接 → 陶土
-            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(minY(8)),
+            // 阶段4-5：高于安全高度，直接 → 陶土
+            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
                     setBlock(Blocks.TERRACOTTA))
     );
 

@@ -21,11 +21,14 @@ public class SmallPlantDecay {
             // 阶段2：天空可见 + 不下雨 + 概率触发 → 空气（无白天限制，夜间也触发）
             when(stageExact(SolarStage.STAGE_2).and(sky()).and(noRain()).and(randomDayRate()),
                     setBlock(Blocks.AIR)),
-            // 阶段3：y>=63 → 空气
+            // 阶段3：高于安全高度 → 空气
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                     setBlock(Blocks.AIR)),
-            // 阶段4-5：y>=8 → 空气
+            // 阶段4-5：高于安全高度 → 空气
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
+                    setBlock(Blocks.AIR)),
+            // 阶段6：露天 → 空气
+            when(stageExact(SolarStage.STAGE_6).and(sky()),
                     setBlock(Blocks.AIR))
     );
 
