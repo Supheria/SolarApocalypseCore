@@ -43,56 +43,26 @@ public class EntityFireHandler {
             return;
         }
 
+        int fireSeconds = StageHeightConfig.getFireSeconds(stage);
+        float fireDamage = StageHeightConfig.getFireDamage(stage);
+
+        if (fireSeconds <= 0 || fireDamage <= 0.0f) {
+            return;
+        }
+
         if (entity instanceof Snowball) {
-            entity.setSecondsOnFire(1);
-            SolarApocalypseCoreMod.queueServerWork(20, () -> entity.remove(Entity.RemovalReason.KILLED));
+            entity.setSecondsOnFire(fireSeconds);
+            SolarApocalypseCoreMod.queueServerWork(Math.max(1, fireSeconds) * 20, () -> entity.remove(Entity.RemovalReason.KILLED));
             return;
         }
 
         if (entity instanceof Projectile) {
-            entity.setSecondsOnFire(5);
-            SolarApocalypseCoreMod.queueServerWork(100, () -> entity.remove(Entity.RemovalReason.KILLED));
-            return;
-        }
-
-        int fireSeconds = switch (stage) {
-            case STAGE_2, STAGE_3, STAGE_4, STAGE_5 -> 5;
-            default -> 0;
-        };
-
-        if (fireSeconds <= 0) {
+            entity.setSecondsOnFire(fireSeconds);
+            SolarApocalypseCoreMod.queueServerWork(Math.max(1, fireSeconds) * 20, () -> entity.remove(Entity.RemovalReason.KILLED));
             return;
         }
 
         entity.setSecondsOnFire(fireSeconds);
-
-        switch (stage) {
-            case STAGE_2, STAGE_3 -> SolarApocalypseCoreMod.queueServerWork(20, () -> {
-                entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 1.0f);
-                SolarApocalypseCoreMod.queueServerWork(20, () -> {
-                    entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 1.0f);
-                    SolarApocalypseCoreMod.queueServerWork(20, () -> {
-                        entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 1.0f);
-                        SolarApocalypseCoreMod.queueServerWork(20, () -> {
-                            entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 1.0f);
-                            SolarApocalypseCoreMod.queueServerWork(20, () -> entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 10.0f));
-                        });
-                    });
-                });
-            });
-            case STAGE_4 -> SolarApocalypseCoreMod.queueServerWork(20, () -> {
-                entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 1.0f);
-                SolarApocalypseCoreMod.queueServerWork(20, () -> {
-                    entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 1.0f);
-                    SolarApocalypseCoreMod.queueServerWork(10, () -> entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 10.0f));
-                });
-            });
-            case STAGE_5 -> SolarApocalypseCoreMod.queueServerWork(5, () -> {
-                entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 1.0f);
-                SolarApocalypseCoreMod.queueServerWork(5, () -> entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), 10.0f));
-            });
-            default -> {
-            }
-        }
+        entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.IN_FIRE)), fireDamage);
     }
 }

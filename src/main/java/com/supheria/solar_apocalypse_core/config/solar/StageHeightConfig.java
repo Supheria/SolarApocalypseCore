@@ -1,6 +1,7 @@
 package com.supheria.solar_apocalypse_core.config.solar;
 
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import org.apache.commons.lang3.tuple.Pair;
@@ -42,11 +43,27 @@ public class StageHeightConfig {
 		public final IntValue stage5CozyHeight;
 		public final IntValue stage6CozyHeight;
 
+		// ============ 燃烧强度配置 ============
+		// 超过安全高度后，实体统一使用这组燃烧秒数与伤害值
+		public final IntValue stage1FireSeconds;
+		public final IntValue stage2FireSeconds;
+		public final IntValue stage3FireSeconds;
+		public final IntValue stage4FireSeconds;
+		public final IntValue stage5FireSeconds;
+		public final IntValue stage6FireSeconds;
+
+		public final DoubleValue stage1FireDamage;
+		public final DoubleValue stage2FireDamage;
+		public final DoubleValue stage3FireDamage;
+		public final DoubleValue stage4FireDamage;
+		public final DoubleValue stage5FireDamage;
+		public final DoubleValue stage6FireDamage;
+
 		public StageHeightValues(ForgeConfigSpec.Builder builder) {
 			builder.comment("===============================");
 			builder.comment("Solar Apocalypse Core - Stage Height Configuration");
 			builder.comment("===============================");
-			builder.comment("Manages safe heights and damage multipliers for all 6 stages");
+			builder.comment("Manages safe heights, thirst thresholds, and fire intensity for all 6 stages");
 			builder.comment("All values can be adjusted to modify gameplay difficulty");
 			builder.comment("");
 
@@ -109,6 +126,60 @@ public class StageHeightConfig {
 					.defineInRange("stage6SapHeight", -64, -64, 320);
 
 			builder.pop();
+
+			// ===== 燃烧强度配置 =====
+			builder.push("fire_intensity");
+			builder.comment("Fire duration and damage used when entities are above the safe height");
+
+			stage1FireSeconds = builder
+					.comment("Stage 1 fire duration in seconds")
+					.defineInRange("stage1FireSeconds", 0, 0, 60);
+
+			stage2FireSeconds = builder
+					.comment("Stage 2 fire duration in seconds")
+					.defineInRange("stage2FireSeconds", 1, 0, 60);
+
+			stage3FireSeconds = builder
+					.comment("Stage 3 fire duration in seconds")
+					.defineInRange("stage3FireSeconds", 2, 0, 60);
+
+			stage4FireSeconds = builder
+					.comment("Stage 4 fire duration in seconds")
+					.defineInRange("stage4FireSeconds", 3, 0, 60);
+
+			stage5FireSeconds = builder
+					.comment("Stage 5 fire duration in seconds")
+					.defineInRange("stage5FireSeconds", 4, 0, 60);
+
+			stage6FireSeconds = builder
+					.comment("Stage 6 fire duration in seconds")
+					.defineInRange("stage6FireSeconds", 0, 0, 60);
+
+			stage1FireDamage = builder
+					.comment("Stage 1 direct fire damage")
+					.defineInRange("stage1FireDamage", 0.0, 0.0, 100.0);
+
+			stage2FireDamage = builder
+					.comment("Stage 2 direct fire damage")
+					.defineInRange("stage2FireDamage", 1.0, 0.0, 100.0);
+
+			stage3FireDamage = builder
+					.comment("Stage 3 direct fire damage")
+					.defineInRange("stage3FireDamage", 2.0, 0.0, 100.0);
+
+			stage4FireDamage = builder
+					.comment("Stage 4 direct fire damage")
+					.defineInRange("stage4FireDamage", 3.0, 0.0, 100.0);
+
+			stage5FireDamage = builder
+					.comment("Stage 5 direct fire damage")
+					.defineInRange("stage5FireDamage", 4.0, 0.0, 100.0);
+
+			stage6FireDamage = builder
+					.comment("Stage 6 direct fire damage")
+					.defineInRange("stage6FireDamage", 0.0, 0.0, 100.0);
+
+			builder.pop();
 		}
 
 		// ============ 辅助方法 ============
@@ -145,6 +216,30 @@ public class StageHeightConfig {
 				default -> -64;
 			};
 		}
+
+		public int getFireSeconds(SolarStage stage) {
+			return switch (stage) {
+				case STAGE_1 -> stage1FireSeconds.get();
+				case STAGE_2 -> stage2FireSeconds.get();
+				case STAGE_3 -> stage3FireSeconds.get();
+				case STAGE_4 -> stage4FireSeconds.get();
+				case STAGE_5 -> stage5FireSeconds.get();
+				case STAGE_6 -> stage6FireSeconds.get();
+				default -> 0;
+			};
+		}
+
+		public float getFireDamage(SolarStage stage) {
+			return switch (stage) {
+				case STAGE_1 -> stage1FireDamage.get().floatValue();
+				case STAGE_2 -> stage2FireDamage.get().floatValue();
+				case STAGE_3 -> stage3FireDamage.get().floatValue();
+				case STAGE_4 -> stage4FireDamage.get().floatValue();
+				case STAGE_5 -> stage5FireDamage.get().floatValue();
+				case STAGE_6 -> stage6FireDamage.get().floatValue();
+				default -> 0.0f;
+			};
+		}
 	}
 
 	// ============ 全局访问方法 ============
@@ -155,5 +250,13 @@ public class StageHeightConfig {
 
 	public static int getCozyHeight(SolarStage stage) {
 		return HEIGHT_VALUES.getCozyHeight(stage);
+	}
+
+	public static int getFireSeconds(SolarStage stage) {
+		return HEIGHT_VALUES.getFireSeconds(stage);
+	}
+
+	public static float getFireDamage(SolarStage stage) {
+		return HEIGHT_VALUES.getFireDamage(stage);
 	}
 }

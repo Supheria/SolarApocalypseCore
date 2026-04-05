@@ -41,20 +41,15 @@ public class HeatEffect {
             return;
         }
 
-        int fireSeconds = switch (stage) {
-            case STAGE_2 -> 1;
-            case STAGE_3 -> 2;
-            case STAGE_4 -> 3;
-            case STAGE_5 -> 4;
-            default -> 0;
-        };
+        int fireSeconds = StageHeightConfig.getFireSeconds(stage);
+        float fireDamage = StageHeightConfig.getFireDamage(stage);
 
-        if (fireSeconds <= 0) {
+        if (fireSeconds <= 0 || fireDamage <= 0.0f) {
             return;
         }
 
         entity.setSecondsOnFire(fireSeconds);
-        entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), (float) (world.dayTime() / 48000));
+        entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), fireDamage);
     }
 
     private static boolean isCreativeOrSpectator(Entity entity) {
