@@ -33,8 +33,8 @@ public class StageHeightConfig {
 		public final IntValue stage5SafeHeight;
 		public final IntValue stage6SafeHeight;
 
-		// ============ 舒适高度（热值积累阈值）============
-		// 低于此高度的玩家不会积累热值（SapStack）
+		// ============ 口渴倍率高度阈值 ============
+		// 低于此高度的玩家不会受到太阳阶段额外口渴倍率影响
 		public final IntValue stage1CozyHeight;
 		public final IntValue stage2CozyHeight;
 		public final IntValue stage3CozyHeight;
@@ -80,32 +80,32 @@ public class StageHeightConfig {
 
 			builder.pop();
 
-			// ===== 热值积累高度配置 =====
+			// ===== 口渴倍率高度配置 =====
 			builder.push("sap_accumulation_heights");
-			builder.comment("Heights at which SapStack (sun heat) accumulates");
+			builder.comment("Heights at which solar thirst multipliers apply");
 
 			stage1CozyHeight = builder
-					.comment("Stage 1: No accumulation")
+					.comment("Stage 1: No extra thirst multiplier")
 					.defineInRange("stage1SapHeight", -64, -64, 320);
 
 			stage2CozyHeight = builder
-					.comment("Stage 2: Accumulate above Y=63")
+					.comment("Stage 2: Extra thirst multiplier above Y=63")
 					.defineInRange("stage2SapHeight", 63, -64, 320);
 
 			stage3CozyHeight = builder
-					.comment("Stage 3: Accumulate above Y=8")
+					.comment("Stage 3: Extra thirst multiplier above Y=8")
 					.defineInRange("stage3SapHeight", 8, -64, 320);
 
 			stage4CozyHeight = builder
-					.comment("Stage 4: Accumulate above Y=-16")
+					.comment("Stage 4: Extra thirst multiplier above Y=-16")
 					.defineInRange("stage4SapHeight", -16, -64, 320);
 
 			stage5CozyHeight = builder
-					.comment("Stage 5: Accumulate everywhere (Y=-64 = unlimited)")
+					.comment("Stage 5: Extra thirst multiplier everywhere (Y=-64 = unlimited)")
 					.defineInRange("stage5SapHeight", -64, -64, 320);
 
 			stage6CozyHeight = builder
-					.comment("Stage 6: No accumulation in COLLAPSE")
+					.comment("Stage 6: No extra thirst multiplier in COLLAPSE")
 					.defineInRange("stage6SapHeight", -64, -64, 320);
 
 			builder.pop();
@@ -131,8 +131,8 @@ public class StageHeightConfig {
 		}
 
 		/**
-		 * 获取指定阶段的舒适高度
-		 * 低于此高度的实体不会积累热值
+		 * 获取指定阶段的口渴倍率高度阈值
+		 * 低于此高度的实体不会受到太阳阶段额外口渴倍率影响
 		 */
 		public int getCozyHeight(SolarStage stage) {
 			return switch (stage) {

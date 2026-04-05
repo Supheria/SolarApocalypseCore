@@ -13,9 +13,5 @@ public class CheckStatus {
             return;
         if (entity instanceof Player _player && !_player.level().isClientSide())
             _player.displayClientMessage(Component.literal(("Stage:" + SapModVariables.MapVariables.get(world).solarStage + " / " + "Today Time:" + SapModVariables.MapVariables.get(world).TodayTime)), false);
-        if (entity instanceof Player _player && !_player.level().isClientSide())
-            _player.displayClientMessage(Component.literal(("FireStack" + entity.getPersistentData().getDouble("SapStack"))), false);
-        if (entity instanceof Player _player && !_player.level().isClientSide())
-            _player.displayClientMessage(Component.literal(("WaterStack" + entity.getPersistentData().getDouble("WaterStack"))), false);
     }
 }
