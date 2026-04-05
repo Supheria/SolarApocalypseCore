@@ -3,13 +3,10 @@ package com.supheria.solar_apocalypse_core.world;
 import net.minecraft.network.chat.Component;
 
 /**
- * 太阳爆发阶段枚举
- * 定义了7个阶段及其属性和方法
+ * 太阳灾变进程的离散阶段枚举。
  *
- * 阶段说明：
- * - NONE：未初始化
- * - STAGE_1 - STAGE_5：爆发阶段（等级 1-5）
- * - STAGE_6：坍缺阶段（恒冬期）
+ * <p>该顺序同时承担两层语义：一是阶段本身的时间推进顺序，二是若干比较辅助方法与
+ * SavedData 序列化时使用的 ordinal 顺序。因此调整枚举排列时必须同时考虑存档兼容性。
  */
 public enum SolarStage {
     /**
@@ -88,8 +85,7 @@ public enum SolarStage {
 //    }
 
     /**
-     * 从序数值获取枚举
-     * 用于从 NBT 或配置中还原枚举值
+     * 从持久化保存的 ordinal 恢复阶段枚举。
      *
      * @param ordinal 序数值（0-6）
      * @return 对应的 SolarStage，超出范围返回 NONE
@@ -102,21 +98,16 @@ public enum SolarStage {
     }
 
     /**
-     * 判断是否至少达到指定阶段
-     * 基于序数比较
-     *
-     * @param other 要比较的阶段
-     * @return true 如果当前阶段 >= other
+     * 判断当前阶段是否至少推进到指定阶段。
+     * 这里依赖枚举声明顺序进行比较，因此顺序本身就是语义的一部分。
      */
     public boolean isAtLeast(SolarStage other) {
         return this.compareTo(other) >= 0;
     }
 
     /**
-     * 判断是否在指定阶段之前
-     *
-     * @param other 要比较的阶段
-     * @return true 如果当前阶段 < other
+     * 判断当前阶段是否仍早于指定阶段。
+     * 常用于把阶段语义映射成 gamerule 或伤害阈值开关。
      */
     public boolean isBefore(SolarStage other) {
         return this.compareTo(other) < 0;

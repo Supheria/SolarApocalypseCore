@@ -3,10 +3,10 @@ package com.supheria.solar_apocalypse_core.world;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 
 /**
- * 太阳阶段计算工具类
- * 提供时间计算、进度查询等核心逻辑
+ * 太阳阶段判定与时间拆分的权威工具类。
  *
- * 所有方法返回或接受 SolarStage 枚举
+ * <p>阶段切换、进度计算与昼夜窗口判断都以这里的规则为准：
+ * 前四阶段平均分配到第五阶段起点之前，第五、第六阶段则使用独立配置边界。
  */
 public final class SolarStageHelper {
     public static final long DAY_TICKS = 24000L;
@@ -15,6 +15,10 @@ public final class SolarStageHelper {
     public static final long NIGHT_END_TICKS = 23450L;
     public static final int EARLY_STAGE_COUNT = 4;
 
+    /**
+     * 根据累计世界时间推导当前应处于哪个太阳阶段。
+     * 这是阶段切换逻辑的权威入口，供服务端推进与客户端展示共用。
+     */
     public static SolarStage getPhaseByDayTime(long dayTime) {
         long stage5Start = SolarStageConfig.getStage5StartTime();
         long stage6Start = SolarStageConfig.getStage6StartTime();
@@ -37,6 +41,10 @@ public final class SolarStageHelper {
         }
     }
 
+    /**
+     * 返回指定阶段在累计时间轴上的起止区间。
+     * 主要用于 HUD、渲染或其它需要计算阶段进度的展示逻辑。
+     */
     public static long[] getPhaseTimeRange(SolarStage stage) {
         long stage5Start = SolarStageConfig.getStage5StartTime();
         long stage6Start = SolarStageConfig.getStage6StartTime();
@@ -53,6 +61,10 @@ public final class SolarStageHelper {
         };
     }
 
+    /**
+     * 计算给定时间点在某个阶段区间内的相对进度。
+     * 若阶段没有上界（第六阶段），当前实现固定返回 1，表示已进入最终阶段。
+     */
     public static float getPhaseProgress(long dayTime, SolarStage stage) {
         long[] timeRange = getPhaseTimeRange(stage);
         long start = timeRange[0];
@@ -75,6 +87,10 @@ public final class SolarStageHelper {
         return SolarStageConfig.getRandomTickingLevel(stage);
     }
 
+    /**
+     * 前四个喷发阶段的统一时长。
+     * 当前实现按第五阶段起点前的总时长平均切分，避免为前四阶段分别维护配置。
+     */
     public static long getEarlyStageLength() {
         return SolarStageConfig.getStage5StartTime() / EARLY_STAGE_COUNT;
     }

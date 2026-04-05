@@ -17,8 +17,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * 太阳阶段切换处理器。
- * 每 tick 检查 dayTime 是否触发阶段变化，并应用相应游戏规则。
+ * 太阳阶段推进的服务端入口。
+ *
+ * <p>该处理器每个世界 tick 读取当前 {@code dayTime}，据此推导目标太阳阶段，
+ * 再把变化写回全局 {@link SapModVariables.MapVariables}，并同步应用阶段级 gamerule 与天气约束。
  */
 @Mod.EventBusSubscriber
 public class StageTickHandler {
@@ -30,6 +32,10 @@ public class StageTickHandler {
         }
     }
 
+    /**
+     * 用当前世界时间驱动太阳阶段切换。
+     * 只有阶段真的发生变化时，才会写入全局状态并触发后续同步与规则刷新。
+     */
     public static void execute(LevelAccessor world) {
         long dayTime = world.dayTime();
         SapModVariables.MapVariables mapVars = SapModVariables.MapVariables.get(world);
@@ -44,6 +50,12 @@ public class StageTickHandler {
         }
     }
 
+    /**
+     * 把阶段语义映射为全局世界规则。
+     *
+     * <p>这里调整的是整张世界的环境行为，而不是单个方块的转换链：
+     * random tick 频率、天气循环、冻伤、无限水源等都会随阶段统一切换。
+     */
     private static void applyPhaseRules(LevelAccessor world, SolarStage phase) {
         int randomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase);
         boolean allowWeather = phase.isBefore(SolarStage.STAGE_3);
@@ -55,6 +67,7 @@ public class StageTickHandler {
         world.getLevelData().getGameRules().getRule(GameRules.RULE_FREEZE_DAMAGE).set(allowFreeze, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WATER_SOURCE_CONVERSION).set(allowWaterSource, world.getServer());
 
+        // 第三阶段起强制清空天气，并关闭天气循环，确保喷发期维持稳定的高温晴空环境。
         if (phase.isEruptionPhase() && phase.isAtLeast(SolarStage.STAGE_3) && world instanceof ServerLevel _level) {
             _level.getServer().getCommands().performPrefixedCommand(
                     new CommandSourceStack(CommandSource.NULL, new Vec3(0, 0, 0), Vec2.ZERO, _level, 4, "",
@@ -62,6 +75,7 @@ public class StageTickHandler {
                     "weather clear");
         }
 
+        // 第六阶段转入坍缺后强制降水，与冻伤和水源恢复规则共同塑造恒冬环境。
         if (phase.isCollapsePhase()) {
             world.getLevelData().setRaining(true);
         }

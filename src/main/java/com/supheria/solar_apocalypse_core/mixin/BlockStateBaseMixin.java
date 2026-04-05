@@ -22,6 +22,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
 
+/**
+ * 把太阳灾变方块转换系统接入所有 {@link BlockStateBase} 的核心 Mixin。
+ *
+ * <p>本类在状态缓存建立时为每个方块状态预先绑定可用的转换过程，随后分别在
+ * {@code randomTick} 和 {@code onPlace} 生命周期中触发不同的规则链。
+ */
 @Mixin(BlockStateBase.class)
 public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState> {
 
@@ -29,16 +35,36 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
     private boolean isRandomlyTicking;
     private boolean isonPlace;
 
+    /**
+     * 当前实现中该标记未在注入流程里显式回填原始值，因此默认保持 false，
+     * 随后用于在执行完模组 randomTick 逻辑后取消原始流程。
+     */
     @Unique
     private boolean sap$isOriginalRandomlyTicking;
+    /**
+     * 与 {@link #sap$isOriginalRandomlyTicking} 类似，当前实现默认保持 false，
+     * 使 onPlace 注入在执行完模组规则后取消原始尾部流程。
+     */
     @Unique
     private boolean sap$isOriginalonPlace;
 
+    /**
+     * 绑定在当前方块状态上的随机刻转换过程。
+     * 只要该字段不为 null，就说明这个状态需要接入灾变规则的 randomTick 触发链。
+     */
     @Unique
     protected BlockTransform sap$procedure;
+    /**
+     * 绑定在当前方块状态上的放置时转换过程。
+     * 这条链用于需要在方块落地后立即修正的规则，而不是等待随机刻触发。
+     */
     @Unique
     protected BlockTransform sap$Nprocedure;
 
+    /**
+     * 防止 onPlace 中再次 setBlock 造成递归回流。
+     * 当前实现用线程局部标记保护同一线程内的重入触发。
+     */
     @Unique
     private static final ThreadLocal<Boolean> sap$isExecutingOnPlace = ThreadLocal.withInitial(() -> false);
 
@@ -46,6 +72,12 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
         super(p_61117_, p_61118_, p_61119_);
     }
 
+    /**
+     * 在方块状态缓存建立完成后预计算可用的灾变转换过程。
+     *
+     * <p>这样后续进入随机刻或放置回调时，就不需要再次遍历整套方块分类规则。
+     * 同时会把原本不参与 random tick 的状态提升为可随机刻更新，以便灾变规则能够接管它们。
+     */
     @Inject(method = "initCache", at = @At("TAIL"))
     private void initCacheTail(CallbackInfo callbackInfo) {
         this.sap$procedure = SolarApocalypseCoreMod.getBlockTransform(this.asState());
@@ -54,6 +86,12 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
         this.isonPlace = this.isonPlace || this.sap$Nprocedure != null;
     }
 
+    /**
+     * 在随机刻进入时优先执行模组绑定的方块转换。
+     *
+     * <p>当某个状态原本并不依赖原版 random tick 时，会在这里直接取消后续原始流程，
+     * 使这次调度仅服务于太阳灾变规则。
+     */
     @Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
     private void randomTick(ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo callbackInfo) {
         if (this.sap$procedure != null) {
@@ -67,8 +105,14 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
             callbackInfo.cancel();
         }
     }
+    /**
+     * 在方块放置完成后立即执行需要同步修正的转换规则。
+     *
+     * <p>这条链主要覆盖不能等待随机刻的情形，例如放下去就必须立刻蒸发、删除或纠正的方块。
+     */
     @Inject(method = "onPlace", at = @At("TAIL"), cancellable = true)
     private void onPlace(Level level, BlockPos pos, BlockState p_60699_, boolean p_60700_, CallbackInfo callbackInfo) {
+        // onPlace 规则内部可能再次 setBlock；若不拦截，会重新触发 onPlace 并递归回流。
         if (this.sap$Nprocedure != null && !sap$isExecutingOnPlace.get()) {
             sap$isExecutingOnPlace.set(true);
             try {
