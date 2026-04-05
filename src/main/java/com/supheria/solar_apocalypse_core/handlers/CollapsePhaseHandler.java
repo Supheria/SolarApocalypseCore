@@ -29,7 +29,7 @@ public class CollapsePhaseHandler {
             SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
 
             if (currentPhase == SolarStage.STAGE_6) {
-                int accumulationRate = SolarStageConfig.SOLAR_STAGE_VALUES.collapseSnowAccumulationRate.get();
+                int accumulationRate = SolarStageConfig.getCollapseSnowAccumulationRate();
                 tickCounter++;
 
                 if (tickCounter >= accumulationRate) {
@@ -49,9 +49,9 @@ public class CollapsePhaseHandler {
 
         RandomSource random = RandomSource.create();
 
-        for (int i = 0; i < 10; i++) {
-            int x = random.nextInt(32) - 16;
-            int z = random.nextInt(32) - 16;
+        for (int i = 0; i < SolarStageConfig.getCollapseSnowSampleCount(); i++) {
+            int x = random.nextInt(SolarStageConfig.getCollapseSnowSampleDiameter()) - SolarStageConfig.getCollapseSnowSampleOffset();
+            int z = random.nextInt(SolarStageConfig.getCollapseSnowSampleDiameter()) - SolarStageConfig.getCollapseSnowSampleOffset();
 
             for (int y = world.getHeight() - 1; y >= world.getMinBuildHeight(); y--) {
                 BlockPos pos = BlockPos.containing(x, y, z);

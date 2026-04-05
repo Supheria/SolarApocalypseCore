@@ -38,7 +38,7 @@ public class SnowMelt {
             world.setBlock(posAbove, newSnowLayer, 3);
         } else if (blockAbove.getBlock() instanceof SnowLayerBlock) {
             int currentLayers = blockAbove.getValue(SnowLayerBlock.LAYERS);
-            int maxSnowLayer = SolarStageConfig.SOLAR_STAGE_VALUES.collapseMaxSnowLayer.get();
+            int maxSnowLayer = SolarStageConfig.getCollapseMaxSnowLayer();
 
             if (currentLayers < maxSnowLayer) {
                 BlockState thickerSnow = blockAbove.setValue(SnowLayerBlock.LAYERS, currentLayers + 1);

@@ -21,12 +21,6 @@ import com.supheria.solar_apocalypse_core.network.SapModVariables;
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class SolarHudRenderer {
 
-    private static final int TEXT_COLOR = 0xFFFFFF;         // 白色
-    private static final int PROGRESS_BAR_BG = 0x88000000;   // 半透明黑色
-    private static final int PROGRESS_BAR_FILL = 0xFF00AA00;  // 绿色
-    private static final int PROGRESS_BAR_HEIGHT = 8;
-    private static final int PROGRESS_BAR_WIDTH = 100;
-
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post event) {
         if (!SolarHudConfig.isEnabled()) {
@@ -44,7 +38,7 @@ public class SolarHudRenderer {
 
         // 获取当前数据
         long dayTime = level.dayTime();
-        long today = dayTime / 24000;
+        long today = SolarStageHelper.getDayIndex(dayTime);
 
         SapModVariables.MapVariables mapVars = SapModVariables.MapVariables.get(level);
         SolarStage currentPhase = mapVars.getCurrentStage();
@@ -71,7 +65,7 @@ public class SolarHudRenderer {
         String phaseText = getPhaseDisplayName(phase);
         String compactText = dayText + " · " + phaseText;
 
-        guiGraphics.drawString(Minecraft.getInstance().font, compactText, posX, posY, TEXT_COLOR, false);
+        guiGraphics.drawString(Minecraft.getInstance().font, compactText, posX, posY, SolarHudConfig.getTextColor(), false);
     }
 
     /**
@@ -86,39 +80,42 @@ public class SolarHudRenderer {
 
         // 第一行：天数
         String dayText = String.format("第%d天", today);
-        guiGraphics.drawString(minecraft.font, dayText, posX, posY, TEXT_COLOR, false);
+        guiGraphics.drawString(minecraft.font, dayText, posX, posY, SolarHudConfig.getTextColor(), false);
 
         // 第二行：当前阶段
         String phaseText = getPhaseDisplayName(phase);
-        guiGraphics.drawString(minecraft.font, phaseText, posX, posY + 11, TEXT_COLOR, false);
+        guiGraphics.drawString(minecraft.font, phaseText, posX, posY + SolarHudConfig.getHudLineHeight(), SolarHudConfig.getTextColor(), false);
 
         // 第三行：进度条 + 信息
-        int barY = posY + 22;
+        int barY = posY + SolarHudConfig.getHudDetailBarOffsetY();
 
         // 进度条背景
-        guiGraphics.fill(posX, barY, posX + PROGRESS_BAR_WIDTH, barY + PROGRESS_BAR_HEIGHT, PROGRESS_BAR_BG);
+        guiGraphics.fill(posX, barY, posX + SolarHudConfig.getProgressBarWidth(), barY + SolarHudConfig.getProgressBarHeight(), SolarHudConfig.getProgressBarBackgroundColor());
 
         // 进度条填充
-        int fillWidth = (int) (PROGRESS_BAR_WIDTH * progress);
+        int fillWidth = (int) (SolarHudConfig.getProgressBarWidth() * progress);
         if (fillWidth > 0) {
-            guiGraphics.fill(posX, barY, posX + fillWidth, barY + PROGRESS_BAR_HEIGHT, PROGRESS_BAR_FILL);
+            guiGraphics.fill(posX, barY, posX + fillWidth, barY + SolarHudConfig.getProgressBarHeight(), SolarHudConfig.getProgressBarFillColor());
         }
 
         // 进度条边框
-        guiGraphics.fill(posX - 1, barY - 1, posX + PROGRESS_BAR_WIDTH + 1, barY, 0xFF888888);
-        guiGraphics.fill(posX - 1, barY + PROGRESS_BAR_HEIGHT, posX + PROGRESS_BAR_WIDTH + 1, barY + PROGRESS_BAR_HEIGHT + 1, 0xFF888888);
-        guiGraphics.fill(posX - 1, barY - 1, posX, barY + PROGRESS_BAR_HEIGHT + 1, 0xFF888888);
-        guiGraphics.fill(posX + PROGRESS_BAR_WIDTH, barY - 1, posX + PROGRESS_BAR_WIDTH + 1, barY + PROGRESS_BAR_HEIGHT + 1, 0xFF888888);
+        int progressBarWidth = SolarHudConfig.getProgressBarWidth();
+        int progressBarHeight = SolarHudConfig.getProgressBarHeight();
+        int progressBarBorderColor = SolarHudConfig.getProgressBarBorderColor();
+        guiGraphics.fill(posX - 1, barY - 1, posX + progressBarWidth + 1, barY, progressBarBorderColor);
+        guiGraphics.fill(posX - 1, barY + progressBarHeight, posX + progressBarWidth + 1, barY + progressBarHeight + 1, progressBarBorderColor);
+        guiGraphics.fill(posX - 1, barY - 1, posX, barY + progressBarHeight + 1, progressBarBorderColor);
+        guiGraphics.fill(posX + progressBarWidth, barY - 1, posX + progressBarWidth + 1, barY + progressBarHeight + 1, progressBarBorderColor);
 
         // 百分比文字
         String percentText = String.format("%.0f%%", progress * 100);
-        guiGraphics.drawString(minecraft.font, percentText, posX + PROGRESS_BAR_WIDTH + 5, barY + 1, TEXT_COLOR, false);
+        guiGraphics.drawString(minecraft.font, percentText, posX + progressBarWidth + SolarHudConfig.getHudPercentTextOffsetX(), barY + 1, SolarHudConfig.getTextColor(), false);
 
         // 下一阶段信息
         SolarStage nextPhase = getNextPhase(phase);
         if (nextPhase != phase) {
             String arrowAndPhase = " → " + getPhaseDisplayName(nextPhase);
-            guiGraphics.drawString(minecraft.font, arrowAndPhase, posX + PROGRESS_BAR_WIDTH + 40, barY + 1, 0xFFAAAAAA, false);
+            guiGraphics.drawString(minecraft.font, arrowAndPhase, posX + progressBarWidth + SolarHudConfig.getHudNextPhaseTextOffsetX(), barY + 1, SolarHudConfig.getMutedTextColor(), false);
         }
     }
 

@@ -5,6 +5,7 @@ import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -20,6 +21,24 @@ import net.minecraft.world.level.block.Blocks;
  * </pre>
  */
 public final class TransformConditions {
+    private static final double RANDOM_DAY_SOFT_MAX = 10.0;
+    private static final double RANDOM_DAY_SOFT_SLOW_MAX = 15.0;
+    private static final double RANDOM_DAY_VARIABLE_BASE = 5.0;
+    private static final double RANDOM_DAY_VARIABLE_DIVISOR = 16000.0;
+    private static final int RANDOM_ONE_IN_TEN_MIN = 1;
+    private static final int RANDOM_ONE_IN_TEN_MAX = 10;
+    private static final double RANDOM_WOOD_MAX = 10.0;
+    private static final double RANDOM_WOOD_SLOW_MAX = 15.0;
+    private static final long RANDOM_WOOD_DIVISOR = 2L;
+    private static final long RANDOM_WOOD_SLOW_DIVISOR = 4L;
+    private static final long RANDOM_WOOD_FAST_DIVISOR = 2L;
+    private static final int RANDOM_WOOD_BASE = 2;
+    private static final int RANDOM_WOOD_SLOW_BASE = 3;
+    private static final int RANDOM_WOOD_FAST_BASE = 3;
+    private static final double RANDOM_50_MAX = 2.0;
+    private static final double RANDOM_50_THRESHOLD = 1.0;
+    private static final double COLLAPSE_RATE_NORMALIZER = 2.0;
+    private static final double COLLAPSE_RANDOM_MAX = 1.0;
 
     // -----------------------------------------------------------------------
     // 阶段 (Stage)
@@ -73,8 +92,8 @@ public final class TransformConditions {
     /** 当前是白天（TodayTime 不在夜间区间 12566–23450） */
     public static TransformCondition daytime() {
         return (world, x, y, z, stage) -> {
-            long t = (long)SapModVariables.MapVariables.get(world).TodayTime;
-            return !(t > 12566 && t < 23450);
+            long t = (long) SapModVariables.MapVariables.get(world).TodayTime;
+            return !SolarStageHelper.isNightWindow(t);
         };
     }
 
@@ -113,7 +132,8 @@ public final class TransformConditions {
      */
     public static TransformCondition randomDaySoft() {
         return (world, x, y, z, stage) ->
-                Mth.nextDouble(RandomSource.create(), 0, 10) <= world.dayTime() / 24000.0 + 1;
+                Mth.nextDouble(RandomSource.create(), 0, RANDOM_DAY_SOFT_MAX)
+                        <= world.dayTime() / (double) SolarStageHelper.DAY_TICKS + 1;
     }
 
     /**
@@ -122,7 +142,8 @@ public final class TransformConditions {
      */
     public static TransformCondition randomDaySoftSlow() {
         return (world, x, y, z, stage) ->
-                Mth.nextDouble(RandomSource.create(), 0, 15) <= world.dayTime() / 24000.0 + 1;
+                Mth.nextDouble(RandomSource.create(), 0, RANDOM_DAY_SOFT_SLOW_MAX)
+                        <= world.dayTime() / (double) SolarStageHelper.DAY_TICKS + 1;
     }
 
     /**
@@ -131,8 +152,9 @@ public final class TransformConditions {
      */
     public static TransformCondition randomDayVariable() {
         return (world, x, y, z, stage) ->
-                Mth.nextDouble(RandomSource.create(), 0, world.dayTime() / 24000.0 + 5)
-                        <= world.dayTime() / 16000d;
+                Mth.nextDouble(RandomSource.create(), 0,
+                        world.dayTime() / (double) SolarStageHelper.DAY_TICKS + RANDOM_DAY_VARIABLE_BASE)
+                        <= world.dayTime() / RANDOM_DAY_VARIABLE_DIVISOR;
     }
 
     /**
@@ -141,7 +163,7 @@ public final class TransformConditions {
      */
     public static TransformCondition randomOneIn10() {
         return (world, x, y, z, stage) ->
-                Mth.nextInt(RandomSource.create(), 1, 10) == 1;
+                Mth.nextInt(RandomSource.create(), RANDOM_ONE_IN_TEN_MIN, RANDOM_ONE_IN_TEN_MAX) == RANDOM_ONE_IN_TEN_MIN;
     }
 
     /**
@@ -150,7 +172,7 @@ public final class TransformConditions {
      */
     public static TransformCondition randomDayRate() {
         return (world, x, y, z, stage) -> {
-            long d = world.dayTime() / 24000;
+            long d = SolarStageHelper.getDayIndex(world.dayTime());
             return Mth.nextDouble(RandomSource.create(), 0, d + 1) <= d;
         };
     }
@@ -161,8 +183,8 @@ public final class TransformConditions {
      */
     public static TransformCondition randomDayWood() {
         return (world, x, y, z, stage) -> {
-            long d = world.dayTime() / 24000;
-            return Mth.nextDouble(RandomSource.create(), 0, 10) <= (d / 2) + 2;
+            long d = SolarStageHelper.getDayIndex(world.dayTime());
+            return Mth.nextDouble(RandomSource.create(), 0, RANDOM_WOOD_MAX) <= (d / RANDOM_WOOD_DIVISOR) + RANDOM_WOOD_BASE;
         };
     }
 
@@ -172,8 +194,8 @@ public final class TransformConditions {
      */
     public static TransformCondition randomDayWoodSlow() {
         return (world, x, y, z, stage) -> {
-            long d = world.dayTime() / 24000;
-            return Mth.nextDouble(RandomSource.create(), 0, 15) <= (d / 4) + 3;
+            long d = SolarStageHelper.getDayIndex(world.dayTime());
+            return Mth.nextDouble(RandomSource.create(), 0, RANDOM_WOOD_SLOW_MAX) <= (d / RANDOM_WOOD_SLOW_DIVISOR) + RANDOM_WOOD_SLOW_BASE;
         };
     }
 
@@ -183,8 +205,8 @@ public final class TransformConditions {
      */
     public static TransformCondition randomDayWoodFast() {
         return (world, x, y, z, stage) -> {
-            long d = world.dayTime() / 24000;
-            return Mth.nextDouble(RandomSource.create(), 0, 15) <= (d / 2) + 3;
+            long d = SolarStageHelper.getDayIndex(world.dayTime());
+            return Mth.nextDouble(RandomSource.create(), 0, RANDOM_WOOD_SLOW_MAX) <= (d / RANDOM_WOOD_FAST_DIVISOR) + RANDOM_WOOD_FAST_BASE;
         };
     }
 
@@ -196,7 +218,7 @@ public final class TransformConditions {
     /** 50% 随机触发（nextDouble(0,2) <= 1）。 */
     public static TransformCondition random50() {
         return (world, x, y, z, stage) ->
-                Mth.nextDouble(RandomSource.create(), 0, 2) <= 1;
+                Mth.nextDouble(RandomSource.create(), 0, RANDOM_50_MAX) <= RANDOM_50_THRESHOLD;
     }
 
     /**
@@ -205,9 +227,9 @@ public final class TransformConditions {
      */
     public static TransformCondition randomCollapse() {
         return (world, x, y, z, stage) -> {
-            int rate = SolarStageConfig.SOLAR_STAGE_VALUES.collapseBlockTransformRate.get();
-            double p = Math.min(1.0, (double) rate / 2.0);
-            return Mth.nextDouble(RandomSource.create(), 0, 1) <= p;
+            int rate = SolarStageConfig.getCollapseBlockTransformRate();
+            double p = Math.min(COLLAPSE_RANDOM_MAX, rate / COLLAPSE_RATE_NORMALIZER);
+            return Mth.nextDouble(RandomSource.create(), 0, COLLAPSE_RANDOM_MAX) <= p;
         };
     }
 

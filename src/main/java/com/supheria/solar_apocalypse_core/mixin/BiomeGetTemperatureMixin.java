@@ -1,6 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.client.CollapsePhaseState;
+import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
@@ -26,7 +27,7 @@ public abstract class BiomeGetTemperatureMixin {
 	private void onGetTemperature(BlockPos pos, CallbackInfoReturnable<Float> cir) {
 		try {
 			if (CollapsePhaseState.isInCollapse()) {
-				cir.setReturnValue(-0.5f);
+				cir.setReturnValue(SolarStageConfig.getCollapseBiomeTemperature());
 			}
 		} catch (Exception e) {
 		}

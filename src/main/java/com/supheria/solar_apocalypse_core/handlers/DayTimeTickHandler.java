@@ -1,6 +1,7 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,14 +21,13 @@ public class DayTimeTickHandler {
     }
 
     public static void execute(LevelAccessor world) {
-        SapModVariables.MapVariables.get(world).Today = Math.floor(world.dayTime() / 24000);
-        SapModVariables.MapVariables.get(world).LunarToday = Math.floor((world.dayTime() / 24000) + 1 / 4);
-        if (world.dayTime() / 24000 >= 1) {
-            SapModVariables.MapVariables.get(world).TodayTime = world.dayTime() - Math.floor(world.dayTime() / 24000) * 24000;
-            SapModVariables.MapVariables.get(world).syncData(world);
-        } else {
-            SapModVariables.MapVariables.get(world).TodayTime = world.dayTime();
-            SapModVariables.MapVariables.get(world).syncData(world);
-        }
+        long dayTime = world.dayTime();
+        SapModVariables.MapVariables mapVariables = SapModVariables.MapVariables.get(world);
+        double dayIndex = SolarStageHelper.getDayIndex(dayTime);
+
+        mapVariables.Today = dayIndex;
+        mapVariables.LunarToday = Math.floor(dayIndex + 1 / 4d);
+        mapVariables.TodayTime = SolarStageHelper.getTimeOfDay(dayTime);
+        mapVariables.syncData(world);
     }
 }

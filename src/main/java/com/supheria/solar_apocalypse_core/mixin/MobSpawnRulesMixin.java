@@ -2,6 +2,7 @@ package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -35,9 +36,7 @@ public class MobSpawnRulesMixin {
 			return;
 		}
 
-		// 检查是否为白天
-		// 允许白天生成敌对生物
-		if (serverLevel.dayTime() % 24000 < 12000) {
+		if (SolarStageHelper.isDaytime(serverLevel.dayTime())) {
 			cir.setReturnValue(true);
 		}
 	}

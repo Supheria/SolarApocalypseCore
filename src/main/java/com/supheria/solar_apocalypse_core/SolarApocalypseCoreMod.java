@@ -1,7 +1,6 @@
 package com.supheria.solar_apocalypse_core;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
-import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.init.*;
 import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
@@ -10,7 +9,6 @@ import com.supheria.solar_apocalypse_core.transforms.misc.*;
 import com.supheria.solar_apocalypse_core.transforms.plant.*;
 import com.supheria.solar_apocalypse_core.transforms.stone.*;
 import com.supheria.solar_apocalypse_core.transforms.wood.*;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,15 +50,6 @@ public class SolarApocalypseCoreMod {
     public SolarApocalypseCoreMod() {
         MinecraftForge.EVENT_BUS.register(this);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        // Register Solar Stage Configuration (COMMON)
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SolarStageConfig.SPEC);
-
-        // Register Stage Height Configuration (SERVER)
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.SERVER, StageHeightConfig.SPEC);
-
-        // Register HUD Configuration (CLIENT)
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.CLIENT, SolarHudConfig.SPEC);
 
         SapModBlocks.REGISTRY.register(bus);
 

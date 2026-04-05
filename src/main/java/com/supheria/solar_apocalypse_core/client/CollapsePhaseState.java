@@ -31,10 +31,7 @@ public class CollapsePhaseState {
 				SolarStage currentPhase = SapModVariables.MapVariables.get(minecraft.level).getCurrentStage();
 				isCollapsePhase = (currentPhase == SolarStage.STAGE_6);
 
-				// 检查是否为白天
-				long dayTime = minecraft.level.dayTime();
-				long timeOfDay = dayTime % 24000;
-				isDaytime = timeOfDay < 12000;
+				isDaytime = SolarStageHelper.isDaytime(minecraft.level.dayTime());
 			} else {
 				isCollapsePhase = false;
 				isDaytime = false;

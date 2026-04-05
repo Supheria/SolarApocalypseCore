@@ -1,12 +1,14 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
+import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import net.minecraft.world.level.Level;
 
 /**
  * 在第六阶段白天降低光照等级
@@ -29,10 +31,9 @@ public class LightLevelMixin {
 				return;
 			}
 
-			long timeOfDay = level.getDayTime() % 24000;
-			if (timeOfDay < 12000) {
+			if (SolarStageHelper.isDaytime(level.getDayTime())) {
 				int original = cir.getReturnValue();
-				int modifiedDarkness = Math.max(original, 11);
+				int modifiedDarkness = Math.max(original, SolarStageConfig.getCollapseMinSkyDarken());
 				if (modifiedDarkness != original) {
 					cir.setReturnValue(modifiedDarkness);
 				}

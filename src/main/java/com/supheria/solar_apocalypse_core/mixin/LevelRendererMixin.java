@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
+import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
@@ -24,6 +25,27 @@ public abstract class LevelRendererMixin {
     @Final
     @Mutable
     public static ResourceLocation SUN_LOCATION;
+    @Unique
+    private static final ResourceLocation[] SUN_TEXTURES = new ResourceLocation[] {
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step1.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step2.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step3.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step4.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step5.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step6.png")
+    };
+    @Unique
+    private static final float COLLAPSE_FOG_RED = 0.15F;
+    @Unique
+    private static final float COLLAPSE_FOG_GREEN = 0.15F;
+    @Unique
+    private static final float COLLAPSE_FOG_BLUE = 0.15F;
+    @Unique
+    private static final float FULL_ALPHA = 1.0F;
+    @Unique
+    private static final int FINAL_LUNAR_DAY = 28;
+    @Unique
+    private static final float FINAL_STAGE_SUN_SCALE = 13.0F;
     public LevelAccessor world;
     @Unique
     private Matrix4f originalCelestialMatrix;
@@ -64,39 +86,17 @@ public abstract class LevelRendererMixin {
         SolarStage solarFlare = SapModVariables.MapVariables.get(world).getSolarStage();
         SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
 
-        // 太阳纹理根据阶段变化
-        if (solarFlare == SolarStage.STAGE_1){
-            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step1.png");
-        }
-        if (solarFlare == SolarStage.STAGE_2){
-            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step2.png");
-        }
-        if (solarFlare == SolarStage.STAGE_3){
-            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step3.png");
-        }
-        if (solarFlare == SolarStage.STAGE_4){
-            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step4.png");
-        }
-        if (solarFlare == SolarStage.STAGE_5){
-            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step5.png");
-        }
-        if (solarFlare == SolarStage.STAGE_6){
-            SUN_LOCATION = new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step6.png");
-        }
+        SUN_LOCATION = getSunTexture(solarFlare);
 
         // 第六阶段白天降低光照
         if (currentPhase == SolarStage.STAGE_6) {
-            if (world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                long dayTime = serverLevel.dayTime();
-                long timeOfDay = dayTime % 24000;
-                boolean isDaytime = timeOfDay < 12000;
-
-                if (isDaytime) {
-                    // 降低白天的光照亮度 - 通过修改着色器颜色和雾效果
-                    com.mojang.blaze3d.systems.RenderSystem.setShaderFogColor(0.15f, 0.15f, 0.15f, 1.0f);
-                    // 降低渲染的整体颜色强度（通过降低颜色乘数）
-                    com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.4f, 0.4f, 0.4f, 1.0f);
-                }
+            if (world instanceof net.minecraft.server.level.ServerLevel serverLevel
+                    && SolarStageHelper.isDaytime(serverLevel.dayTime())) {
+                // 降低白天的光照亮度 - 通过修改着色器颜色和雾效果
+                com.mojang.blaze3d.systems.RenderSystem.setShaderFogColor(COLLAPSE_FOG_RED, COLLAPSE_FOG_GREEN, COLLAPSE_FOG_BLUE, FULL_ALPHA);
+                // 降低渲染的整体颜色强度（通过降低颜色乘数）
+                float brightnessFactor = getCollapseDayBrightnessFactor();
+                com.mojang.blaze3d.systems.RenderSystem.setShaderColor(brightnessFactor, brightnessFactor, brightnessFactor, FULL_ALPHA);
             }
         }
     }
@@ -112,8 +112,8 @@ public abstract class LevelRendererMixin {
         float scale;
         if (flare == SolarStage.STAGE_6) {
             scale = 1.0F;
-        } else if (flare == SolarStage.STAGE_5 || lunar >= 28) {
-            scale = 13.0F;
+        } else if (flare == SolarStage.STAGE_5 || lunar >= FINAL_LUNAR_DAY) {
+            scale = FINAL_STAGE_SUN_SCALE;
         } else {
             scale = LUNAR_SCALE_MAP.getOrDefault(lunar, 1.0F);
         }
@@ -130,6 +130,15 @@ public abstract class LevelRendererMixin {
         return copy;
     }
 
+    @Unique
+    private static ResourceLocation getSunTexture(SolarStage solarFlare) {
+        int stageIndex = solarFlare.ordinal();
+        if (stageIndex < 0 || stageIndex >= SUN_TEXTURES.length) {
+            return SUN_TEXTURES[0];
+        }
+        return SUN_TEXTURES[stageIndex];
+    }
+
     /**
      * 获取第六阶段白天的亮度因子
      * 用于降低白天的光照等级，使僵尸能在白天生成
@@ -142,15 +151,9 @@ public abstract class LevelRendererMixin {
             return 1.0f;
         }
 
-        // 检查是否为白天
-        if (world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-            long dayTime = serverLevel.dayTime();
-            long timeOfDay = dayTime % 24000;
-            boolean isDaytime = timeOfDay < 12000;
-
-            if (isDaytime) {
-                return 0.3f; // 白天亮度降至30%
-            }
+        if (world instanceof net.minecraft.server.level.ServerLevel serverLevel
+                && SolarStageHelper.isDaytime(serverLevel.dayTime())) {
+            return SolarStageConfig.getCollapseDayBrightnessFactor();
         }
         return 1.0f;
     }

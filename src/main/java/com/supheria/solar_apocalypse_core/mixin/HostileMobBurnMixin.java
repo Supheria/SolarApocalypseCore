@@ -2,6 +2,7 @@ package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
@@ -45,12 +46,7 @@ public abstract class HostileMobBurnMixin {
 			return;
 		}
 
-		// 检查是否为白天
-		long dayTime = level.dayTime();
-		long timeOfDay = dayTime % 24000;
-		boolean isDaytime = timeOfDay < 12000;
-
-		if (isDaytime) {
+		if (SolarStageHelper.isDaytime(level.dayTime())) {
 			// 移除燃烧效果
 			if (mob.getRemainingFireTicks() > 0) {
 				mob.clearFire();

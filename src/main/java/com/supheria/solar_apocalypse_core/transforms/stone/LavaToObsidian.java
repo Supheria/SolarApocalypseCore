@@ -18,12 +18,16 @@ import net.minecraft.world.level.block.Blocks;
 public class LavaToObsidian {
 
     public static final BlockTransform TRANSFORM = LavaToObsidian::transform;
+    private static final double ADJACENT_WATER_PROBABILITY = 0.8;
+    private static final double BASE_OBSIDIAN_PROBABILITY = 0.3;
 
     private static void transform(LevelAccessor world, double x, double y, double z) {
         if (SapModVariables.MapVariables.get(world).getCurrentStage() != SolarStage.STAGE_6) return;
         if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
 
-        double probability = BlockSpreadUtils.hasAdjacentWater(world, x, y, z) ? 0.8 : 0.3;
+        double probability = BlockSpreadUtils.hasAdjacentWater(world, x, y, z)
+                ? ADJACENT_WATER_PROBABILITY
+                : BASE_OBSIDIAN_PROBABILITY;
         if (Mth.nextDouble(RandomSource.create(), 0, 1) <= probability) {
             world.setBlock(BlockPos.containing(x, y, z), Blocks.OBSIDIAN.defaultBlockState(), 3);
         }

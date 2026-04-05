@@ -15,12 +15,6 @@ import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
  */
 public class SolarHudEditScreen extends Screen {
 
-    private static final int HUD_WIDTH = 150;
-    private static final int HUD_HEIGHT = 70;
-    private static final int ELEMENT_BG_COLOR = 0xAA1F1F1F;
-    private static final int ELEMENT_BORDER_COLOR = 0xFF00AAFF;
-    private static final int TEXT_COLOR = 0xFFFFFF;
-
     private int hudX;
     private int hudY;
     private boolean isDragging = false;
@@ -28,9 +22,9 @@ public class SolarHudEditScreen extends Screen {
     private int dragOffsetY = 0;
     private boolean isDetailedMode;
 
-    private long sampleDay = 27;
+    private long sampleDay = SolarHudConfig.getSampleDay();
     private SolarStage samplePhase = SolarStage.STAGE_4;
-    private float sampleProgress = 0.75f;
+    private float sampleProgress = SolarHudConfig.getSampleProgress();
 
     private Button toggleModeButton;
 
@@ -51,17 +45,17 @@ public class SolarHudEditScreen extends Screen {
             isDetailedMode = !isDetailedMode;
             String newText = isDetailedMode ? "详细模式 ON" : "精简模式 ON";
             button.setMessage(Component.literal(newText));
-            SolarHudConfig.HUD_VALUES.detailedMode.set(isDetailedMode);
+            SolarHudConfig.setDetailedMode(isDetailedMode);
         })
-        .pos(this.width / 2 - 75, 50)
-        .size(150, 20)
+        .pos(this.width / 2 - SolarHudConfig.getEditorButtonWidth() / 2, SolarHudConfig.getEditorButtonOffsetY())
+        .size(SolarHudConfig.getEditorButtonWidth(), SolarHudConfig.getEditorButtonHeight())
         .build());
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         // 绘制背景（半透明黑色）
-        guiGraphics.fill(0, 0, this.width, this.height, 0xAA000000);
+        guiGraphics.fill(0, 0, this.width, this.height, SolarHudConfig.getEditorOverlayColor());
 
         // 绘制 HUD 元素和边框
         renderHudElement(guiGraphics);
@@ -70,11 +64,11 @@ public class SolarHudEditScreen extends Screen {
         String hint = "[拖动] 调整位置  |  [Esc] 保存退出";
         int hintWidth = this.font.width(hint);
         int hintX = (this.width - hintWidth) / 2;
-        guiGraphics.drawString(this.font, hint, hintX, 10, TEXT_COLOR, false);
+        guiGraphics.drawString(this.font, hint, hintX, 10, SolarHudConfig.getTextColor(), false);
 
         // 绘制坐标显示
         String coordText = String.format("位置: X=%d Y=%d", hudX, hudY);
-        guiGraphics.drawString(this.font, coordText, 10, 25, 0xFFAAAAAA, false);
+        guiGraphics.drawString(this.font, coordText, 10, 25, SolarHudConfig.getMutedTextColor(), false);
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
@@ -84,17 +78,20 @@ public class SolarHudEditScreen extends Screen {
      */
     private void renderHudElement(GuiGraphics guiGraphics) {
         // 背景
-        guiGraphics.fill(hudX - 1, hudY - 1, hudX + HUD_WIDTH + 1, hudY + HUD_HEIGHT + 1, ELEMENT_BG_COLOR);
+        int editorWidth = SolarHudConfig.getEditorWidth();
+        int editorHeight = SolarHudConfig.getEditorHeight();
+        guiGraphics.fill(hudX - 1, hudY - 1, hudX + editorWidth + 1, hudY + editorHeight + 1, SolarHudConfig.getEditorBackgroundColor());
 
         // 蓝色虚线边框（表示可拖动）
         // 上边
-        guiGraphics.fill(hudX, hudY, hudX + HUD_WIDTH, hudY + 1, ELEMENT_BORDER_COLOR);
+        int editorBorderColor = SolarHudConfig.getEditorBorderColor();
+        guiGraphics.fill(hudX, hudY, hudX + editorWidth, hudY + 1, editorBorderColor);
         // 下边
-        guiGraphics.fill(hudX, hudY + HUD_HEIGHT, hudX + HUD_WIDTH, hudY + HUD_HEIGHT + 1, ELEMENT_BORDER_COLOR);
+        guiGraphics.fill(hudX, hudY + editorHeight, hudX + editorWidth, hudY + editorHeight + 1, editorBorderColor);
         // 左边
-        guiGraphics.fill(hudX, hudY, hudX + 1, hudY + HUD_HEIGHT, ELEMENT_BORDER_COLOR);
+        guiGraphics.fill(hudX, hudY, hudX + 1, hudY + editorHeight, editorBorderColor);
         // 右边
-        guiGraphics.fill(hudX + HUD_WIDTH, hudY, hudX + HUD_WIDTH + 1, hudY + HUD_HEIGHT, ELEMENT_BORDER_COLOR);
+        guiGraphics.fill(hudX + editorWidth, hudY, hudX + editorWidth + 1, hudY + editorHeight, editorBorderColor);
 
         // 绘制示例 HUD 内容
         String dayText = String.format("第%d天", sampleDay);
@@ -102,32 +99,36 @@ public class SolarHudEditScreen extends Screen {
 
         if (isDetailedMode) {
             // 详细模式
-            guiGraphics.drawString(this.font, dayText, hudX + 5, hudY + 5, TEXT_COLOR, false);
-            guiGraphics.drawString(this.font, phaseText, hudX + 5, hudY + 16, TEXT_COLOR, false);
+            int textPadding = SolarHudConfig.getHudTextPadding();
+            int lineHeight = SolarHudConfig.getHudLineHeight();
+            int progressBarWidth = SolarHudConfig.getProgressBarWidth();
+            int progressBarHeight = SolarHudConfig.getProgressBarHeight();
+            int progressBarBorderColor = SolarHudConfig.getProgressBarBorderColor();
+            guiGraphics.drawString(this.font, dayText, hudX + textPadding, hudY + textPadding, SolarHudConfig.getTextColor(), false);
+            guiGraphics.drawString(this.font, phaseText, hudX + textPadding, hudY + textPadding + lineHeight, SolarHudConfig.getTextColor(), false);
 
             // 进度条背景
-            int barX = hudX + 5;
-            int barY = hudY + 28;
-            int barWidth = 100;
-            guiGraphics.fill(barX, barY, barX + barWidth, barY + 8, 0x88000000);
+            int barX = hudX + textPadding;
+            int barY = hudY + SolarHudConfig.getHudPreviewBarOffsetY();
+            guiGraphics.fill(barX, barY, barX + progressBarWidth, barY + progressBarHeight, SolarHudConfig.getProgressBarBackgroundColor());
 
             // 进度条填充
-            int fillWidth = (int) (barWidth * sampleProgress);
-            guiGraphics.fill(barX, barY, barX + fillWidth, barY + 8, 0xFF00AA00);
+            int fillWidth = (int) (progressBarWidth * sampleProgress);
+            guiGraphics.fill(barX, barY, barX + fillWidth, barY + progressBarHeight, SolarHudConfig.getProgressBarFillColor());
 
             // 进度条边框
-            guiGraphics.fill(barX - 1, barY - 1, barX + barWidth + 1, barY, 0xFF888888);
-            guiGraphics.fill(barX - 1, barY + 8, barX + barWidth + 1, barY + 9, 0xFF888888);
-            guiGraphics.fill(barX - 1, barY - 1, barX, barY + 9, 0xFF888888);
-            guiGraphics.fill(barX + barWidth, barY - 1, barX + barWidth + 1, barY + 9, 0xFF888888);
+            guiGraphics.fill(barX - 1, barY - 1, barX + progressBarWidth + 1, barY, progressBarBorderColor);
+            guiGraphics.fill(barX - 1, barY + progressBarHeight, barX + progressBarWidth + 1, barY + progressBarHeight + 1, progressBarBorderColor);
+            guiGraphics.fill(barX - 1, barY - 1, barX, barY + progressBarHeight + 1, progressBarBorderColor);
+            guiGraphics.fill(barX + progressBarWidth, barY - 1, barX + progressBarWidth + 1, barY + progressBarHeight + 1, progressBarBorderColor);
 
             // 百分比
             String percentText = String.format("%.0f%%", sampleProgress * 100);
-            guiGraphics.drawString(this.font, percentText, barX + barWidth + 5, barY + 1, TEXT_COLOR, false);
+            guiGraphics.drawString(this.font, percentText, barX + progressBarWidth + SolarHudConfig.getHudPercentTextOffsetX(), barY + 1, SolarHudConfig.getTextColor(), false);
         } else {
             // 精简模式
             String compactText = dayText + " · " + phaseText;
-            guiGraphics.drawString(this.font, compactText, hudX + 5, hudY + 5, TEXT_COLOR, false);
+            guiGraphics.drawString(this.font, compactText, hudX + SolarHudConfig.getHudTextPadding(), hudY + SolarHudConfig.getHudTextPadding(), SolarHudConfig.getTextColor(), false);
         }
     }
 
@@ -141,7 +142,7 @@ public class SolarHudEditScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) { // 左键
             // 检查是否点击在 HUD 元素范围内
-            if (mouseX >= hudX && mouseX <= hudX + HUD_WIDTH && mouseY >= hudY && mouseY <= hudY + HUD_HEIGHT) {
+            if (mouseX >= hudX && mouseX <= hudX + SolarHudConfig.getEditorWidth() && mouseY >= hudY && mouseY <= hudY + SolarHudConfig.getEditorHeight()) {
                 isDragging = true;
                 dragOffsetX = (int) (mouseX - hudX);
                 dragOffsetY = (int) (mouseY - hudY);
@@ -167,8 +168,8 @@ public class SolarHudEditScreen extends Screen {
             hudY = (int) (mouseY - dragOffsetY);
 
             // 限制范围，避免 HUD 超出屏幕
-            hudX = Math.max(0, Math.min(hudX, this.width - HUD_WIDTH));
-            hudY = Math.max(0, Math.min(hudY, this.height - HUD_HEIGHT));
+            hudX = Math.max(0, Math.min(hudX, this.width - SolarHudConfig.getEditorWidth()));
+            hudY = Math.max(0, Math.min(hudY, this.height - SolarHudConfig.getEditorHeight()));
 
             return true;
         }
@@ -186,8 +187,8 @@ public class SolarHudEditScreen extends Screen {
      * 保存位置到配置文件
      */
     private void savePositionToConfig() {
-        SolarHudConfig.HUD_VALUES.posX.set(hudX);
-        SolarHudConfig.HUD_VALUES.posY.set(hudY);
+        SolarHudConfig.setHudX(hudX);
+        SolarHudConfig.setHudY(hudY);
     }
 
     /**
