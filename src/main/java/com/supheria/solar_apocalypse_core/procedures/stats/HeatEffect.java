@@ -2,13 +2,18 @@ package com.supheria.solar_apocalypse_core.procedures.stats;
 
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.thirst.SolarThirstHelper;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelAccessor;
@@ -21,6 +26,8 @@ import net.minecraftforge.fml.common.Mod;
  */
 @Mod.EventBusSubscriber
 public class HeatEffect {
+    private static final int DEHYDRATION_REFRESH_INTERVAL = 40;
+    private static final int DEHYDRATION_DURATION = 100;
 
     @SubscribeEvent
     public static void onEntityTick(LivingEvent.LivingTickEvent event) {
@@ -28,13 +35,17 @@ public class HeatEffect {
     }
 
     public static void execute(LevelAccessor world, double y, Entity entity) {
-        if (entity == null || isCreativeOrSpectator(entity)) {
+        if (entity == null || world.isClientSide() || isCreativeOrSpectator(entity)) {
             return;
         }
 
         SolarStage stage = SapModVariables.MapVariables.get(world).getCurrentStage();
-        if (!stage.isAtLeast(SolarStage.STAGE_2) || stage.isAtLeast(SolarStage.STAGE_6)) {
+        if (!SolarThirstHelper.isDehydrationStage(stage)) {
             return;
+        }
+
+        if (entity instanceof LivingEntity livingEntity && SolarThirstHelper.isDehydrationActive(stage, y)) {
+            applyDehydrationEffects(livingEntity, stage);
         }
 
         if (y <= StageHeightConfig.getSafeHeight(stage)) {
@@ -50,6 +61,35 @@ public class HeatEffect {
 
         entity.setSecondsOnFire(fireSeconds);
         entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), fireDamage);
+    }
+
+    private static void applyDehydrationEffects(LivingEntity entity, SolarStage stage) {
+        if (entity.tickCount % DEHYDRATION_REFRESH_INTERVAL != 0) {
+            return;
+        }
+
+        int amplifier = getDehydrationAmplifier(stage);
+        refreshEffect(entity, MobEffects.MOVEMENT_SLOWDOWN, amplifier);
+        refreshEffect(entity, MobEffects.WEAKNESS, amplifier);
+        refreshEffect(entity, MobEffects.DIG_SLOWDOWN, amplifier);
+    }
+
+    private static void refreshEffect(LivingEntity entity, MobEffect effect, int amplifier) {
+        MobEffectInstance current = entity.getEffect(effect);
+        if (current != null && current.getAmplifier() >= amplifier && current.getDuration() > DEHYDRATION_REFRESH_INTERVAL) {
+            return;
+        }
+        entity.addEffect(new MobEffectInstance(effect, DEHYDRATION_DURATION, amplifier, false, true, true));
+    }
+
+    private static int getDehydrationAmplifier(SolarStage stage) {
+        return switch (stage) {
+            case STAGE_2 -> 0;
+            case STAGE_3 -> 1;
+            case STAGE_4 -> 2;
+            case STAGE_5 -> 3;
+            default -> 0;
+        };
     }
 
     private static boolean isCreativeOrSpectator(Entity entity) {
