@@ -8,6 +8,7 @@
 		"LevelRendererMixin",
 		"LightLevelMixin",
 		"HostileMobBurnMixin",
+		"FishingHookMixin",
 		"SnowLayerMixin",
 		"BiomeGetTemperatureMixin",
 		"MobSpawnRulesMixin",
