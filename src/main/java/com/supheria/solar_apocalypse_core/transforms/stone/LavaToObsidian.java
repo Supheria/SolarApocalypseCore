@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.transforms.stone;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
@@ -22,7 +22,7 @@ public class LavaToObsidian {
     private static final double BASE_OBSIDIAN_PROBABILITY = 0.3;
 
     private static void transform(LevelAccessor world, double x, double y, double z) {
-        if (SapModVariables.MapVariables.get(world).getCurrentStage() != SolarStage.STAGE_6) return;
+        if (SolarModVariables.MapVariables.get(world).getCurrentStage() != SolarStage.STAGE_6) return;
         if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
 
         double probability = BlockSpreadUtils.hasAdjacentWater(world, x, y, z)

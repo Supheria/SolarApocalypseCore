@@ -34,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>服务端持有权威状态，客户端只维护网络同步后的镜像副本。
  */
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-public class SapModVariables {
+public class SolarModVariables {
 	/**
 	 * 在通用初始化阶段注册 SavedData 同步消息。
 	 */
@@ -122,15 +122,15 @@ public class SapModVariables {
 	 * 读取到的仍然是同一份全局阶段状态。客户端通过 {@link #clientSide} 持有最近一次同步到本地的镜像副本。
 	 */
 	public static class MapVariables extends SavedData {
-		public static final String DATA_NAME = "sap_mapvars";
+		public static final String DATA_NAME = "solar_mapvars";
 		/** 当前太阳阶段。 */
 		public SolarStage solarStage = SolarStage.NONE;
 		/** 当前日内时间快照。 */
-		public double TodayTime = 0;
+		public double currentTimeOfDay = 0;
 		/** 当前天数/日推进快照。 */
-		public double Today = 0;
+		public double currentDay = 0;
 		/** 与月相或独立昼夜推进关联的计数快照。 */
-		public double LunarToday = 0;
+		public double currentLunarDay = 0;
 
 		public static MapVariables load(CompoundTag tag) {
 			MapVariables data = new MapVariables();
@@ -141,18 +141,18 @@ public class SapModVariables {
 		public void read(CompoundTag nbt) {
 			// 从 NBT 读取阶段值
 			solarStage = SolarStage.getByOrdinal(nbt.getInt("solarStage"));
-			TodayTime = nbt.getDouble("TodayTime");
-			Today = nbt.getDouble("Today");
-			LunarToday = nbt.getDouble("LunarToday");
+			currentTimeOfDay = nbt.getDouble("currentTimeOfDay");
+			currentDay = nbt.getDouble("currentDay");
+			currentLunarDay = nbt.getDouble("currentLunarDay");
 		}
 
 		@Override
 		public @NotNull CompoundTag save(CompoundTag nbt) {
 			// 这里按 ordinal 持久化阶段；如果未来调整枚举顺序，需要同步考虑旧存档兼容性。
 			nbt.putInt("solarStage", solarStage.ordinal());
-			nbt.putDouble("TodayTime", TodayTime);
-			nbt.putDouble("Today", Today);
-			nbt.putDouble("LunarToday", LunarToday);
+			nbt.putDouble("currentTimeOfDay", currentTimeOfDay);
+			nbt.putDouble("currentDay", currentDay);
+			nbt.putDouble("currentLunarDay", currentLunarDay);
 			return nbt;
 		}
 

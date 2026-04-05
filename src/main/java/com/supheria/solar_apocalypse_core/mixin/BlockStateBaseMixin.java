@@ -33,40 +33,40 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
 
     @Shadow
     private boolean isRandomlyTicking;
-    private boolean isonPlace;
+    private boolean hasOnPlaceTransform;
 
     /**
      * 当前实现中该标记未在注入流程里显式回填原始值，因此默认保持 false，
      * 随后用于在执行完模组 randomTick 逻辑后取消原始流程。
      */
     @Unique
-    private boolean sap$isOriginalRandomlyTicking;
+    private boolean solar$isOriginalRandomlyTicking;
     /**
-     * 与 {@link #sap$isOriginalRandomlyTicking} 类似，当前实现默认保持 false，
+     * 与 {@link #solar$isOriginalRandomlyTicking} 类似，当前实现默认保持 false，
      * 使 onPlace 注入在执行完模组规则后取消原始尾部流程。
      */
     @Unique
-    private boolean sap$isOriginalonPlace;
+    private boolean solar$isOriginalOnPlace;
 
     /**
      * 绑定在当前方块状态上的随机刻转换过程。
      * 只要该字段不为 null，就说明这个状态需要接入灾变规则的 randomTick 触发链。
      */
     @Unique
-    protected BlockTransform sap$procedure;
+    protected BlockTransform solar$procedure;
     /**
      * 绑定在当前方块状态上的放置时转换过程。
      * 这条链用于需要在方块落地后立即修正的规则，而不是等待随机刻触发。
      */
     @Unique
-    protected BlockTransform sap$Nprocedure;
+    protected BlockTransform solar$onPlaceProcedure;
 
     /**
      * 防止 onPlace 中再次 setBlock 造成递归回流。
      * 当前实现用线程局部标记保护同一线程内的重入触发。
      */
     @Unique
-    private static final ThreadLocal<Boolean> sap$isExecutingOnPlace = ThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<Boolean> solar$isExecutingOnPlace = ThreadLocal.withInitial(() -> false);
 
     protected BlockStateBaseMixin(Block p_61117_, ImmutableMap<Property<?>, Comparable<?>> p_61118_, MapCodec<BlockState> p_61119_) {
         super(p_61117_, p_61118_, p_61119_);
@@ -80,10 +80,10 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
      */
     @Inject(method = "initCache", at = @At("TAIL"))
     private void initCacheTail(CallbackInfo callbackInfo) {
-        this.sap$procedure = SolarApocalypseCoreMod.getBlockTransform(this.asState());
-        this.sap$Nprocedure = SolarApocalypseCoreMod.getNBlockTransform(this.asState());
-        this.isRandomlyTicking = this.isRandomlyTicking || this.sap$procedure != null;
-        this.isonPlace = this.isonPlace || this.sap$Nprocedure != null;
+        this.solar$procedure = SolarApocalypseCoreMod.getBlockTransform(this.asState());
+        this.solar$onPlaceProcedure = SolarApocalypseCoreMod.getNBlockTransform(this.asState());
+        this.isRandomlyTicking = this.isRandomlyTicking || this.solar$procedure != null;
+        this.hasOnPlaceTransform = this.hasOnPlaceTransform || this.solar$onPlaceProcedure != null;
     }
 
     /**
@@ -94,14 +94,14 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
      */
     @Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
     private void randomTick(ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo callbackInfo) {
-        if (this.sap$procedure != null) {
+        if (this.solar$procedure != null) {
             int x = pos.getX();
             int y = pos.getY();
             int z = pos.getZ();
-            this.sap$procedure.call(level, x, y, z);
+            this.solar$procedure.call(level, x, y, z);
         }
 
-        if (!this.sap$isOriginalRandomlyTicking) {
+        if (!this.solar$isOriginalRandomlyTicking) {
             callbackInfo.cancel();
         }
     }
@@ -113,19 +113,19 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
     @Inject(method = "onPlace", at = @At("TAIL"), cancellable = true)
     private void onPlace(Level level, BlockPos pos, BlockState p_60699_, boolean p_60700_, CallbackInfo callbackInfo) {
         // onPlace 规则内部可能再次 setBlock；若不拦截，会重新触发 onPlace 并递归回流。
-        if (this.sap$Nprocedure != null && !sap$isExecutingOnPlace.get()) {
-            sap$isExecutingOnPlace.set(true);
+        if (this.solar$onPlaceProcedure != null && !solar$isExecutingOnPlace.get()) {
+            solar$isExecutingOnPlace.set(true);
             try {
                 int x = pos.getX();
                 int y = pos.getY();
                 int z = pos.getZ();
-                this.sap$Nprocedure.call(level, x, y, z);
+                this.solar$onPlaceProcedure.call(level, x, y, z);
             } finally {
-                sap$isExecutingOnPlace.set(false);
+                solar$isExecutingOnPlace.set(false);
             }
         }
 
-        if (!this.sap$isOriginalonPlace) {
+        if (!this.solar$isOriginalOnPlace) {
             callbackInfo.cancel();
         }
     }

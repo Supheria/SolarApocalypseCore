@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.Entity;
@@ -26,7 +26,7 @@ public class PassiveMobSpawnBanHandler {
 		}
 
 		if (event.getLevel() instanceof ServerLevel serverLevel) {
-			SolarStage stage = SapModVariables.MapVariables.get(serverLevel).getCurrentStage();
+			SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getCurrentStage();
 			
 			if (stage == SolarStage.NONE || stage == SolarStage.STAGE_1 || stage == SolarStage.STAGE_2) {
 				return;

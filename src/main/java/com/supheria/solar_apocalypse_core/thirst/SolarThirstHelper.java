@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.thirst;
 
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
@@ -18,7 +18,7 @@ public class SolarThirstHelper {
             return 1.0f;
         }
 
-        SolarStage stage = SapModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage stage = SolarModVariables.MapVariables.get(world).getCurrentStage();
         if (!isDehydrationActive(stage, player.getY())) {
             return 1.0f;
         }
@@ -33,7 +33,7 @@ public class SolarThirstHelper {
     }
 
     public static boolean isDehydrationActive(LevelAccessor world, double y) {
-        return isDehydrationActive(SapModVariables.MapVariables.get(world).getCurrentStage(), y);
+        return isDehydrationActive(SolarModVariables.MapVariables.get(world).getCurrentStage(), y);
     }
 
     public static boolean isDehydrationActive(SolarStage stage, double y) {

@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.transforms.rule;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.world.level.LevelAccessor;
@@ -41,7 +41,7 @@ public record TransformRule(TransformCondition condition, TransformAction action
     public static BlockTransform rulesOf(TransformRule... rules) {
         return (world, x, y, z) -> {
             if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
-            var stage = SapModVariables.MapVariables.get(world).getSolarStage();
+            var stage = SolarModVariables.MapVariables.get(world).getSolarStage();
             for (TransformRule rule : rules) {
                 rule.apply(world, x, y, z, stage);
             }

@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
-import com.supheria.solar_apocalypse_core.init.SapModItems;
+import com.supheria.solar_apocalypse_core.init.SolarModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +20,7 @@ public class SunBlockInteraction {
         if ((entity instanceof net.minecraft.world.entity.LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == Blocks.AIR.asItem()
                 && world.canSeeSkyFromBelowWater(BlockPos.containing(x, y, z))) {
             if (entity instanceof Player _player) {
-                ItemStack _setstack = new ItemStack(SapModItems.COORDINATES_OF_THE_SUN.get());
+                ItemStack _setstack = new ItemStack(SolarModItems.COORDINATES_OF_THE_SUN.get());
                 _setstack.setCount(4);
                 ItemHandlerHelper.giveItemToPlayer(_player, _setstack);
             }

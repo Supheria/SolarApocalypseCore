@@ -11,7 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.level.Level;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarHudConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 
 /**
  * HUD 渲染器
@@ -40,7 +40,7 @@ public class SolarHudRenderer {
         long dayTime = level.dayTime();
         long today = SolarStageHelper.getDayIndex(dayTime);
 
-        SapModVariables.MapVariables mapVars = SapModVariables.MapVariables.get(level);
+        SolarModVariables.MapVariables mapVars = SolarModVariables.MapVariables.get(level);
         SolarStage currentPhase = mapVars.getCurrentStage();
         float progress = SolarStageHelper.getPhaseProgress(dayTime, currentPhase);
 

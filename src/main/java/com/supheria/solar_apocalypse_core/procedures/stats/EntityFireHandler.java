@@ -2,7 +2,7 @@ package com.supheria.solar_apocalypse_core.procedures.stats;
 
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.damagesource.DamageSource;
@@ -34,7 +34,7 @@ public class EntityFireHandler {
             return;
         }
 
-        SolarStage stage = SapModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage stage = SolarModVariables.MapVariables.get(world).getCurrentStage();
         if (!stage.isAtLeast(SolarStage.STAGE_2) || stage.isAtLeast(SolarStage.STAGE_6)) {
             return;
         }

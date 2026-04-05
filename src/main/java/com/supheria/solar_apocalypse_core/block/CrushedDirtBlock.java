@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Collections;
 
 import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
-import com.supheria.solar_apocalypse_core.init.SapModBlocks;
+import com.supheria.solar_apocalypse_core.init.SolarModBlocks;
 
 public class CrushedDirtBlock extends FallingBlock {
 	public CrushedDirtBlock() {
@@ -36,7 +36,7 @@ public class CrushedDirtBlock extends FallingBlock {
 		List<ItemStack> dropsOriginal = super.getDrops(state, builder);
 		if (!dropsOriginal.isEmpty())
 			return dropsOriginal;
-		return Collections.singletonList(new ItemStack(SapModBlocks.CRUSHED_DIRT.get()));
+		return Collections.singletonList(new ItemStack(SolarModBlocks.CRUSHED_DIRT.get()));
 	}
 
 	@Override

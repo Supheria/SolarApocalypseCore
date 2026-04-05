@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.client;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraftforge.api.distmarker.Dist;
@@ -28,7 +28,7 @@ public class CollapsePhaseState {
 		if (event.phase == TickEvent.Phase.END) {
 			Minecraft minecraft = Minecraft.getInstance();
 			if (minecraft.level != null) {
-				SolarStage currentPhase = SapModVariables.MapVariables.get(minecraft.level).getCurrentStage();
+				SolarStage currentPhase = SolarModVariables.MapVariables.get(minecraft.level).getCurrentStage();
 				isCollapsePhase = (currentPhase == SolarStage.STAGE_6);
 
 				isDaytime = SolarStageHelper.isDaytime(minecraft.level.dayTime());

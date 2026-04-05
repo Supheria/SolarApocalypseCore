@@ -2,7 +2,7 @@ package com.supheria.solar_apocalypse_core.transforms.rule;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
@@ -89,10 +89,10 @@ public final class TransformConditions {
         return (world, x, y, z, stage) -> !world.getLevelData().isRaining();
     }
 
-    /** 当前是白天（TodayTime 不在夜间区间 12566–23450） */
+    /** 当前是白天（currentTimeOfDay 不在夜间区间 12566–23450） */
     public static TransformCondition daytime() {
         return (world, x, y, z, stage) -> {
-            long t = (long) SapModVariables.MapVariables.get(world).TodayTime;
+            long t = (long) SolarModVariables.MapVariables.get(world).currentTimeOfDay;
             return !SolarStageHelper.isNightWindow(t);
         };
     }

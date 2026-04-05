@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.transforms.plant;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
-import com.supheria.solar_apocalypse_core.init.SapModBlocks;
+import com.supheria.solar_apocalypse_core.init.SolarModBlocks;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformAction;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformCondition;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
@@ -47,11 +47,11 @@ public class LeavesWither {
     private static final TransformCondition SKY_OR_WITHER_ABOVE =
             sky().or((world, x, y, z, stage) ->
                     world.getBlockState(BlockPos.containing(x, y + 1, z)).getBlock()
-                            == SapModBlocks.WITHERED_LEAVES.get());
+                            == SolarModBlocks.WITHERED_LEAVES.get());
 
     /** 当前方块是枯萎树叶。 */
     private static final TransformCondition IS_WITHERED =
-            isBlock(SapModBlocks.WITHERED_LEAVES.get());
+            isBlock(SolarModBlocks.WITHERED_LEAVES.get());
 
     /** 当前方块不是枯萎树叶。 */
     private static final TransformCondition NOT_WITHERED = IS_WITHERED.negate();
@@ -72,7 +72,7 @@ public class LeavesWither {
                         for (int[] o : BlockSpreadUtils.OFFSETS_8H) {
                             BlockPos neighbor = center.offset(o[0], o[1], o[2]);
                             if (world.getBlockState(neighbor).is(BlockTags.LEAVES)) {
-                                world.setBlock(neighbor, SapModBlocks.DUST.get().defaultBlockState(), 3);
+                                world.setBlock(neighbor, SolarModBlocks.DUST.get().defaultBlockState(), 3);
                             }
                         }
                     });
@@ -81,12 +81,12 @@ public class LeavesWither {
             // 阶段1-5（非枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 慢速概率 → 枯萎树叶
             when(stageIsEruptionPhase().and(NOT_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
                             .and(daytime()).and(randomDayWoodSlow()),
-                    setBlock(SapModBlocks.WITHERED_LEAVES.get())),
+                    setBlock(SolarModBlocks.WITHERED_LEAVES.get())),
 
             // 阶段2-5（非枯萎叶）：白天 + 不下雨 + 高于安全高度 → 枯萎树叶
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(NOT_WITHERED).and(SOFT_BASE_2)
                             .and(aboveSafeHeight()).and(randomDayWood()),
-                    setBlock(SapModBlocks.WITHERED_LEAVES.get())),
+                    setBlock(SolarModBlocks.WITHERED_LEAVES.get())),
 
             // 阶段2-5（枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 概率 → 上方点火
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(IS_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
@@ -108,7 +108,7 @@ public class LeavesWither {
 
             // 阶段3-5（非枯萎叶）：高于安全高度 → 枯萎叶
             when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(NOT_WITHERED).and(aboveSafeHeight()),
-                    setBlock(SapModBlocks.WITHERED_LEAVES.get())),
+                    setBlock(SolarModBlocks.WITHERED_LEAVES.get())),
 
             // 阶段4：高于安全高度 → 50% 扩散火焰8H 或 50% 空气+树叶→尘土8H
             when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()),

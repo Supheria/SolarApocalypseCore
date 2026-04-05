@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.commands.CommandSource;
@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.Mod;
  * 太阳阶段推进的服务端入口。
  *
  * <p>该处理器每个世界 tick 读取当前 {@code dayTime}，据此推导目标太阳阶段，
- * 再把变化写回全局 {@link SapModVariables.MapVariables}，并同步应用阶段级 gamerule 与天气约束。
+ * 再把变化写回全局 {@link SolarModVariables.MapVariables}，并同步应用阶段级 gamerule 与天气约束。
  */
 @Mod.EventBusSubscriber
 public class StageTickHandler {
@@ -38,7 +38,7 @@ public class StageTickHandler {
      */
     public static void execute(LevelAccessor world) {
         long dayTime = world.dayTime();
-        SapModVariables.MapVariables mapVars = SapModVariables.MapVariables.get(world);
+        SolarModVariables.MapVariables mapVars = SolarModVariables.MapVariables.get(world);
 
         SolarStage targetPhase = SolarStageHelper.getPhaseByDayTime(dayTime);
         SolarStage currentPhase = mapVars.getCurrentStage();

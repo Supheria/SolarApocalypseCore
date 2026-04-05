@@ -11,7 +11,13 @@
 		"SnowLayerMixin",
 		"BiomeGetTemperatureMixin",
 		"MobSpawnRulesMixin",
-		"ThirstHelperSolarMixin"
+		"ThirstHelperSolarMixin",
+		"CropGrowthBlockMixin",
+		"SaplingGrowthBlockMixin",
+		"BambooGrowthBlockMixin",
+		"StemGrowthBlockMixin",
+		"ColumnPlantGrowthBlockMixin",
+		"SweetBerryBushGrowthBlockMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

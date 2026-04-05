@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -83,8 +83,8 @@ public abstract class LevelRendererMixin {
 
     @Inject(method="renderSky", at = @At("HEAD"))
     private void onRendersky(PoseStack p_202424_, Matrix4f p_254034_, float p_202426_, Camera p_202427_, boolean p_202428_, Runnable p_202429_, CallbackInfo ci){
-        SolarStage solarFlare = SapModVariables.MapVariables.get(world).getSolarStage();
-        SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage solarFlare = SolarModVariables.MapVariables.get(world).getSolarStage();
+        SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getCurrentStage();
 
         SUN_LOCATION = getSunTexture(solarFlare);
 
@@ -106,8 +106,8 @@ public abstract class LevelRendererMixin {
         originalCelestialMatrix = new Matrix4f(in);
         Matrix4f copy = new Matrix4f(in);
 
-        SolarStage flare = SapModVariables.MapVariables.get(world).getSolarStage();
-        int lunar = (int) SapModVariables.MapVariables.get(world).LunarToday;
+        SolarStage flare = SolarModVariables.MapVariables.get(world).getSolarStage();
+        int lunar = (int) SolarModVariables.MapVariables.get(world).currentLunarDay;
 
         float scale;
         if (flare == SolarStage.STAGE_6) {
@@ -146,7 +146,7 @@ public abstract class LevelRendererMixin {
     private float getCollapseDayBrightnessFactor() {
         if (world == null) return 1.0f;
 
-        SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getCurrentStage();
         if (currentPhase != SolarStage.STAGE_6) {
             return 1.0f;
         }

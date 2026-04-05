@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.core.BlockPos;
@@ -31,7 +31,7 @@ public class MobSpawnRulesMixin {
 			return;
 		}
 
-		SolarStage stage = SapModVariables.MapVariables.get(serverLevel).getCurrentStage();
+		SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getCurrentStage();
 		if (stage != SolarStage.STAGE_6) {
 			return;
 		}

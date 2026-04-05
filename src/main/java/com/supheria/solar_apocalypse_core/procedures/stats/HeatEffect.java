@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.procedures.stats;
 
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.thirst.SolarThirstHelper;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.client.Minecraft;
@@ -39,7 +39,7 @@ public class HeatEffect {
             return;
         }
 
-        SolarStage stage = SapModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage stage = SolarModVariables.MapVariables.get(world).getCurrentStage();
         if (!SolarThirstHelper.isDehydrationStage(stage)) {
             return;
         }

@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.level.Level;
@@ -25,7 +25,7 @@ public class LightLevelMixin {
 		Level level = (Level) (Object) this;
 
 		try {
-			SolarStage currentStage = SapModVariables.MapVariables.get(level).getCurrentStage();
+			SolarStage currentStage = SolarModVariables.MapVariables.get(level).getCurrentStage();
 
 			if (currentStage != SolarStage.STAGE_6) {
 				return;

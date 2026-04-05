@@ -62,11 +62,11 @@ public class SolarApocalypseCoreMod {
         MinecraftForge.EVENT_BUS.register(this);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        SapModBlocks.REGISTRY.register(bus);
+        SolarModBlocks.REGISTRY.register(bus);
 
-        SapModItems.REGISTRY.register(bus);
+        SolarModItems.REGISTRY.register(bus);
 
-        SapModTabs.REGISTRY.register(bus);
+        SolarModTabs.REGISTRY.register(bus);
 
     }
 
@@ -128,7 +128,7 @@ public class SolarApocalypseCoreMod {
      * <p>当前主要排除两类对象：显式标记为耐火的方块，以及需要钻石工具的高价值硬质方块。
      */
     private static boolean notExcluded(Reference<Block> ref) {
-        return !ref.is(SapModTags.Blocks.FIRE_RESISTANCE)
+        return !ref.is(SolarModTags.Blocks.FIRE_RESISTANCE)
                 && !ref.is(BlockTags.NEEDS_DIAMOND_TOOL);
     }
 
@@ -145,7 +145,7 @@ public class SolarApocalypseCoreMod {
         // 第一层：会被直接清除或快速衰亡的轻质/脆弱方块。
         // 这些规则优先于木材、泥土、石头等长链规则，避免被后续通用分类截获。
         // 简单删除类（杂草、花朵、旗帜、蜡烛、床、珊瑚等）
-        if ((ref.is(SapModTags.Blocks.SIMPLE_DELETE)
+        if ((ref.is(SolarModTags.Blocks.SIMPLE_DELETE)
                 || ref.is(BlockTags.REPLACEABLE_BY_TREES)
                 || ref.is(BlockTags.SWORD_EFFICIENT)
                 || ref.is(BlockTags.MINEABLE_WITH_HOE)
@@ -215,17 +215,17 @@ public class SolarApocalypseCoreMod {
             return LeavesWither.TRANSFORM;
         }
         // 苔藓石
-        if (ref.is(SapModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDecay.TRANSFORM;
+        if (ref.is(SolarModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDecay.TRANSFORM;
         // 草方块
-        if (ref.is(SapModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChain.GRASS_BLOCK;
+        if (ref.is(SolarModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChain.GRASS_BLOCK;
         // 泥土
-        if (ref.is(SapModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChain.DIRT;
+        if (ref.is(SolarModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChain.DIRT;
         // 粗泥土
-        if (ref.is(SapModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChain.COARSE_DIRT;
+        if (ref.is(SolarModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChain.COARSE_DIRT;
         // 沙子
         if (ref.is(BlockTags.SAND) && notExcluded(ref)) return DirtChain.SAND;
         // 粉尘
-        if (ref.is(SapModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChain.DUST;
+        if (ref.is(SolarModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChain.DUST;
         // 冰类
         if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMelt.TRANSFORM;
         // 水
@@ -244,14 +244,14 @@ public class SolarApocalypseCoreMod {
             return SpongeDry.TRANSFORM;
         }
         // TNT
-        if (ref.is(SapModTags.Blocks.TNT) && notExcluded(ref)) return TntIgnite.TRANSFORM;
+        if (ref.is(SolarModTags.Blocks.TNT) && notExcluded(ref)) return TntIgnite.TRANSFORM;
         // 花盆
         if (ref.is(BlockTags.FLOWER_POTS) && notExcluded(ref)) return FlowerPotDecay.TRANSFORM;
         // 石头系（镐可挖掘，排除特殊矿石与存储块）
         if (ref.is(BlockTags.MINEABLE_WITH_PICKAXE) && notExcluded(ref)
-                && !ref.is(SapModTags.Blocks.SIMPLE_DELETE)
-                && !ref.is(SapModTags.Blocks.SANDSTONE)
-                && !ref.is(SapModTags.Blocks.COBBLESTONE)
+                && !ref.is(SolarModTags.Blocks.SIMPLE_DELETE)
+                && !ref.is(SolarModTags.Blocks.SANDSTONE)
+                && !ref.is(SolarModTags.Blocks.COBBLESTONE)
                 && !ref.is(BlockTags.IRON_ORES)
                 && !ref.is(Tags.Blocks.STORAGE_BLOCKS_IRON)
                 && !ref.is(Tags.Blocks.STORAGE_BLOCKS_RAW_IRON)
@@ -266,7 +266,7 @@ public class SolarApocalypseCoreMod {
                     || ref.is(Tags.Blocks.COBBLESTONE_DEEPSLATE)
                     || ref.is(Tags.Blocks.ORE_BEARING_GROUND_DEEPSLATE)
                     || ref.is(Tags.Blocks.ORES_IN_GROUND_DEEPSLATE)
-                    || ref.is(SapModTags.Blocks.DEEPSLATE)) {
+                    || ref.is(SolarModTags.Blocks.DEEPSLATE)) {
                 if (ref.is(BlockTags.STAIRS)) return StoneTo.of(Blocks.COBBLED_DEEPSLATE_STAIRS);
                 if (ref.is(BlockTags.SLABS))  return StoneTo.of(Blocks.COBBLED_DEEPSLATE_SLAB);
                 if (ref.is(BlockTags.WALLS))  return StoneTo.of(Blocks.COBBLED_DEEPSLATE_WALL);
@@ -279,17 +279,17 @@ public class SolarApocalypseCoreMod {
             return StoneTo.of(Blocks.COBBLESTONE);
         }
         // 卵石
-        if (ref.is(SapModTags.Blocks.COBBLESTONE) && notExcluded(ref)) return StoneChain.COBBLESTONE;
+        if (ref.is(SolarModTags.Blocks.COBBLESTONE) && notExcluded(ref)) return StoneChain.COBBLESTONE;
         // 砾石
         if (ref.is(Tags.Blocks.GRAVEL) && notExcluded(ref)) return StoneChain.GRAVEL;
         // 熔岩（第六阶段转化为黑曜石）
-        if (block == Blocks.LAVA && !ref.is(SapModTags.Blocks.FIRE_RESISTANCE)) {
+        if (block == Blocks.LAVA && !ref.is(SolarModTags.Blocks.FIRE_RESISTANCE)) {
             return LavaToObsidian.TRANSFORM;
         }
         // 砂岩
-        if (ref.is(SapModTags.Blocks.SANDSTONE) && notExcluded(ref)) return DirtChain.CRUSHED_DIRT;
+        if (ref.is(SolarModTags.Blocks.SANDSTONE) && notExcluded(ref)) return DirtChain.CRUSHED_DIRT;
         // 黏土
-        if (ref.is(SapModTags.Blocks.CLAY) && notExcluded(ref)) return StoneChain.CLAY;
+        if (ref.is(SolarModTags.Blocks.CLAY) && notExcluded(ref)) return StoneChain.CLAY;
         // 传送门
         if (ref.is(BlockTags.PORTALS)) return ForceDelete.TRANSFORM;
         // 末地传送门框架
@@ -312,7 +312,7 @@ public class SolarApocalypseCoreMod {
         // 末地传送门框架
         if (block instanceof EndPortalFrameBlock) return EndFrameClear.TRANSFORM;
         // 简单删除类（杂草、花朵、旗帜、蜡烛、床、珊瑚等）
-        if ((ref.is(SapModTags.Blocks.SIMPLE_DELETE)
+        if ((ref.is(SolarModTags.Blocks.SIMPLE_DELETE)
                 || ref.is(BlockTags.REPLACEABLE_BY_TREES)
                 || ref.is(BlockTags.SWORD_EFFICIENT)
                 || ref.is(BlockTags.MINEABLE_WITH_HOE)
@@ -382,17 +382,17 @@ public class SolarApocalypseCoreMod {
             return LeavesWither.TRANSFORM;
         }
         // 苔藓石
-        if (ref.is(SapModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDecay.TRANSFORM;
+        if (ref.is(SolarModTags.Blocks.MOSSY) && notExcluded(ref)) return MossyDecay.TRANSFORM;
         // 草方块
-        if (ref.is(SapModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChain.GRASS_BLOCK;
+        if (ref.is(SolarModTags.Blocks.MOIST_DIRT) && notExcluded(ref)) return DirtChain.GRASS_BLOCK;
         // 泥土
-        if (ref.is(SapModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChain.DIRT;
+        if (ref.is(SolarModTags.Blocks.DIRT) && notExcluded(ref)) return DirtChain.DIRT;
         // 粗泥土
-        if (ref.is(SapModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChain.COARSE_DIRT;
+        if (ref.is(SolarModTags.Blocks.HARD_DIRT) && notExcluded(ref)) return DirtChain.COARSE_DIRT;
         // 沙子
         if (ref.is(BlockTags.SAND) && notExcluded(ref)) return DirtChain.SAND;
         // 粉尘
-        if (ref.is(SapModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChain.DUST;
+        if (ref.is(SolarModTags.Blocks.POWDER) && notExcluded(ref)) return DirtChain.DUST;
         // 冰类
         if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMelt.TRANSFORM;
         // 水

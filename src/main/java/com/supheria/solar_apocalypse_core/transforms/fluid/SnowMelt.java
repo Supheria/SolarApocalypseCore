@@ -2,7 +2,7 @@ package com.supheria.solar_apocalypse_core.transforms.fluid;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.core.BlockPos;
@@ -20,7 +20,7 @@ public class SnowMelt {
     public static final BlockTransform TRANSFORM = SnowMelt::transform;
 
     private static void transform(LevelAccessor world, double x, double y, double z) {
-        SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getCurrentStage();
         if (currentPhase != SolarStage.STAGE_6) return;
 
         BlockPos pos = BlockPos.containing(x, y, z);

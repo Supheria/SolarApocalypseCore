@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.block;
 
-import com.supheria.solar_apocalypse_core.init.SapModBlocks;
+import com.supheria.solar_apocalypse_core.init.SolarModBlocks;
 import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerLevel;
@@ -42,7 +42,7 @@ public class DustBlock extends FallingBlock {
         List<ItemStack> dropsOriginal = super.getDrops(state, builder);
         if (!dropsOriginal.isEmpty())
             return dropsOriginal;
-        return Collections.singletonList(new ItemStack(SapModBlocks.DUST.get()));
+        return Collections.singletonList(new ItemStack(SolarModBlocks.DUST.get()));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.TickEvent;
@@ -8,7 +8,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * 今日时间变量更新处理器（原 TodayCountProcedure）。
+ * 今日时间变量更新处理器（原 currentDayCountProcedure）。
  */
 @Mod.EventBusSubscriber
 public class DayTimeTickHandler {
@@ -22,12 +22,12 @@ public class DayTimeTickHandler {
 
     public static void execute(LevelAccessor world) {
         long dayTime = world.dayTime();
-        SapModVariables.MapVariables mapVariables = SapModVariables.MapVariables.get(world);
+        SolarModVariables.MapVariables mapVariables = SolarModVariables.MapVariables.get(world);
         double dayIndex = SolarStageHelper.getDayIndex(dayTime);
 
-        mapVariables.Today = dayIndex;
-        mapVariables.LunarToday = Math.floor(dayIndex + 1 / 4d);
-        mapVariables.TodayTime = SolarStageHelper.getTimeOfDay(dayTime);
+        mapVariables.currentDay = dayIndex;
+        mapVariables.currentLunarDay = Math.floor(dayIndex + 1 / 4d);
+        mapVariables.currentTimeOfDay = SolarStageHelper.getTimeOfDay(dayTime);
         mapVariables.syncData(world);
     }
 }

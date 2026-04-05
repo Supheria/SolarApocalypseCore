@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.procedures.commands;
 
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +12,6 @@ public class CheckStatus {
         if (entity == null)
             return;
         if (entity instanceof Player _player && !_player.level().isClientSide())
-            _player.displayClientMessage(Component.literal(("Stage:" + SapModVariables.MapVariables.get(world).solarStage + " / " + "Today Time:" + SapModVariables.MapVariables.get(world).TodayTime)), false);
+            _player.displayClientMessage(Component.literal("Stage: " + SolarModVariables.MapVariables.get(world).solarStage + " / Day: " + SolarModVariables.MapVariables.get(world).currentDay + " / Time: " + SolarModVariables.MapVariables.get(world).currentTimeOfDay), false);
     }
 }

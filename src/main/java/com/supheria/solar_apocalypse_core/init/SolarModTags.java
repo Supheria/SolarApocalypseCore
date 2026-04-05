@@ -7,7 +7,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 
-public class SapModTags {
+public class SolarModTags {
     public static class Blocks {
         public static final TagKey<Block> SIMPLE_DELETE = BlockTags.create(new ResourceLocation(SolarApocalypseCoreMod.MOD_ID, "simple_delete"));
         public static final TagKey<Block> FIRE_RESISTANCE = BlockTags.create(new ResourceLocation(SolarApocalypseCoreMod.MOD_ID, "fire_resistance"));

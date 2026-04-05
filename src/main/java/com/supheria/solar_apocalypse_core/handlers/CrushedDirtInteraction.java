@@ -1,6 +1,6 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
-import com.supheria.solar_apocalypse_core.init.SapModBlocks;
+import com.supheria.solar_apocalypse_core.init.SolarModBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -39,7 +39,7 @@ public class CrushedDirtInteraction {
     public static void execute(LevelAccessor world, double x, double y, double z, Entity entity) {
         if (entity == null)
             return;
-        if ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.CRUSHED_DIRT.get()
+        if ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SolarModBlocks.CRUSHED_DIRT.get()
                 && ((entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == Items.NETHERITE_HOE
                 || (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == Items.DIAMOND_HOE
                 || (entity instanceof LivingEntity _livEnt ? _livEnt.getMainHandItem() : ItemStack.EMPTY).getItem() == Items.IRON_HOE
@@ -78,7 +78,7 @@ public class CrushedDirtInteraction {
             }
             world.setBlock(BlockPos.containing(x, y, z), Blocks.AIR.defaultBlockState(), 3);
             world.setBlock(BlockPos.containing(x, y, z), Blocks.COARSE_DIRT.defaultBlockState(), 3);
-        } else if ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SapModBlocks.CRUSHED_DIRT.get()
+        } else if ((world.getBlockState(BlockPos.containing(x, y, z))).getBlock() == SolarModBlocks.CRUSHED_DIRT.get()
                 && ((entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == Items.NETHERITE_HOE
                 || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == Items.DIAMOND_HOE
                 || (entity instanceof LivingEntity _livEnt ? _livEnt.getOffhandItem() : ItemStack.EMPTY).getItem() == Items.IRON_HOE

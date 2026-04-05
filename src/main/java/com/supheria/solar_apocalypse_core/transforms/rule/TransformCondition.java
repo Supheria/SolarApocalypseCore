@@ -21,7 +21,7 @@ public interface TransformCondition {
      * @param x     方块 X 坐标
      * @param y     方块 Y 坐标
      * @param z     方块 Z 坐标
-     * @param stage 当前太阳阶段（已从 SapModVariables 读取）
+     * @param stage 当前太阳阶段（已从 SolarModVariables 读取）
      */
     boolean test(LevelAccessor world, double x, double y, double z, SolarStage stage);
 

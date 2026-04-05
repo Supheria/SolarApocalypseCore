@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
-import com.supheria.solar_apocalypse_core.network.SapModVariables;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.fluid.SnowMelt;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
@@ -26,7 +26,7 @@ public class CollapsePhaseHandler {
     public static void onWorldTick(TickEvent.LevelTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             LevelAccessor world = event.level;
-            SolarStage currentPhase = SapModVariables.MapVariables.get(world).getCurrentStage();
+            SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getCurrentStage();
 
             if (currentPhase == SolarStage.STAGE_6) {
                 int accumulationRate = SolarStageConfig.getCollapseSnowAccumulationRate();
