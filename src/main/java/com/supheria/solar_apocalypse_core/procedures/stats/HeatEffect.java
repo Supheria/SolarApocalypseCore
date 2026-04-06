@@ -28,6 +28,8 @@ import net.minecraftforge.fml.common.Mod;
 public class HeatEffect {
     private static final int DEHYDRATION_REFRESH_INTERVAL = 40;
     private static final int DEHYDRATION_DURATION = 100;
+    private static final int EFFECT_LEVEL_1 = 0;
+    private static final int EFFECT_LEVEL_2 = 1;
 
     @SubscribeEvent
     public static void onEntityTick(LivingEvent.LivingTickEvent event) {
@@ -40,11 +42,20 @@ public class HeatEffect {
         }
 
         SolarStage stage = SolarModVariables.MapVariables.get(world).getCurrentStage();
+        if (!(entity instanceof LivingEntity livingEntity)) {
+            return;
+        }
+
+        if (stage == SolarStage.STAGE_6) {
+            applyCollapseEffects(livingEntity);
+            return;
+        }
+
         if (!SolarThirstHelper.isDehydrationStage(stage)) {
             return;
         }
 
-        if (entity instanceof LivingEntity livingEntity && SolarThirstHelper.isDehydrationActive(stage, y)) {
+        if (SolarThirstHelper.isDehydrationActive(stage, y)) {
             applyDehydrationEffects(livingEntity, stage);
         }
 
@@ -68,10 +79,28 @@ public class HeatEffect {
             return;
         }
 
-        int amplifier = getDehydrationAmplifier(stage);
-        refreshEffect(entity, MobEffects.MOVEMENT_SLOWDOWN, amplifier);
-        refreshEffect(entity, MobEffects.WEAKNESS, amplifier);
-        refreshEffect(entity, MobEffects.DIG_SLOWDOWN, amplifier);
+        switch (stage) {
+            case STAGE_3 -> refreshEffect(entity, MobEffects.WEAKNESS, EFFECT_LEVEL_1);
+            case STAGE_4 -> {
+                refreshEffect(entity, MobEffects.WEAKNESS, EFFECT_LEVEL_1);
+                refreshEffect(entity, MobEffects.HUNGER, EFFECT_LEVEL_1);
+            }
+            case STAGE_5 -> {
+                refreshEffect(entity, MobEffects.WEAKNESS, EFFECT_LEVEL_2);
+                refreshEffect(entity, MobEffects.HUNGER, EFFECT_LEVEL_2);
+            }
+            default -> {
+            }
+        }
+    }
+
+    private static void applyCollapseEffects(LivingEntity entity) {
+        if (entity.tickCount % DEHYDRATION_REFRESH_INTERVAL != 0) {
+            return;
+        }
+
+        refreshEffect(entity, MobEffects.WEAKNESS, EFFECT_LEVEL_1);
+        refreshEffect(entity, MobEffects.MOVEMENT_SLOWDOWN, EFFECT_LEVEL_1);
     }
 
     private static void refreshEffect(LivingEntity entity, MobEffect effect, int amplifier) {
@@ -80,16 +109,6 @@ public class HeatEffect {
             return;
         }
         entity.addEffect(new MobEffectInstance(effect, DEHYDRATION_DURATION, amplifier, false, true, true));
-    }
-
-    private static int getDehydrationAmplifier(SolarStage stage) {
-        return switch (stage) {
-            case STAGE_2 -> 0;
-            case STAGE_3 -> 1;
-            case STAGE_4 -> 2;
-            case STAGE_5 -> 3;
-            default -> 0;
-        };
     }
 
     private static boolean isCreativeOrSpectator(Entity entity) {
