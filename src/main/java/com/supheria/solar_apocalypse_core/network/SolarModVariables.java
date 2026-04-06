@@ -181,6 +181,10 @@ public class SolarModVariables {
 		public double currentDay = 0;
 		/** 与月相或独立昼夜推进关联的计数快照。 */
 		public double currentLunarDay = 0;
+		/** 是否已经为该存档初始化过永久禁作弊配置。 */
+		public boolean cheatLockConfigured = false;
+		/** 该存档是否被永久锁定为不可开启作弊。 */
+		public boolean cheatsPermanentlyLocked = false;
 
 		public static MapVariables load(CompoundTag tag) {
 			MapVariables data = new MapVariables();
@@ -194,6 +198,8 @@ public class SolarModVariables {
 			currentTimeOfDay = nbt.getDouble("currentTimeOfDay");
 			currentDay = nbt.getDouble("currentDay");
 			currentLunarDay = nbt.getDouble("currentLunarDay");
+			cheatLockConfigured = nbt.getBoolean("cheatLockConfigured");
+			cheatsPermanentlyLocked = nbt.getBoolean("cheatsPermanentlyLocked");
 		}
 
 		@Override
@@ -203,6 +209,8 @@ public class SolarModVariables {
 			nbt.putDouble("currentTimeOfDay", currentTimeOfDay);
 			nbt.putDouble("currentDay", currentDay);
 			nbt.putDouble("currentLunarDay", currentLunarDay);
+			nbt.putBoolean("cheatLockConfigured", cheatLockConfigured);
+			nbt.putBoolean("cheatsPermanentlyLocked", cheatsPermanentlyLocked);
 			return nbt;
 		}
 
@@ -239,6 +247,22 @@ public class SolarModVariables {
 
 		public void setCurrentStage(SolarStage stage) {
 			this.solarStage = stage;
+		}
+
+		public boolean isCheatLockConfigured() {
+			return this.cheatLockConfigured;
+		}
+
+		public void setCheatLockConfigured(boolean cheatLockConfigured) {
+			this.cheatLockConfigured = cheatLockConfigured;
+		}
+
+		public boolean isCheatsPermanentlyLocked() {
+			return this.cheatLockConfigured && this.cheatsPermanentlyLocked;
+		}
+
+		public void setCheatsPermanentlyLocked(boolean cheatsPermanentlyLocked) {
+			this.cheatsPermanentlyLocked = cheatsPermanentlyLocked;
 		}
 
 		public static MapVariables get(LevelAccessor world) {

@@ -5,20 +5,27 @@
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
 		"BlockStateBaseMixin",
+		"CreateWorldScreenGameTabMixin",
+		"CreateWorldScreenMixin",
 		"LevelRendererMixin",
 		"LightLevelMixin",
+		"MinecraftServerMixin",
 		"HostileMobBurnMixin",
 		"FishingHookMixin",
+		"IntegratedServerMixin",
 		"SnowLayerMixin",
 		"BiomeGetTemperatureMixin",
 		"MobSpawnRulesMixin",
+		"ServerGamePacketListenerImplMixin",
+		"ShareToLanScreenMixin",
 		"ThirstHelperSolarMixin",
 		"CropGrowthBlockMixin",
 		"SaplingGrowthBlockMixin",
 		"BambooGrowthBlockMixin",
 		"StemGrowthBlockMixin",
 		"ColumnPlantGrowthBlockMixin",
-		"SweetBerryBushGrowthBlockMixin"
+		"SweetBerryBushGrowthBlockMixin",
+		"WorldCreationUiStateMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

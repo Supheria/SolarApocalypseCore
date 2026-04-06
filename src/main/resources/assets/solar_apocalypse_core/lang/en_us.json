@@ -11,6 +11,7 @@
   "message.solar_apocalypse_core.spyglass.time.hours_minutes": "%s hour(s) %s minute(s)",
   "message.solar_apocalypse_core.command.set_stage": "Solar stage set to %s (starting on day %s)",
   "message.solar_apocalypse_core.command.current": "Current solar stage: %s / Day: %s / Time: %s",
+  "message.solar_apocalypse_core.create_world.hardcore_locked": "This is impossible!",
 
   "key.categories.solar_apocalypse_core": "Solar Apocalypse Core",
   "key.solar_apocalypse_core.hud_edit": "HUD Editor",
