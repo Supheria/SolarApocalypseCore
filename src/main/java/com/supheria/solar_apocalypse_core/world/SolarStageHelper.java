@@ -83,6 +83,18 @@ public final class SolarStageHelper {
         return Math.min(1.0f, Math.max(0.0f, (float) elapsed / duration));
     }
 
+    public static boolean hasPhaseEnd(SolarStage stage) {
+        return getPhaseTimeRange(stage)[1] != Long.MAX_VALUE;
+    }
+
+    public static long getRemainingTicksInPhase(long dayTime, SolarStage stage) {
+        long end = getPhaseTimeRange(stage)[1];
+        if (end == Long.MAX_VALUE) {
+            return -1L;
+        }
+        return Math.max(0L, end - dayTime);
+    }
+
     public static int getRandomTickingLevel(SolarStage stage) {
         return SolarStageConfig.getRandomTickingLevel(stage);
     }

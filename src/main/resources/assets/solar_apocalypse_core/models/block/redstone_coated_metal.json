@@ -1,8 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "solar_apocalypse_core:block/redstone_coated_metal",
-    "particle": "solar_apocalypse_core:block/redstone_coated_metal"
-  },
-  "render_type": "solid"
-}

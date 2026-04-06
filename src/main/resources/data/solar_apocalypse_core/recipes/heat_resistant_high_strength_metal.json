@@ -7,7 +7,7 @@
     ],
     "key": {
         "#": {
-            "item": "solar_apocalypse_core:redstone_coated_metal"
+            "item": "minecraft:netherite_ingot"
         },
         "O": {
             "item": "minecraft:obsidian"
@@ -17,5 +17,5 @@
         "item": "solar_apocalypse_core:heat_resistant_high_strength_metal",
         "count": 1
     },
-    "group": "high_density_metal"
+    "group": "heat_resistant_high_strength_metal"
 }

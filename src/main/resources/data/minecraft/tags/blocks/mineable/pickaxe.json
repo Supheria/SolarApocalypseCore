@@ -1,9 +1,6 @@
 {
   "replace": false,
   "values": [
-    "solar_apocalypse_core:high_density_metal",
-    "solar_apocalypse_core:redstone_coated_metal",
-    "solar_apocalypse_core:heat_resistant_high_strength_metal",
-    "solar_apocalypse_core:measuring_instrument"
+    "solar_apocalypse_core:heat_resistant_high_strength_metal"
   ]
 }

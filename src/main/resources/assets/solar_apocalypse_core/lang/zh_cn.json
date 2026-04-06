@@ -3,13 +3,12 @@
   "block.solar_apocalypse_core.falling_snow": "下落中的积雪",
   "block.solar_apocalypse_core.crushed_dirt": "碎土",
   "block.solar_apocalypse_core.withered_leaves": "枯叶",
-  "block.solar_apocalypse_core.high_density_metal": "高密度金属",
-  "block.solar_apocalypse_core.redstone_coated_metal": "红石涂层金属",
   "block.solar_apocalypse_core.heat_resistant_high_strength_metal": "耐热高强度金属",
-  "block.solar_apocalypse_core.measuring_instrument": "测量仪器",
 
-  "item.solar_apocalypse_core.uv_umbrella": "防紫外线伞",
-  "item.solar_apocalypse_core.coordinates_of_the_sun": "太阳坐标",
+  "message.solar_apocalypse_core.spyglass.status": "当前太阳阶段：%s，距离阶段结束：%s",
+  "message.solar_apocalypse_core.spyglass.status_final": "当前太阳阶段：%s，已是最终阶段",
+  "message.solar_apocalypse_core.spyglass.time.days_hours": "%s天%s小时",
+  "message.solar_apocalypse_core.spyglass.time.hours_minutes": "%s小时%s分钟",
 
   "key.categories.solar_apocalypse_core": "烈日升腾",
   "key.solar_apocalypse_core.hud_edit": "HUD编辑器",

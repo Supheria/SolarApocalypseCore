@@ -1,8 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "solar_apocalypse_core:block/high_density_metal",
-    "particle": "solar_apocalypse_core:block/high_density_metal"
-  },
-  "render_type": "solid"
-}
