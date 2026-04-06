@@ -9,6 +9,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 
 import java.util.function.Predicate;
 
@@ -46,6 +47,9 @@ public final class BlockSpreadUtils {
             {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1},
             {1, 0, 1}, {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1}
     };
+
+    /** 以中心为圆心的 5×5 水平面（含中心），用于坍缺期海面小片冻结。 */
+    public static final int[][] OFFSETS_SURFACE_WATER_5X5 = buildSameLayerOffsets5x5();
 
     /**
      * 17格范围：8H（同层含对角）+ 下层3×3共9格。
@@ -155,9 +159,47 @@ public final class BlockSpreadUtils {
                 || world.getFluidState(BlockPos.containing(x, y, z - 1)).is(FluidTags.WATER);
     }
 
+    /**
+     * 判断给定位置是否为最上层的静止水面。
+     * 仅允许处理完整水源块，避免把流动中的边缘水或水下层错误冻成冰。
+     */
+    public static boolean isSurfaceWater(LevelAccessor world, BlockPos pos) {
+        FluidState fluidState = world.getFluidState(pos);
+        if (!fluidState.is(FluidTags.WATER) || !fluidState.isSource()) {
+            return false;
+        }
+        return !world.getFluidState(pos.above()).is(FluidTags.WATER);
+    }
+
+    /**
+     * 在同一高度平面内，把中心及 offsets 指向的表层水源块冻结为冰。
+     */
+    public static void freezeSurfaceWater(LevelAccessor world, BlockPos center, int[][] offsets) {
+        if (isSurfaceWater(world, center)) {
+            world.setBlock(center, Blocks.ICE.defaultBlockState(), 3);
+        }
+        for (int[] o : offsets) {
+            BlockPos neighbor = center.offset(o[0], o[1], o[2]);
+            if (isSurfaceWater(world, neighbor)) {
+                world.setBlock(neighbor, Blocks.ICE.defaultBlockState(), 3);
+            }
+        }
+    }
+
     // -------------------------------------------------------------------------
     // 私有构建方法
     // -------------------------------------------------------------------------
+
+    private static int[][] buildSameLayerOffsets5x5() {
+        int[][] offsets = new int[25][3];
+        int i = 0;
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                offsets[i++] = new int[]{dx, 0, dz};
+            }
+        }
+        return offsets;
+    }
 
     private static int[][] buildOffsets17() {
         int[][] offsets = new int[17][3];

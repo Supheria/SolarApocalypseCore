@@ -102,6 +102,9 @@ public class SnowMelt {
 
     public static boolean canSnowSurviveAt(LevelReader world, BlockPos pos) {
         BlockState belowState = world.getBlockState(pos.below());
+        if (belowState.is(Blocks.ICE) || belowState.is(Blocks.PACKED_ICE) || belowState.is(Blocks.BLUE_ICE) || belowState.is(Blocks.FROSTED_ICE)) {
+            return true;
+        }
         if (belowState.is(BlockTags.SNOW_LAYER_CANNOT_SURVIVE_ON)) {
             return false;
         }
