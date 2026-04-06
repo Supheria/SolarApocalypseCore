@@ -186,11 +186,11 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
                 || state.is(SolarModTags.Blocks.COBBLESTONE)
                 || state.is(SolarModTags.Blocks.CLAY)
                 || state.is(net.minecraftforge.common.Tags.Blocks.GRAVEL)
-                || shouldForceStoneChainTick(state);
+                || solar$shouldForceStoneChainTick(state);
     }
 
     @Unique
-    private static boolean shouldForceStoneChainTick(BlockState state) {
+    private static boolean solar$shouldForceStoneChainTick(BlockState state) {
         return state.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE)
                 && !state.is(SolarModTags.Blocks.SIMPLE_DELETE)
                 && !state.is(SolarModTags.Blocks.SANDSTONE)
@@ -208,7 +208,5 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
     }
 
     @Shadow
-    private BlockState asState() {
-        return null;
-    }
+    protected abstract BlockState asState();
 }

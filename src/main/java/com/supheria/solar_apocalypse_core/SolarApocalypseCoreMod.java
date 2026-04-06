@@ -144,6 +144,10 @@ public class SolarApocalypseCoreMod {
 
         // 第一层：会被直接清除或快速衰亡的轻质/脆弱方块。
         // 这些规则优先于木材、泥土、石头等长链规则，避免被后续通用分类截获。
+        // 雪类
+        if ((block == Blocks.SNOW_BLOCK || block == Blocks.SNOW) && notExcluded(ref)) {
+            return SimpleDecay.TRANSFORM;
+        }
         // 简单删除类（杂草、花朵、旗帜、蜡烛、床、珊瑚等）
         if ((ref.is(SolarModTags.Blocks.SIMPLE_DELETE)
                 || ref.is(BlockTags.REPLACEABLE_BY_TREES)
@@ -172,6 +176,7 @@ public class SolarApocalypseCoreMod {
                 && notExcluded(ref)
                 && !ref.is(BlockTags.LEAVES)
                 && !ref.is(FluidTags.WATER.location())
+                && !ref.is(BlockTags.SNOW)
                 && !(block instanceof SpongeBlock)
                 && !(block instanceof WetSpongeBlock)
                 && !(block instanceof SculkBlock)
@@ -311,6 +316,10 @@ public class SolarApocalypseCoreMod {
         if (ref.is(BlockTags.PORTALS)) return ForceDelete.TRANSFORM;
         // 末地传送门框架
         if (block instanceof EndPortalFrameBlock) return EndFrameClear.TRANSFORM;
+        // 雪类
+        if ((block == Blocks.SNOW_BLOCK || block == Blocks.SNOW) && notExcluded(ref)) {
+            return SimpleDecay.TRANSFORM;
+        }
         // 简单删除类（杂草、花朵、旗帜、蜡烛、床、珊瑚等）
         if ((ref.is(SolarModTags.Blocks.SIMPLE_DELETE)
                 || ref.is(BlockTags.REPLACEABLE_BY_TREES)
@@ -339,6 +348,7 @@ public class SolarApocalypseCoreMod {
                 && notExcluded(ref)
                 && !ref.is(BlockTags.LEAVES)
                 && !ref.is(FluidTags.WATER.location())
+                && !ref.is(BlockTags.SNOW)
                 && !(block instanceof SpongeBlock)
                 && !(block instanceof WetSpongeBlock)
                 && !(block instanceof SculkBlock)
