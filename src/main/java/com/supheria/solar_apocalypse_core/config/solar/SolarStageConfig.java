@@ -10,10 +10,16 @@ import com.supheria.solar_apocalypse_core.world.SolarStage;
  */
 public final class SolarStageConfig {
 
-    /** 第五阶段开始的累计世界时间。前四阶段会平均切分到这一时刻之前。 */
-    public static final int STAGE_5_START_TIME = 648000;
-    /** 第六阶段（坍缺）开始的累计世界时间。 */
-    public static final int STAGE_6_START_TIME = 960000;
+    /** 第二阶段开始的累计世界时间（第 5 天结束后）。 */
+    public static final int STAGE_2_START_TIME = 120000;
+    /** 第三阶段开始的累计世界时间（第 12 天结束后）。 */
+    public static final int STAGE_3_START_TIME = 288000;
+    /** 第四阶段开始的累计世界时间（第 20 天结束后）。 */
+    public static final int STAGE_4_START_TIME = 480000;
+    /** 第五阶段开始的累计世界时间（第 30 天结束后）。 */
+    public static final int STAGE_5_START_TIME = 720000;
+    /** 第六阶段（坍缺）开始的累计世界时间（第 50 天结束后）。 */
+    public static final int STAGE_6_START_TIME = 1200000;
 
     /** 坍缺期自然积雪允许达到的最大层数。 */
     public static final int COLLAPSE_MAX_SNOW_LAYER = 6;
@@ -51,6 +57,18 @@ public final class SolarStageConfig {
     private static final int[] STAGE_SPREAD_BUDGETS = {2, 3, 4, 6, 8, 10};
     /** 水蒸发链的单次扩散预算。 */
     private static final int[] WATER_SPREAD_BUDGETS = {3, 4, 6, 9, 12, 16};
+
+    public static int getStage2StartTime() {
+        return STAGE_2_START_TIME;
+    }
+
+    public static int getStage3StartTime() {
+        return STAGE_3_START_TIME;
+    }
+
+    public static int getStage4StartTime() {
+        return STAGE_4_START_TIME;
+    }
 
     public static int getStage5StartTime() {
         return STAGE_5_START_TIME;
