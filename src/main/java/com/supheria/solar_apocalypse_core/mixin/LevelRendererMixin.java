@@ -6,8 +6,9 @@ import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,12 +28,12 @@ public abstract class LevelRendererMixin {
     public static ResourceLocation SUN_LOCATION;
     @Unique
     private static final ResourceLocation[] SUN_TEXTURES = new ResourceLocation[] {
-            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step1.png"),
-            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step2.png"),
-            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step3.png"),
-            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step4.png"),
-            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step5.png"),
-            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step6.png")
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_stage1.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_stage2.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_stage3.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_stage4.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_stage5.png"),
+            new ResourceLocation("solar_apocalypse_core:textures/environment/sun_stage6.png")
     };
     @Unique
     private static final float COLLAPSE_FOG_RED = 0.15F;
@@ -43,61 +44,39 @@ public abstract class LevelRendererMixin {
     @Unique
     private static final float FULL_ALPHA = 1.0F;
     @Unique
-    private static final int FINAL_LUNAR_DAY = 28;
-    @Unique
-    private static final float FINAL_STAGE_SUN_SCALE = 13.0F;
-    public LevelAccessor world;
-    @Unique
     private Matrix4f originalCelestialMatrix;
     @Unique
-    private static final java.util.Map<Integer, Float> LUNAR_SCALE_MAP = new java.util.HashMap<>() {{
-        put(0,  1.1F);
-        put(1,  1.3F);
-        put(2,  1.5F);
-        put(3,  1.7F);
-        put(4,  1.9F);
-        put(5,  2.1F);
-        put(6,  2.3F);
-        put(7,  2.5F);
-        put(8,  3.5F);
-        put(9,  4.5F);
-        put(10, 5.5F);
-        put(11, 6.5F);
-        put(12, 7.5F);
-        put(13, 8.5F);
-        put(14, 9.5F);
-        put(15, 9.6F);
-        put(16, 9.7F);
-        put(17, 9.8F);
-        put(18, 9.9F);
-        put(19, 10.0F);
-        put(20, 10.1F);
-        put(21, 10.2F);
-        put(22, 10.6F);
-        put(23, 11.0F);
-        put(24, 11.4F);
-        put(25, 11.8F);
-        put(26, 12.2F);
-        put(27, 12.6F);
-    }};
+    private static final float STAGE_1_START_SCALE = 1.1F;
+    @Unique
+    private static final float STAGE_2_SCALE = 2.1F;
+    @Unique
+    private static final float STAGE_3_SCALE = 4.5F;
+    @Unique
+    private static final float STAGE_4_SCALE = 7.5F;
+    @Unique
+    private static final float STAGE_5_SCALE = 10.6F;
+    @Unique
+    private static final float STAGE_6_SCALE = 13.0F;
 
     @Inject(method="renderSky", at = @At("HEAD"))
     private void onRendersky(PoseStack p_202424_, Matrix4f p_254034_, float p_202426_, Camera p_202427_, boolean p_202428_, Runnable p_202429_, CallbackInfo ci){
-        SolarStage solarFlare = SolarModVariables.MapVariables.get(world).getSolarStage();
-        SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getCurrentStage();
+        Level level = getClientLevel();
+        if (level == null) {
+            return;
+        }
+
+        SolarStage solarFlare = SolarStageHelper.getPhaseByDayTime(level.dayTime());
+        SolarStage currentPhase = solarFlare;
 
         SUN_LOCATION = getSunTexture(solarFlare);
 
         // 第六阶段白天降低光照
-        if (currentPhase == SolarStage.STAGE_6) {
-            if (world instanceof net.minecraft.server.level.ServerLevel serverLevel
-                    && SolarStageHelper.isDaytime(serverLevel.dayTime())) {
+        if (currentPhase == SolarStage.STAGE_6 && SolarStageHelper.isDaytime(level.dayTime())) {
                 // 降低白天的光照亮度 - 通过修改着色器颜色和雾效果
                 com.mojang.blaze3d.systems.RenderSystem.setShaderFogColor(COLLAPSE_FOG_RED, COLLAPSE_FOG_GREEN, COLLAPSE_FOG_BLUE, FULL_ALPHA);
                 // 降低渲染的整体颜色强度（通过降低颜色乘数）
-                float brightnessFactor = getCollapseDayBrightnessFactor();
+                float brightnessFactor = SolarStageConfig.getCollapseDayBrightnessFactor();
                 com.mojang.blaze3d.systems.RenderSystem.setShaderColor(brightnessFactor, brightnessFactor, brightnessFactor, FULL_ALPHA);
-            }
         }
     }
 
@@ -106,17 +85,7 @@ public abstract class LevelRendererMixin {
         originalCelestialMatrix = new Matrix4f(in);
         Matrix4f copy = new Matrix4f(in);
 
-        SolarStage flare = SolarModVariables.MapVariables.get(world).getSolarStage();
-        int lunar = (int) SolarModVariables.MapVariables.get(world).currentLunarDay;
-
-        float scale;
-        if (flare == SolarStage.STAGE_6) {
-            scale = 1.0F;
-        } else if (flare == SolarStage.STAGE_5 || lunar >= FINAL_LUNAR_DAY) {
-            scale = FINAL_STAGE_SUN_SCALE;
-        } else {
-            scale = LUNAR_SCALE_MAP.getOrDefault(lunar, 1.0F);
-        }
+        float scale = getCurrentSunScale();
 
         copy.scale(scale, 1.0F, scale);
         return copy;
@@ -132,29 +101,40 @@ public abstract class LevelRendererMixin {
 
     @Unique
     private static ResourceLocation getSunTexture(SolarStage solarFlare) {
-        int stageIndex = solarFlare.ordinal();
-        if (stageIndex < 0 || stageIndex >= SUN_TEXTURES.length) {
+        if (solarFlare == null || !solarFlare.isAtLeast(SolarStage.STAGE_1)) {
             return SUN_TEXTURES[0];
+        }
+
+        int stageIndex = solarFlare.ordinal() - SolarStage.STAGE_1.ordinal();
+        if (stageIndex < 0 || stageIndex >= SUN_TEXTURES.length) {
+            return SUN_TEXTURES[SUN_TEXTURES.length - 1];
         }
         return SUN_TEXTURES[stageIndex];
     }
 
-    /**
-     * 获取第六阶段白天的亮度因子
-     * 用于降低白天的光照等级，使僵尸能在白天生成
-     */
-    private float getCollapseDayBrightnessFactor() {
-        if (world == null) return 1.0f;
+    @Unique
+    private static Level getClientLevel() {
+        return Minecraft.getInstance().level;
+    }
 
-        SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getCurrentStage();
-        if (currentPhase != SolarStage.STAGE_6) {
-            return 1.0f;
+    @Unique
+    private static float getCurrentSunScale() {
+        Level level = getClientLevel();
+        if (level == null) {
+            return STAGE_1_START_SCALE;
         }
 
-        if (world instanceof net.minecraft.server.level.ServerLevel serverLevel
-                && SolarStageHelper.isDaytime(serverLevel.dayTime())) {
-            return SolarStageConfig.getCollapseDayBrightnessFactor();
-        }
-        return 1.0f;
+        long dayTime = level.dayTime();
+        SolarStage currentStage = SolarStageHelper.getPhaseByDayTime(dayTime);
+
+        return switch (currentStage) {
+            case STAGE_1 -> STAGE_1_START_SCALE;
+            case STAGE_2 -> STAGE_2_SCALE;
+            case STAGE_3 -> STAGE_3_SCALE;
+            case STAGE_4 -> STAGE_4_SCALE;
+            case STAGE_5 -> STAGE_5_SCALE;
+            case STAGE_6 -> STAGE_6_SCALE;
+            case NONE -> STAGE_1_START_SCALE;
+        };
     }
 }

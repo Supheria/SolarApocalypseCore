@@ -438,9 +438,9 @@ mod_id 从 `sap` 改为 `solar_apocalypse_core` 后，以下位置都需要同�
 **Java 代码中的字符串字面量：**
 ```java
 // ❌ 遗漏
-new ResourceLocation("sap:textures/environment/sun_step1.png")
+new ResourceLocation("sap:textures/environment/sun_stage1.png")
 // ✅ 正确
-new ResourceLocation("solar_apocalypse_core:textures/environment/sun_step1.png")
+new ResourceLocation("solar_apocalypse_core:textures/environment/sun_stage1.png")
 ```
 
 **JSON 资源文件中的引用（blockstates、models）：**

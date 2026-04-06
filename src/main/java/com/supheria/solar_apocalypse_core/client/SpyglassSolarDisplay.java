@@ -80,7 +80,7 @@ public class SpyglassSolarDisplay {
     }
 
     private static Component buildStatusMessage(Level level) {
-        SolarStage currentStage = SolarModVariables.MapVariables.get(level).getCurrentStage();
+        SolarStage currentStage = SolarModVariables.MapVariables.get(level).getSolarStage();
         if (!SolarStageHelper.hasPhaseEnd(currentStage)) {
             return Component.translatable("message.solar_apocalypse_core.spyglass.status_final", currentStage.getDisplayName());
         }

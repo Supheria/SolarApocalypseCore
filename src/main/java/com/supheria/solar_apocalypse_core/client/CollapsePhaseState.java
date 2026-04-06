@@ -28,7 +28,7 @@ public class CollapsePhaseState {
 		if (event.phase == TickEvent.Phase.END) {
 			Minecraft minecraft = Minecraft.getInstance();
 			if (minecraft.level != null) {
-				SolarStage currentPhase = SolarModVariables.MapVariables.get(minecraft.level).getCurrentStage();
+				SolarStage currentPhase = SolarModVariables.MapVariables.get(minecraft.level).getSolarStage();
 				isCollapsePhase = (currentPhase == SolarStage.STAGE_6);
 
 				isDaytime = SolarStageHelper.isDaytime(minecraft.level.dayTime());

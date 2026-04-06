@@ -44,10 +44,10 @@ public class StageTickHandler {
         SolarModVariables.MapVariables mapVars = SolarModVariables.MapVariables.get(world);
 
         SolarStage targetPhase = SolarStageHelper.getPhaseByDayTime(dayTime);
-        SolarStage currentPhase = mapVars.getCurrentStage();
+        SolarStage currentPhase = mapVars.getSolarStage();
 
         if (currentPhase != targetPhase) {
-            mapVars.setCurrentStage(targetPhase);
+            mapVars.setSolarStage(targetPhase);
             mapVars.syncData(world);
             applyPhaseRules(world, targetPhase);
         }

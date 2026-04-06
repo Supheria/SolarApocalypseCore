@@ -22,7 +22,7 @@ public class LavaToObsidian {
     private static final double BASE_OBSIDIAN_PROBABILITY = 0.3;
 
     private static void transform(LevelAccessor world, double x, double y, double z) {
-        if (SolarModVariables.MapVariables.get(world).getCurrentStage() != SolarStage.STAGE_6) return;
+        if (SolarModVariables.MapVariables.get(world).getSolarStage() != SolarStage.STAGE_6) return;
         if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
 
         double probability = BlockSpreadUtils.hasAdjacentWater(world, x, y, z)

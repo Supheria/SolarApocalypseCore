@@ -18,7 +18,7 @@ public class SolarThirstHelper {
             return 1.0f;
         }
 
-        SolarStage stage = SolarModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage stage = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (!isDehydrationActive(stage, player.getY())) {
             return 1.0f;
         }
@@ -33,7 +33,7 @@ public class SolarThirstHelper {
     }
 
     public static boolean isDehydrationActive(LevelAccessor world, double y) {
-        return isDehydrationActive(SolarModVariables.MapVariables.get(world).getCurrentStage(), y);
+        return isDehydrationActive(SolarModVariables.MapVariables.get(world).getSolarStage(), y);
     }
 
     public static boolean isDehydrationActive(SolarStage stage, double y) {

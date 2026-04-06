@@ -25,7 +25,7 @@ public class LightLevelMixin {
 		Level level = (Level) (Object) this;
 
 		try {
-			SolarStage currentStage = SolarModVariables.MapVariables.get(level).getCurrentStage();
+			SolarStage currentStage = SolarModVariables.MapVariables.get(level).getSolarStage();
 
 			if (currentStage != SolarStage.STAGE_6) {
 				return;

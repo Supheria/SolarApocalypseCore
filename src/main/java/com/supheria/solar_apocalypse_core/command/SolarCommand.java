@@ -40,9 +40,8 @@ public class SolarCommand {
         server.getCommands().performPrefixedCommand(source.withSuppressedOutput(), "time set " + targetDayTime);
 
         SolarModVariables.MapVariables mapVariables = SolarModVariables.MapVariables.get(source.getLevel());
-        mapVariables.setCurrentStage(stage);
+        mapVariables.setSolarStage(stage);
         mapVariables.currentDay = targetDayTime / 24000d;
-        mapVariables.currentLunarDay = Math.floor(mapVariables.currentDay + 0.25d);
         mapVariables.currentTimeOfDay = 0;
         mapVariables.syncData(source.getLevel());
 
@@ -61,7 +60,7 @@ public class SolarCommand {
         SolarModVariables.MapVariables mapVariables = SolarModVariables.MapVariables.get(source.getLevel());
         source.sendSuccess(() -> Component.translatable(
                 "message.solar_apocalypse_core.command.current",
-                mapVariables.getCurrentStage().getDisplayName(),
+                mapVariables.getSolarStage().getDisplayName(),
                 formatNumber(mapVariables.currentDay),
                 formatNumber(mapVariables.currentTimeOfDay)), false);
         return Command.SINGLE_SUCCESS;

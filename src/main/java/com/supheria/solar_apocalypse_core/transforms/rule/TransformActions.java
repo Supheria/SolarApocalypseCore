@@ -74,40 +74,40 @@ public final class TransformActions {
     private static TransformAction spreadRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
                                                      int[][] offsets, ToIntFunction<SolarStage> budgetProvider) {
         return (world, x, y, z) -> BlockSpreadUtils.spreadBlockLimited(world, x, y, z, target, neighborPredicate,
-                offsets, budgetProvider.applyAsInt(getCurrentStage(world)));
+                offsets, budgetProvider.applyAsInt(getSolarStage(world)));
     }
 
     private static TransformAction spreadSameLayerFirstRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
                                                                    int[][] offsets, ToIntFunction<SolarStage> budgetProvider) {
         return (world, x, y, z) -> BlockSpreadUtils.spreadBlockSameLayerFirstLimited(world, x, y, z, target, neighborPredicate,
-                offsets, budgetProvider.applyAsInt(getCurrentStage(world)));
+                offsets, budgetProvider.applyAsInt(getSolarStage(world)));
     }
 
     public static TransformAction spreadWaterRateLimited(int[][] offsets) {
         return (world, x, y, z) -> BlockSpreadUtils.spreadWaterLimited(world, x, y, z, offsets,
-                SolarStageConfig.getWaterSpreadBudget(getCurrentStage(world)));
+                SolarStageConfig.getWaterSpreadBudget(getSolarStage(world)));
     }
 
     public static TransformAction spreadWaterRateLimited(int[][] offsets, ToIntFunction<SolarStage> budgetProvider) {
         return (world, x, y, z) -> BlockSpreadUtils.spreadWaterLimited(world, x, y, z, offsets,
-                budgetProvider.applyAsInt(getCurrentStage(world)));
+                budgetProvider.applyAsInt(getSolarStage(world)));
     }
 
     public static TransformAction freezeSurfaceWaterRateLimited(int[][] offsets, ToIntFunction<SolarStage> budgetProvider) {
         return (world, x, y, z) -> BlockSpreadUtils.freezeSurfaceWaterLimited(world, BlockPos.containing(x, y, z), offsets,
-                budgetProvider.applyAsInt(getCurrentStage(world)));
+                budgetProvider.applyAsInt(getSolarStage(world)));
     }
 
-    private static SolarStage getCurrentStage(LevelAccessor world) {
-        return SolarModVariables.MapVariables.get(world).getCurrentStage();
+    private static SolarStage getSolarStage(LevelAccessor world) {
+        return SolarModVariables.MapVariables.get(world).getSolarStage();
     }
 
     public static int stageSpreadBudget(LevelAccessor world) {
-        return SolarStageConfig.getStageSpreadBudget(getCurrentStage(world));
+        return SolarStageConfig.getStageSpreadBudget(getSolarStage(world));
     }
 
     public static int waterSpreadBudget(LevelAccessor world) {
-        return SolarStageConfig.getWaterSpreadBudget(getCurrentStage(world));
+        return SolarStageConfig.getWaterSpreadBudget(getSolarStage(world));
     }
 
     public static int waterSpreadBudget(SolarStage stage) {
@@ -123,7 +123,7 @@ public final class TransformActions {
     }
 
     public static int scaleBudget(LevelAccessor world, double multiplier) {
-        return scaleBudget(getCurrentStage(world), multiplier);
+        return scaleBudget(getSolarStage(world), multiplier);
     }
 
     public static int scaleWaterBudget(SolarStage stage, double multiplier) {
@@ -131,7 +131,7 @@ public final class TransformActions {
     }
 
     public static int scaleWaterBudget(LevelAccessor world, double multiplier) {
-        return scaleWaterBudget(getCurrentStage(world), multiplier);
+        return scaleWaterBudget(getSolarStage(world), multiplier);
     }
 
     public static int countMatchingNeighbors(LevelAccessor world, double x, double y, double z,

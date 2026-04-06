@@ -34,7 +34,7 @@ public class EntityFireHandler {
             return;
         }
 
-        SolarStage stage = SolarModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage stage = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (!stage.isAtLeast(SolarStage.STAGE_2) || stage.isAtLeast(SolarStage.STAGE_6)) {
             return;
         }

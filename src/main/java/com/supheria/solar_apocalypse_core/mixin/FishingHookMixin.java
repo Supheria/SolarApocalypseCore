@@ -40,7 +40,7 @@ public abstract class FishingHookMixin {
             return;
         }
 
-        SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getCurrentStage();
+        SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getSolarStage();
         if (stage.isCollapsePhase() || stage == SolarStage.NONE) {
             return;
         }

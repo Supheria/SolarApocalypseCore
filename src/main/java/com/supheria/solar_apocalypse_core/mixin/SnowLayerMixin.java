@@ -41,6 +41,6 @@ public abstract class SnowLayerMixin {
     }
 
     private boolean isStage6(ServerLevel serverLevel) {
-        return SolarModVariables.MapVariables.get(serverLevel).getCurrentStage() == SolarStage.STAGE_6;
+        return SolarModVariables.MapVariables.get(serverLevel).getSolarStage() == SolarStage.STAGE_6;
     }
 }

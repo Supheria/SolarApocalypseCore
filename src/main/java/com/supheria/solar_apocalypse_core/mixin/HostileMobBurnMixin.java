@@ -41,7 +41,7 @@ public abstract class HostileMobBurnMixin {
 			return;
 		}
 
-		SolarStage currentPhase = SolarModVariables.MapVariables.get(level).getCurrentStage();
+		SolarStage currentPhase = SolarModVariables.MapVariables.get(level).getSolarStage();
 		if (currentPhase != SolarStage.STAGE_6) {
 			return;
 		}

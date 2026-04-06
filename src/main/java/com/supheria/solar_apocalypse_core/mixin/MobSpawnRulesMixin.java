@@ -31,7 +31,7 @@ public class MobSpawnRulesMixin {
 			return;
 		}
 
-		SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getCurrentStage();
+		SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getSolarStage();
 		if (stage != SolarStage.STAGE_6) {
 			return;
 		}

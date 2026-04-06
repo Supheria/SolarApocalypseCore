@@ -41,7 +41,7 @@ public class SolarHudRenderer {
         long today = SolarStageHelper.getDayIndex(dayTime);
 
         SolarModVariables.MapVariables mapVars = SolarModVariables.MapVariables.get(level);
-        SolarStage currentPhase = mapVars.getCurrentStage();
+        SolarStage currentPhase = mapVars.getSolarStage();
         float progress = SolarStageHelper.getPhaseProgress(dayTime, currentPhase);
 
         // 获取配置信息

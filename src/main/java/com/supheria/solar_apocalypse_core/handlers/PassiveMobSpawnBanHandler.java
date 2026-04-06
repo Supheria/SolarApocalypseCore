@@ -26,7 +26,7 @@ public class PassiveMobSpawnBanHandler {
 		}
 
 		if (event.getLevel() instanceof ServerLevel serverLevel) {
-			SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getCurrentStage();
+			SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getSolarStage();
 			
 			if (stage == SolarStage.NONE || stage == SolarStage.STAGE_1 || stage == SolarStage.STAGE_2) {
 				return;

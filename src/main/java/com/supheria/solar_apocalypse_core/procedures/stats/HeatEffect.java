@@ -41,7 +41,7 @@ public class HeatEffect {
             return;
         }
 
-        SolarStage stage = SolarModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage stage = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (!(entity instanceof LivingEntity livingEntity)) {
             return;
         }

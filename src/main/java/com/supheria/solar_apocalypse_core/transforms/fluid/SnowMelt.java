@@ -309,7 +309,7 @@ public class SnowMelt {
     }
 
     private static boolean isStage6(LevelAccessor world) {
-        return SolarModVariables.MapVariables.get(world).getCurrentStage() == SolarStage.STAGE_6;
+        return SolarModVariables.MapVariables.get(world).getSolarStage() == SolarStage.STAGE_6;
     }
 
     private SnowMelt() {}

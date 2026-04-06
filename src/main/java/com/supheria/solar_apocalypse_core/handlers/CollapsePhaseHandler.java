@@ -33,7 +33,7 @@ public class CollapsePhaseHandler {
         }
 
         LevelAccessor world = event.level;
-        SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getCurrentStage();
+        SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (currentPhase != SolarStage.STAGE_6) {
             snowTickCounter = 0;
             waterTickCounter = 0;

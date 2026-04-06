@@ -161,7 +161,7 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
     @Unique
     private static boolean triggerStage6SnowBlockFall(ServerLevel level, BlockPos pos, BlockState state) {
         return state.is(Blocks.SNOW_BLOCK)
-                && SolarModVariables.MapVariables.get(level).getCurrentStage() == SolarStage.STAGE_6
+                && SolarModVariables.MapVariables.get(level).getSolarStage() == SolarStage.STAGE_6
                 && level.getBlockState(pos.below()).isAir()
                 && SnowMelt.triggerVisibleFall(level, pos, state);
     }

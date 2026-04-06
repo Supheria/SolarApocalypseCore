@@ -179,8 +179,6 @@ public class SolarModVariables {
 		public double currentTimeOfDay = 0;
 		/** 当前天数/日推进快照。 */
 		public double currentDay = 0;
-		/** 与月相或独立昼夜推进关联的计数快照。 */
-		public double currentLunarDay = 0;
 		/** 是否已经为该存档初始化过永久禁作弊配置。 */
 		public boolean cheatLockConfigured = false;
 		/** 该存档是否被永久锁定为不可开启作弊。 */
@@ -197,7 +195,6 @@ public class SolarModVariables {
 			solarStage = SolarStage.getByOrdinal(nbt.getInt("solarStage"));
 			currentTimeOfDay = nbt.getDouble("currentTimeOfDay");
 			currentDay = nbt.getDouble("currentDay");
-			currentLunarDay = nbt.getDouble("currentLunarDay");
 			cheatLockConfigured = nbt.getBoolean("cheatLockConfigured");
 			cheatsPermanentlyLocked = nbt.getBoolean("cheatsPermanentlyLocked");
 		}
@@ -208,7 +205,6 @@ public class SolarModVariables {
 			nbt.putInt("solarStage", solarStage.ordinal());
 			nbt.putDouble("currentTimeOfDay", currentTimeOfDay);
 			nbt.putDouble("currentDay", currentDay);
-			nbt.putDouble("currentLunarDay", currentLunarDay);
 			nbt.putBoolean("cheatLockConfigured", cheatLockConfigured);
 			nbt.putBoolean("cheatsPermanentlyLocked", cheatsPermanentlyLocked);
 			return nbt;
@@ -237,15 +233,11 @@ public class SolarModVariables {
 
 		static MapVariables clientSide = new MapVariables();
 
-		public SolarStage getCurrentStage() {
-			return this.solarStage;
-		}
-
 		public SolarStage getSolarStage() {
 			return this.solarStage;
 		}
 
-		public void setCurrentStage(SolarStage stage) {
+		public void setSolarStage(SolarStage stage) {
 			this.solarStage = stage;
 		}
 
