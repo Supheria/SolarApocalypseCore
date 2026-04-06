@@ -9,6 +9,8 @@
   "message.solar_apocalypse_core.spyglass.status_final": "当前太阳阶段：%s，已是最终阶段",
   "message.solar_apocalypse_core.spyglass.time.days_hours": "%s天%s小时",
   "message.solar_apocalypse_core.spyglass.time.hours_minutes": "%s小时%s分钟",
+  "message.solar_apocalypse_core.command.set_stage": "太阳阶段已设置为：%s（第%s天起）",
+  "message.solar_apocalypse_core.command.current": "当前太阳阶段：%s / 天数：%s / 时间：%s",
 
   "key.categories.solar_apocalypse_core": "烈日升腾",
   "key.solar_apocalypse_core.hud_edit": "HUD编辑器",

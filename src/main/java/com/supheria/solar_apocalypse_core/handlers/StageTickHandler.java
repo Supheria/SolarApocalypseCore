@@ -59,7 +59,7 @@ public class StageTickHandler {
      * <p>这里调整的是整张世界的环境行为，而不是单个方块的转换链：
      * random tick 频率、天气循环、冻伤、无限水源等都会随阶段统一切换。
      */
-    private static void applyPhaseRules(LevelAccessor world, SolarStage phase) {
+    public static void applyPhaseRules(LevelAccessor world, SolarStage phase) {
         int targetRandomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase);
         boolean allowWeather = phase.isBefore(SolarStage.STAGE_2);
         boolean allowFreeze = phase.isAtLeast(SolarStage.STAGE_6);

@@ -9,6 +9,8 @@
   "message.solar_apocalypse_core.spyglass.status_final": "Current solar stage: %s, this is the final stage",
   "message.solar_apocalypse_core.spyglass.time.days_hours": "%s day(s) %s hour(s)",
   "message.solar_apocalypse_core.spyglass.time.hours_minutes": "%s hour(s) %s minute(s)",
+  "message.solar_apocalypse_core.command.set_stage": "Solar stage set to %s (starting on day %s)",
+  "message.solar_apocalypse_core.command.current": "Current solar stage: %s / Day: %s / Time: %s",
 
   "key.categories.solar_apocalypse_core": "Solar Apocalypse Core",
   "key.solar_apocalypse_core.hud_edit": "HUD Editor",
