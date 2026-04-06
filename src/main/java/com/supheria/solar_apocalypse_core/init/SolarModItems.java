@@ -16,7 +16,6 @@ public class SolarModItems {
 	public static final RegistryObject<Item> DUST = block(SolarModBlocks.DUST);
 	public static final RegistryObject<Item> FALLING_SNOW = block(SolarModBlocks.FALLING_SNOW);
 	public static final RegistryObject<Item> WITHERED_LEAVES = block(SolarModBlocks.WITHERED_LEAVES);
-	public static final RegistryObject<Item> HEAT_RESISTANT_HIGH_STRENGTH_METAL = block(SolarModBlocks.HEAT_RESISTANT_HIGH_STRENGTH_METAL);
 
 	private static RegistryObject<Item> block(RegistryObject<Block> block) {
 		return REGISTRY.register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties()));

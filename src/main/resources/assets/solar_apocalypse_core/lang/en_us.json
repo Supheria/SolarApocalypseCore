@@ -3,7 +3,6 @@
   "block.solar_apocalypse_core.falling_snow": "Falling Snow",
   "block.solar_apocalypse_core.crushed_dirt": "Crushed Dirt",
   "block.solar_apocalypse_core.withered_leaves": "Withered Leaves",
-  "block.solar_apocalypse_core.heat_resistant_high_strength_metal": "Heat Resistant High Strength Metal",
 
   "message.solar_apocalypse_core.spyglass.status": "Current solar stage: %s, time until stage end: %s",
   "message.solar_apocalypse_core.spyglass.status_final": "Current solar stage: %s, this is the final stage",

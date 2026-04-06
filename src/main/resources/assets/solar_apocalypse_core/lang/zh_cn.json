@@ -3,7 +3,6 @@
   "block.solar_apocalypse_core.falling_snow": "下落中的积雪",
   "block.solar_apocalypse_core.crushed_dirt": "碎土",
   "block.solar_apocalypse_core.withered_leaves": "枯叶",
-  "block.solar_apocalypse_core.heat_resistant_high_strength_metal": "耐热高强度金属",
 
   "message.solar_apocalypse_core.spyglass.status": "当前太阳阶段：%s，距离阶段结束：%s",
   "message.solar_apocalypse_core.spyglass.status_final": "当前太阳阶段：%s，已是最终阶段",

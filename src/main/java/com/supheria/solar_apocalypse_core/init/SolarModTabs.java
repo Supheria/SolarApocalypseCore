@@ -17,10 +17,6 @@ public class SolarModTabs {
 
 	@SubscribeEvent
 	public static void buildTabContentsVanilla(BuildCreativeModeTabContentsEvent tabData) {
-		if (tabData.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-			tabData.accept(SolarModBlocks.HEAT_RESISTANT_HIGH_STRENGTH_METAL.get().asItem());
-		}
-
 		if (tabData.getTabKey() == CreativeModeTabs.NATURAL_BLOCKS) {
 			tabData.accept(SolarModBlocks.CRUSHED_DIRT.get().asItem());
 			tabData.accept(SolarModBlocks.DUST.get().asItem());

@@ -15,5 +15,4 @@ public class SolarModBlocks {
 	public static final RegistryObject<Block> DUST = REGISTRY.register("dust", () -> new DustBlock());
 	public static final RegistryObject<Block> FALLING_SNOW = REGISTRY.register("falling_snow", () -> new FallingSnowBlock());
 	public static final RegistryObject<Block> WITHERED_LEAVES = REGISTRY.register("withered_leaves", () -> new WitheredLeavesBlock());
-	public static final RegistryObject<Block> HEAT_RESISTANT_HIGH_STRENGTH_METAL = REGISTRY.register("heat_resistant_high_strength_metal", () -> new HeatResistantHighStrengthMetalBlock());
 }
