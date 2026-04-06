@@ -78,6 +78,7 @@ Windows 下可改用：
 
 - `README.txt`：Forge MDK 默认说明
 - `_docs/solar-stage-rules.md`：太阳阶段与规则说明
+- `_docs/thirst-integration.md`：与定制版 Thirst 模组的联动说明
 - `_docs/forge-gradle-mixin-guide.md`：ForgeGradle / Mixin 排查记录
 
 ## 维护约定
