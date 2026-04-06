@@ -30,8 +30,7 @@ public class Stage6Command {
 			world.getLevelData().getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(3, world.getServer());
 			world.getLevelData().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(true, world.getServer());
 			world.getLevelData().getGameRules().getRule(GameRules.RULE_FREEZE_DAMAGE).set(true, world.getServer());
-			world.getLevelData().getGameRules().getRule(GameRules.RULE_WATER_SOURCE_CONVERSION).set(true, world.getServer());
-			return 0;
+						return 0;
 		}));
 	}
 }

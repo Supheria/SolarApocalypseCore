@@ -32,10 +32,10 @@ public class WaterloggedDry {
     };
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段2-5：露天+晴天，概率去水
-            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky()).and(daytime()).and(IS_WATERLOGGED).and(randomDayRate()), DEWATERLOG),
-            // 阶段3：超过蒸发高度，直接去水
-            when(stageExact(SolarStage.STAGE_3).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG),
+            // 阶段2：露天+晴天，概率去水，仅表现为局部逐步失水
+            when(stageExact(SolarStage.STAGE_2).and(sky()).and(daytime()).and(IS_WATERLOGGED).and(randomDayRate()).and(stageRateScaled(0.55)), DEWATERLOG),
+            // 阶段3：高于安全高度的含水方块更快去水，不再继承第二阶段的露天缓慢失水路径
+            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED).and(stageRateScaled(0.95)), DEWATERLOG),
             // 阶段4-5：超过蒸发高度，直接去水
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG)
     );

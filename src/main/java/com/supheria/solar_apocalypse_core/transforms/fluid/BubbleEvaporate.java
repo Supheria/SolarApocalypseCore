@@ -15,18 +15,18 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class BubbleEvaporate {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段2：白天 + 天空可见 + 概率触发，向17邻扩散 → 空气
+            // 阶段2：白天 + 天空可见 + 概率触发，限额清除少量气泡柱
             when(stageExact(SolarStage.STAGE_2).and(daytime()).and(sky()).and(randomDayRate()),
-                    spread17(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN)),
-            // 阶段3：白天 + 高于安全高度，向17邻扩散 → 空气
-            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(aboveSafeHeight()),
-                    spread17(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN)),
-            // 阶段4：白天 + 高于安全高度，向17邻扩散 → 空气
+                    spread17RateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN, stage -> scaleBudget(stage, 0.8))),
+            // 阶段3：白天 + 高于安全高度，较快清除气泡柱，但仍走限额扩散避免卡顿尖峰
+            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(aboveSafeHeight()).and(stageRateScaled(0.85)),
+                    spread17RateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN, stage -> scaleBudget(stage, 1.0))),
+            // 阶段4：白天 + 高于安全高度，继续增强，但保持限额扩散
             when(stageExact(SolarStage.STAGE_4).and(daytime()).and(aboveSafeHeight()),
-                    spread17(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN)),
-            // 阶段5：高于安全高度，向17邻扩散 → 空气
+                    spread17RateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN, stage -> scaleBudget(stage, 1.25))),
+            // 阶段5：高于安全高度，维持更强的限额清除
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
-                    spread17(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN))
+                    spread17RateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN, stage -> scaleBudget(stage, 1.5)))
     );
 
     private BubbleEvaporate() {}
