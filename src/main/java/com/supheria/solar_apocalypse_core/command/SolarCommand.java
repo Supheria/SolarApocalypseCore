@@ -1,6 +1,7 @@
 package com.supheria.solar_apocalypse_core.command;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.handlers.StageTickHandler;
 import com.supheria.solar_apocalypse_core.network.SolarModVariables;
@@ -22,20 +23,14 @@ public class SolarCommand {
     @SubscribeEvent
     public static void registerCommand(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("solar")
-                .then(Commands.literal("stage1").requires(source -> source.hasPermission(3))
-                        .executes(context -> setStage(context.getSource(), SolarStage.STAGE_1)))
-                .then(Commands.literal("stage2").requires(source -> source.hasPermission(3))
-                        .executes(context -> setStage(context.getSource(), SolarStage.STAGE_2)))
-                .then(Commands.literal("stage3").requires(source -> source.hasPermission(3))
-                        .executes(context -> setStage(context.getSource(), SolarStage.STAGE_3)))
-                .then(Commands.literal("stage4").requires(source -> source.hasPermission(3))
-                        .executes(context -> setStage(context.getSource(), SolarStage.STAGE_4)))
-                .then(Commands.literal("stage5").requires(source -> source.hasPermission(3))
-                        .executes(context -> setStage(context.getSource(), SolarStage.STAGE_5)))
-                .then(Commands.literal("stage6").requires(source -> source.hasPermission(3))
-                        .executes(context -> setStage(context.getSource(), SolarStage.STAGE_6)))
-                .then(Commands.literal("current")
-                        .executes(context -> showCurrentStage(context.getSource()))));
+                .then(Commands.literal("stage")
+                        .then(Commands.literal("set").requires(source -> source.hasPermission(3))
+                                .then(Commands.argument("stage", IntegerArgumentType.integer(1, 6))
+                                        .executes(context -> setStage(
+                                                context.getSource(),
+                                                getStageByNumber(IntegerArgumentType.getInteger(context, "stage"))))))
+                        .then(Commands.literal("current")
+                                .executes(context -> showCurrentStage(context.getSource())))));
     }
 
     private static int setStage(CommandSourceStack source, SolarStage stage) {
@@ -80,6 +75,18 @@ public class SolarCommand {
             case STAGE_4 -> SolarStageConfig.getStage4StartTime();
             case STAGE_5 -> SolarStageConfig.getStage5StartTime();
             case STAGE_6 -> SolarStageConfig.getStage6StartTime();
+        };
+    }
+
+    private static SolarStage getStageByNumber(int stageNumber) {
+        return switch (stageNumber) {
+            case 1 -> SolarStage.STAGE_1;
+            case 2 -> SolarStage.STAGE_2;
+            case 3 -> SolarStage.STAGE_3;
+            case 4 -> SolarStage.STAGE_4;
+            case 5 -> SolarStage.STAGE_5;
+            case 6 -> SolarStage.STAGE_6;
+            default -> throw new IllegalArgumentException("Unsupported solar stage: " + stageNumber);
         };
     }
 
