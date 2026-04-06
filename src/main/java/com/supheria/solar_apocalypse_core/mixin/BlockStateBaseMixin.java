@@ -11,12 +11,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.google.common.collect.ImmutableMap;
 import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
+import com.supheria.solar_apocalypse_core.network.SolarModVariables;
+import com.supheria.solar_apocalypse_core.transforms.fluid.SnowMelt;
+import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour.BlockStateBase;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateHolder;
@@ -101,10 +107,25 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
             this.solar$procedure.call(level, x, y, z);
         }
 
+        triggerStage6SnowBlockFall(level, pos, this.asState());
+
         if (!this.solar$isOriginalRandomlyTicking) {
             callbackInfo.cancel();
         }
     }
+
+    @Inject(method = "updateShape(Lnet/minecraft/core/Direction;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", at = @At("HEAD"), cancellable = true)
+    private void updateShape(Direction direction, BlockState neighborState, LevelAccessor level,
+            BlockPos pos, BlockPos neighborPos, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<BlockState> cir) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        if (triggerStage6SnowBlockFall(serverLevel, pos, this.asState())) {
+            cir.setReturnValue(level.getBlockState(pos));
+        }
+    }
+
     /**
      * 在方块放置完成后立即执行需要同步修正的转换规则。
      *
@@ -125,9 +146,21 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
             }
         }
 
+        if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
+            triggerStage6SnowBlockFall(serverLevel, pos, this.asState());
+        }
+
         if (!this.solar$isOriginalOnPlace) {
             callbackInfo.cancel();
         }
+    }
+
+    @Unique
+    private static boolean triggerStage6SnowBlockFall(ServerLevel level, BlockPos pos, BlockState state) {
+        return state.is(Blocks.SNOW_BLOCK)
+                && SolarModVariables.MapVariables.get(level).getCurrentStage() == SolarStage.STAGE_6
+                && level.getBlockState(pos.below()).isAir()
+                && SnowMelt.triggerVisibleFall(level, pos, state);
     }
 
     @Shadow

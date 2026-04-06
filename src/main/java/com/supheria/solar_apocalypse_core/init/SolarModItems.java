@@ -18,6 +18,7 @@ public class SolarModItems {
 	public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, SolarApocalypseCoreMod.MOD_ID);
 	public static final RegistryObject<Item> CRUSHED_DIRT = block(SolarModBlocks.CRUSHED_DIRT);
 	public static final RegistryObject<Item> DUST = block(SolarModBlocks.DUST);
+	public static final RegistryObject<Item> FALLING_SNOW = block(SolarModBlocks.FALLING_SNOW);
 	public static final RegistryObject<Item> WITHERED_LEAVES = block(SolarModBlocks.WITHERED_LEAVES);
 	public static final RegistryObject<Item> HIGH_DENSITY_METAL = block(SolarModBlocks.HIGH_DENSITY_METAL);
 	public static final RegistryObject<Item> REDSTONE_COATED_METAL = block(SolarModBlocks.REDSTONE_COATED_METAL);

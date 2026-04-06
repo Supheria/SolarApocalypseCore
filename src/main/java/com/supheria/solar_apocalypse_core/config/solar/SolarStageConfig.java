@@ -18,7 +18,7 @@ public final class SolarStageConfig {
     /** 坍缺期自然积雪允许达到的最大层数。 */
     public static final int COLLAPSE_MAX_SNOW_LAYER = 6;
     /** 坍缺期积雪采样/堆积的基础节奏。 */
-    public static final int COLLAPSE_SNOW_ACCUMULATION_RATE = 100;
+    public static final int COLLAPSE_SNOW_ACCUMULATION_RATE = 10;
     /** 坍缺期白天亮度缩放系数，用于整体压暗天空表现。 */
     public static final double COLLAPSE_DAY_BRIGHTNESS_FACTOR = 0.3;
     /** 坍缺期额外方块转换逻辑的触发频率。 */
