@@ -77,6 +77,12 @@ public final class TransformActions {
                 offsets, budgetProvider.applyAsInt(getCurrentStage(world)));
     }
 
+    private static TransformAction spreadSameLayerFirstRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
+                                                                   int[][] offsets, ToIntFunction<SolarStage> budgetProvider) {
+        return (world, x, y, z) -> BlockSpreadUtils.spreadBlockSameLayerFirstLimited(world, x, y, z, target, neighborPredicate,
+                offsets, budgetProvider.applyAsInt(getCurrentStage(world)));
+    }
+
     public static TransformAction spreadWaterRateLimited(int[][] offsets) {
         return (world, x, y, z) -> BlockSpreadUtils.spreadWaterLimited(world, x, y, z, offsets,
                 SolarStageConfig.getWaterSpreadBudget(getCurrentStage(world)));
@@ -194,9 +200,19 @@ public final class TransformActions {
         return spreadRateLimited(target, neighborPredicate, BlockSpreadUtils.OFFSETS_5X5, budgetProvider);
     }
 
+    public static TransformAction spread5x5SameLayerFirstRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
+                                                                     ToIntFunction<SolarStage> budgetProvider) {
+        return spreadSameLayerFirstRateLimited(target, neighborPredicate, BlockSpreadUtils.OFFSETS_5X5, budgetProvider);
+    }
+
     public static TransformAction spread17RateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
                                                        ToIntFunction<SolarStage> budgetProvider) {
         return spreadRateLimited(target, neighborPredicate, BlockSpreadUtils.OFFSETS_17, budgetProvider);
+    }
+
+    public static TransformAction spread17SameLayerFirstRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
+                                                                    ToIntFunction<SolarStage> budgetProvider) {
+        return spreadSameLayerFirstRateLimited(target, neighborPredicate, BlockSpreadUtils.OFFSETS_17, budgetProvider);
     }
 
     public static TransformAction spread8HRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
@@ -223,9 +239,19 @@ public final class TransformActions {
         return spread5x5RateLimited(target, neighborPredicate, stage -> scaleBudget(stage, multiplier));
     }
 
+    public static TransformAction spread5x5SameLayerFirstRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
+                                                                     double multiplier) {
+        return spread5x5SameLayerFirstRateLimited(target, neighborPredicate, stage -> scaleBudget(stage, multiplier));
+    }
+
     public static TransformAction spread17RateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
                                                        double multiplier) {
         return spread17RateLimited(target, neighborPredicate, stage -> scaleBudget(stage, multiplier));
+    }
+
+    public static TransformAction spread17SameLayerFirstRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,
+                                                                    double multiplier) {
+        return spread17SameLayerFirstRateLimited(target, neighborPredicate, stage -> scaleBudget(stage, multiplier));
     }
 
     public static TransformAction spread8HRateLimited(BlockState target, Predicate<BlockState> neighborPredicate,

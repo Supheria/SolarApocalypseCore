@@ -35,7 +35,7 @@ public final class BlockSpreadUtils {
 
     /** 主世界 biome tag，所有 TC 类共享，避免重复创建对象。 */
     public static final TagKey<Biome> IS_OVERWORLD =
-            TagKey.create(Registries.BIOME, new ResourceLocation("minecraft:is_overworld"));
+            TagKey.create(Registries.BIOME, ResourceLocation.parse("minecraft:is_overworld"));
 
     // -------------------------------------------------------------------------
     // 预定义 offset 数组
@@ -105,6 +105,16 @@ public final class BlockSpreadUtils {
                 pos -> setBlockIfChanged(world, pos, target));
     }
 
+    public static void spreadBlockSameLayerFirstLimited(LevelAccessor world, double cx, double cy, double cz,
+                                                        BlockState target, Predicate<BlockState> neighborPredicate,
+                                                        int[][] offsets, int budget) {
+        BlockPos center = BlockPos.containing(cx, cy, cz);
+        setBlockIfChanged(world, center, target);
+        visitLimitedOffsetsSameLayerFirst(world, center, offsets, budget,
+                pos -> neighborPredicate.test(world.getBlockState(pos)),
+                pos -> setBlockIfChanged(world, pos, target));
+    }
+
     public static void spreadBlockLimited(LevelAccessor world, double cx, double cy, double cz,
                                           BlockState target, Predicate<BlockState> neighborPredicate,
                                           int[][] offsets) {
@@ -153,6 +163,83 @@ public final class BlockSpreadUtils {
             consumer.accept(candidate);
             visited++;
         }
+    }
+
+    private static void visitLimitedOffsetsSameLayerFirst(LevelAccessor world, BlockPos center, int[][] offsets, int budget,
+                                                          PositionPredicate predicate, PositionConsumer consumer) {
+        if (budget <= 0 || offsets.length == 0) {
+            return;
+        }
+
+        int remaining = Math.min(budget, offsets.length);
+        remaining = visitOffsetsForLayer(world, center, offsets, 0, remaining, predicate, consumer);
+        if (remaining > 0) {
+            for (int dy = -1; remaining > 0; dy--) {
+                boolean hasLayer = false;
+                for (int[] offset : offsets) {
+                    if (offset[1] == dy) {
+                        hasLayer = true;
+                        break;
+                    }
+                }
+                if (!hasLayer) {
+                    break;
+                }
+                remaining = visitOffsetsForLayer(world, center, offsets, dy, remaining, predicate, consumer);
+            }
+        }
+    }
+
+    private static int visitOffsetsForLayer(LevelAccessor world, BlockPos center, int[][] offsets, int dy, int budget,
+                                            PositionPredicate predicate, PositionConsumer consumer) {
+        if (budget <= 0) {
+            return 0;
+        }
+
+        int layerLength = countOffsetsForLayer(offsets, dy);
+        if (layerLength == 0) {
+            return budget;
+        }
+
+        int startIndex = getOffsetStartIndex(world, center, layerLength);
+        int matched = 0;
+        for (int i = 0; i < layerLength && matched < budget; i++) {
+            int[] offset = getLayerOffsetAt(offsets, dy, (startIndex + i) % layerLength);
+            if (offset == null) {
+                continue;
+            }
+            BlockPos candidate = center.offset(offset[0], offset[1], offset[2]);
+            if (!predicate.test(candidate)) {
+                continue;
+            }
+            consumer.accept(candidate);
+            matched++;
+        }
+        return budget - matched;
+    }
+
+    private static int countOffsetsForLayer(int[][] offsets, int dy) {
+        int count = 0;
+        for (int[] offset : offsets) {
+            if (offset[1] == dy) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static int[] getLayerOffsetAt(int[][] offsets, int dy, int targetIndex) {
+        int currentIndex = 0;
+        for (int[] offset : offsets) {
+            if (offset[1] != dy) {
+                continue;
+            }
+            if (currentIndex == targetIndex) {
+                return offset;
+            }
+            currentIndex++;
+        }
+        return null;
     }
 
     private static int getOffsetStartIndex(LevelAccessor world, BlockPos center, int length) {
