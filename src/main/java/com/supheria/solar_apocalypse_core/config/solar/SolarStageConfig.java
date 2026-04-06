@@ -17,14 +17,20 @@ public final class SolarStageConfig {
 
     /** 坍缺期自然积雪允许达到的最大层数。 */
     public static final int COLLAPSE_MAX_SNOW_LAYER = 6;
-    /** 坍缺期积雪采样/堆积的基础节奏。 */
-    public static final int COLLAPSE_SNOW_ACCUMULATION_RATE = 10;
+    /** 坍缺期雪层采样/堆积节奏。 */
+    public static final int COLLAPSE_SNOW_ACCUMULATION_RATE = 4;
+    /** 坍缺期水面冻结节奏。 */
+    public static final int COLLAPSE_WATER_FREEZE_RATE = 6;
     /** 坍缺期白天亮度缩放系数，用于整体压暗天空表现。 */
     public static final double COLLAPSE_DAY_BRIGHTNESS_FACTOR = 0.3;
     /** 坍缺期额外方块转换逻辑的触发频率。 */
     public static final int COLLAPSE_BLOCK_TRANSFORM_RATE = 2;
     /** 单次雪层处理采样的候选点数量。 */
-    public static final int COLLAPSE_SNOW_SAMPLE_COUNT = 10;
+    public static final int COLLAPSE_SNOW_SAMPLE_COUNT = 4;
+    /** 单次冻结处理采样的候选点数量。 */
+    public static final int COLLAPSE_WATER_SAMPLE_COUNT = 3;
+    /** 单次雪推进允许消耗的最大步骤数。 */
+    public static final int COLLAPSE_SNOW_STEP_BUDGET = 3;
     /** 雪层采样区域直径。 */
     public static final int COLLAPSE_SNOW_SAMPLE_DIAMETER = 32;
     /** 雪层采样相对中心点的偏移半径。 */
@@ -39,6 +45,12 @@ public final class SolarStageConfig {
      * 下标按 STAGE_1 ~ STAGE_6 顺序排列；NONE 与未初始化状态回退到第一档。
      */
     private static final int[] RANDOM_TICKING_LEVELS = {4, 5, 8, 9, 10, 10};
+    /** 各阶段通用转换触发率。 */
+    private static final double[] STAGE_TRANSFORM_RATES = {0.22, 0.35, 0.5, 0.68, 0.82, 1.0};
+    /** 各阶段通用单次扩散预算。 */
+    private static final int[] STAGE_SPREAD_BUDGETS = {2, 3, 4, 6, 8, 10};
+    /** 水蒸发链的单次扩散预算。 */
+    private static final int[] WATER_SPREAD_BUDGETS = {3, 4, 6, 9, 12, 16};
 
     public static int getStage5StartTime() {
         return STAGE_5_START_TIME;
@@ -56,6 +68,10 @@ public final class SolarStageConfig {
         return COLLAPSE_SNOW_ACCUMULATION_RATE;
     }
 
+    public static int getCollapseWaterFreezeRate() {
+        return COLLAPSE_WATER_FREEZE_RATE;
+    }
+
     public static float getCollapseDayBrightnessFactor() {
         return (float) COLLAPSE_DAY_BRIGHTNESS_FACTOR;
     }
@@ -66,6 +82,14 @@ public final class SolarStageConfig {
 
     public static int getCollapseSnowSampleCount() {
         return COLLAPSE_SNOW_SAMPLE_COUNT;
+    }
+
+    public static int getCollapseWaterSampleCount() {
+        return COLLAPSE_WATER_SAMPLE_COUNT;
+    }
+
+    public static int getCollapseSnowStepBudget() {
+        return COLLAPSE_SNOW_STEP_BUDGET;
     }
 
     public static int getCollapseSnowSampleDiameter() {
@@ -93,6 +117,25 @@ public final class SolarStageConfig {
             return RANDOM_TICKING_LEVELS[0];
         }
         return RANDOM_TICKING_LEVELS[stage.ordinal() - 1];
+    }
+
+    public static double getStageTransformRate(SolarStage stage) {
+        return STAGE_TRANSFORM_RATES[getStageIndex(stage)];
+    }
+
+    public static int getStageSpreadBudget(SolarStage stage) {
+        return STAGE_SPREAD_BUDGETS[getStageIndex(stage)];
+    }
+
+    public static int getWaterSpreadBudget(SolarStage stage) {
+        return WATER_SPREAD_BUDGETS[getStageIndex(stage)];
+    }
+
+    private static int getStageIndex(SolarStage stage) {
+        if (stage == null || !stage.isAtLeast(SolarStage.STAGE_1)) {
+            return 0;
+        }
+        return Math.min(STAGE_TRANSFORM_RATES.length - 1, stage.ordinal() - 1);
     }
 
     private SolarStageConfig() {}

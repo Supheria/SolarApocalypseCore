@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.handlers;
 
+import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
@@ -24,6 +25,8 @@ import net.minecraftforge.fml.common.Mod;
  */
 @Mod.EventBusSubscriber
 public class StageTickHandler {
+
+    private static final int RANDOM_TICK_RAMP_INTERVAL = 20;
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent event) {
@@ -57,12 +60,12 @@ public class StageTickHandler {
      * random tick 频率、天气循环、冻伤、无限水源等都会随阶段统一切换。
      */
     private static void applyPhaseRules(LevelAccessor world, SolarStage phase) {
-        int randomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase);
+        int targetRandomTickingLevel = SolarStageConfig.getRandomTickingLevel(phase);
         boolean allowWeather = phase.isBefore(SolarStage.STAGE_3);
         boolean allowFreeze = phase.isAtLeast(SolarStage.STAGE_6);
         boolean allowWaterSource = phase.isBefore(SolarStage.STAGE_3) || phase.isAtLeast(SolarStage.STAGE_6);
 
-        world.getLevelData().getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(randomTickingLevel, world.getServer());
+        setRandomTickingLevelGradually(world, targetRandomTickingLevel);
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(allowWeather, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_FREEZE_DAMAGE).set(allowFreeze, world.getServer());
         world.getLevelData().getGameRules().getRule(GameRules.RULE_WATER_SOURCE_CONVERSION).set(allowWaterSource, world.getServer());
@@ -78,6 +81,20 @@ public class StageTickHandler {
         // 第六阶段转入坍缺后强制降水，与冻伤和水源恢复规则共同塑造恒冬环境。
         if (phase.isCollapsePhase()) {
             world.getLevelData().setRaining(true);
+        }
+    }
+
+    private static void setRandomTickingLevelGradually(LevelAccessor world, int targetLevel) {
+        int currentLevel = world.getLevelData().getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
+        if (currentLevel == targetLevel) {
+            return;
+        }
+
+        int nextLevel = currentLevel < targetLevel ? currentLevel + 1 : targetLevel;
+        world.getLevelData().getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(nextLevel, world.getServer());
+        if (nextLevel < targetLevel) {
+            SolarApocalypseCoreMod.queueServerWork(RANDOM_TICK_RAMP_INTERVAL,
+                    () -> setRandomTickingLevelGradually(world, targetLevel));
         }
     }
 }

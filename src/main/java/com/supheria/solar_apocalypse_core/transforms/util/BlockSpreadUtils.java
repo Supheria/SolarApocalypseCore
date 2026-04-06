@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -28,6 +29,9 @@ import java.util.function.Predicate;
  * </ul>
  */
 public final class BlockSpreadUtils {
+
+    private static final BlockState AIR = Blocks.AIR.defaultBlockState();
+    private static final BlockState ICE = Blocks.ICE.defaultBlockState();
 
     /** 主世界 biome tag，所有 TC 类共享，避免重复创建对象。 */
     public static final TagKey<Biome> IS_OVERWORLD =
@@ -89,14 +93,71 @@ public final class BlockSpreadUtils {
     public static void spreadBlock(LevelAccessor world, double cx, double cy, double cz,
                                    BlockState target, Predicate<BlockState> neighborPredicate,
                                    int[][] offsets) {
+        spreadBlockLimited(world, cx, cy, cz, target, neighborPredicate, offsets, offsets.length);
+    }
+
+    public static void spreadBlockLimited(LevelAccessor world, double cx, double cy, double cz,
+                                          BlockState target, Predicate<BlockState> neighborPredicate,
+                                          int[][] offsets, int budget) {
         BlockPos center = BlockPos.containing(cx, cy, cz);
-        world.setBlock(center, target, 3);
-        for (int[] o : offsets) {
-            BlockPos neighbor = center.offset(o[0], o[1], o[2]);
-            if (neighborPredicate.test(world.getBlockState(neighbor))) {
-                world.setBlock(neighbor, target, 3);
-            }
+        setBlockIfChanged(world, center, target);
+        visitLimitedOffsets(world, center, offsets, budget, pos -> neighborPredicate.test(world.getBlockState(pos)),
+                pos -> setBlockIfChanged(world, pos, target));
+    }
+
+    public static void spreadBlockLimited(LevelAccessor world, double cx, double cy, double cz,
+                                          BlockState target, Predicate<BlockState> neighborPredicate,
+                                          int[][] offsets) {
+        spreadBlockLimited(world, cx, cy, cz, target, neighborPredicate, offsets, offsets.length);
+    }
+
+    public static void spreadNeighborsLimited(LevelAccessor world, double cx, double cy, double cz,
+                                              BlockState target, Predicate<BlockState> neighborPredicate,
+                                              int[][] offsets, int budget) {
+        BlockPos center = BlockPos.containing(cx, cy, cz);
+        visitLimitedOffsets(world, center, offsets, budget, pos -> neighborPredicate.test(world.getBlockState(pos)),
+                pos -> setBlockIfChanged(world, pos, target));
+    }
+
+    public static void spreadNeighborsLimited(LevelAccessor world, double cx, double cy, double cz,
+                                              BlockState target, Predicate<BlockState> neighborPredicate,
+                                              int[][] offsets) {
+        spreadNeighborsLimited(world, cx, cy, cz, target, neighborPredicate, offsets, offsets.length);
+    }
+
+    @FunctionalInterface
+    private interface PositionConsumer {
+        void accept(BlockPos pos);
+    }
+
+    @FunctionalInterface
+    private interface PositionPredicate {
+        boolean test(BlockPos pos);
+    }
+
+    private static void visitLimitedOffsets(LevelAccessor world, BlockPos center, int[][] offsets, int budget,
+                                            PositionPredicate predicate, PositionConsumer consumer) {
+        if (budget <= 0 || offsets.length == 0) {
+            return;
         }
+
+        int limit = Math.min(budget, offsets.length);
+        int startIndex = getOffsetStartIndex(world, center, offsets.length);
+        int visited = 0;
+        for (int i = 0; i < offsets.length && visited < limit; i++) {
+            int[] offset = offsets[(startIndex + i) % offsets.length];
+            BlockPos candidate = center.offset(offset[0], offset[1], offset[2]);
+            if (!predicate.test(candidate)) {
+                continue;
+            }
+            consumer.accept(candidate);
+            visited++;
+        }
+    }
+
+    private static int getOffsetStartIndex(LevelAccessor world, BlockPos center, int length) {
+        RandomSource random = world.getRandom();
+        return Math.floorMod(center.hashCode() + random.nextInt(length), length);
     }
 
     /**
@@ -110,7 +171,7 @@ public final class BlockSpreadUtils {
         for (int[] o : offsets) {
             BlockPos neighbor = center.offset(o[0], o[1], o[2]);
             if (neighborPredicate.test(world.getBlockState(neighbor))) {
-                world.setBlock(neighbor, target, 3);
+                setBlockIfChanged(world, neighbor, target);
             }
         }
     }
@@ -120,14 +181,72 @@ public final class BlockSpreadUtils {
      * 用于水蒸发类过程（WaterEvaporate）。
      */
     public static void spreadWater(LevelAccessor world, double cx, double cy, double cz, int[][] offsets) {
+        spreadWaterLimited(world, cx, cy, cz, offsets, offsets.length);
+    }
+
+    public static void spreadWaterLimited(LevelAccessor world, double cx, double cy, double cz, int[][] offsets, int budget) {
         BlockPos center = BlockPos.containing(cx, cy, cz);
-        world.setBlock(center, Blocks.AIR.defaultBlockState(), 3);
-        for (int[] o : offsets) {
-            BlockPos neighbor = center.offset(o[0], o[1], o[2]);
-            if (world.getFluidState(neighbor).is(FluidTags.WATER)) {
-                world.setBlock(neighbor, Blocks.AIR.defaultBlockState(), 3);
+        setBlockIfChanged(world, center, AIR);
+        visitLimitedOffsets(world, center, offsets, budget, pos -> world.getFluidState(pos).is(FluidTags.WATER),
+                pos -> setBlockIfChanged(world, pos, AIR));
+    }
+
+    public static void spreadWaterLimited(LevelAccessor world, double cx, double cy, double cz, int[][] offsets) {
+        spreadWaterLimited(world, cx, cy, cz, offsets, offsets.length);
+    }
+
+    public static void freezeSurfaceWaterLimited(LevelAccessor world, BlockPos center, int[][] offsets, int budget) {
+        if (isSurfaceWater(world, center)) {
+            setBlockIfChanged(world, center, ICE);
+        }
+        visitLimitedOffsets(world, center, offsets, budget, pos -> isSurfaceWater(world, pos),
+                pos -> setBlockIfChanged(world, pos, ICE));
+    }
+
+    public static void freezeSurfaceWaterLimited(LevelAccessor world, BlockPos center, int[][] offsets) {
+        freezeSurfaceWaterLimited(world, center, offsets, offsets.length);
+    }
+
+    public static int countMatchedOffsets(LevelAccessor world, BlockPos center, int[][] offsets,
+                                          Predicate<BlockPos> predicate, int limit) {
+        if (limit <= 0) {
+            return 0;
+        }
+
+        int matches = 0;
+        int startIndex = getOffsetStartIndex(world, center, offsets.length);
+        for (int i = 0; i < offsets.length && matches < limit; i++) {
+            int[] offset = offsets[(startIndex + i) % offsets.length];
+            if (predicate.test(center.offset(offset[0], offset[1], offset[2]))) {
+                matches++;
             }
         }
+        return matches;
+    }
+
+    public static int countSurfaceWater(LevelAccessor world, BlockPos center, int[][] offsets, int limit) {
+        int matches = isSurfaceWater(world, center) ? 1 : 0;
+        if (matches >= limit) {
+            return matches;
+        }
+        return matches + countMatchedOffsets(world, center, offsets, pos -> isSurfaceWater(world, pos), limit - matches);
+    }
+
+    public static int countWaterNeighbors(LevelAccessor world, BlockPos center, int[][] offsets, int limit) {
+        int matches = world.getFluidState(center).is(FluidTags.WATER) ? 1 : 0;
+        if (matches >= limit) {
+            return matches;
+        }
+        return matches + countMatchedOffsets(world, center, offsets, pos -> world.getFluidState(pos).is(FluidTags.WATER), limit - matches);
+    }
+
+    public static int countMatchingNeighbors(LevelAccessor world, BlockPos center, int[][] offsets,
+                                             Predicate<BlockState> predicate, int limit) {
+        int matches = predicate.test(world.getBlockState(center)) ? 1 : 0;
+        if (matches >= limit) {
+            return matches;
+        }
+        return matches + countMatchedOffsets(world, center, offsets, pos -> predicate.test(world.getBlockState(pos)), limit - matches);
     }
 
     // -------------------------------------------------------------------------
@@ -159,6 +278,12 @@ public final class BlockSpreadUtils {
                 || world.getFluidState(BlockPos.containing(x, y, z - 1)).is(FluidTags.WATER);
     }
 
+    public static void setBlockIfChanged(LevelAccessor world, BlockPos pos, BlockState target) {
+        if (!world.getBlockState(pos).equals(target)) {
+            world.setBlock(pos, target, 3);
+        }
+    }
+
     /**
      * 判断给定位置是否为最上层的静止水面。
      * 仅允许处理完整水源块，避免把流动中的边缘水或水下层错误冻成冰。
@@ -176,12 +301,12 @@ public final class BlockSpreadUtils {
      */
     public static void freezeSurfaceWater(LevelAccessor world, BlockPos center, int[][] offsets) {
         if (isSurfaceWater(world, center)) {
-            world.setBlock(center, Blocks.ICE.defaultBlockState(), 3);
+            setBlockIfChanged(world, center, ICE);
         }
         for (int[] o : offsets) {
             BlockPos neighbor = center.offset(o[0], o[1], o[2]);
             if (isSurfaceWater(world, neighbor)) {
-                world.setBlock(neighbor, Blocks.ICE.defaultBlockState(), 3);
+                setBlockIfChanged(world, neighbor, ICE);
             }
         }
     }

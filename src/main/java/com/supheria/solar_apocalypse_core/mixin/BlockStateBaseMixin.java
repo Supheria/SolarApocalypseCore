@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.google.common.collect.ImmutableMap;
 import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
+import com.supheria.solar_apocalypse_core.init.SolarModTags;
 import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.fluid.SnowMelt;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
@@ -86,9 +87,11 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
      */
     @Inject(method = "initCache", at = @At("TAIL"))
     private void initCacheTail(CallbackInfo callbackInfo) {
+        this.solar$isOriginalRandomlyTicking = this.isRandomlyTicking;
+        this.solar$isOriginalOnPlace = this.hasOnPlaceTransform;
         this.solar$procedure = SolarApocalypseCoreMod.getBlockTransform(this.asState());
         this.solar$onPlaceProcedure = SolarApocalypseCoreMod.getNBlockTransform(this.asState());
-        this.isRandomlyTicking = this.isRandomlyTicking || this.solar$procedure != null;
+        this.isRandomlyTicking = this.isRandomlyTicking || shouldForceRandomTick(this.asState(), this.solar$procedure);
         this.hasOnPlaceTransform = this.hasOnPlaceTransform || this.solar$onPlaceProcedure != null;
     }
 
@@ -161,6 +164,47 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
                 && SolarModVariables.MapVariables.get(level).getCurrentStage() == SolarStage.STAGE_6
                 && level.getBlockState(pos.below()).isAir()
                 && SnowMelt.triggerVisibleFall(level, pos, state);
+    }
+
+    @Unique
+    private static boolean shouldForceRandomTick(BlockState state, BlockTransform procedure) {
+        if (procedure == null) {
+            return false;
+        }
+        return state.is(Blocks.WATER)
+                || state.is(Blocks.BUBBLE_COLUMN)
+                || state.is(Blocks.ICE)
+                || state.is(Blocks.PACKED_ICE)
+                || state.is(Blocks.BLUE_ICE)
+                || state.is(Blocks.FROSTED_ICE)
+                || state.getBlock() instanceof net.minecraft.world.level.block.SnowLayerBlock
+                || state.is(SolarModTags.Blocks.MOIST_DIRT)
+                || state.is(SolarModTags.Blocks.DIRT)
+                || state.is(SolarModTags.Blocks.HARD_DIRT)
+                || state.is(SolarModTags.Blocks.POWDER)
+                || state.is(SolarModTags.Blocks.SANDSTONE)
+                || state.is(SolarModTags.Blocks.COBBLESTONE)
+                || state.is(SolarModTags.Blocks.CLAY)
+                || state.is(net.minecraftforge.common.Tags.Blocks.GRAVEL)
+                || shouldForceStoneChainTick(state);
+    }
+
+    @Unique
+    private static boolean shouldForceStoneChainTick(BlockState state) {
+        return state.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE)
+                && !state.is(SolarModTags.Blocks.SIMPLE_DELETE)
+                && !state.is(SolarModTags.Blocks.SANDSTONE)
+                && !state.is(SolarModTags.Blocks.COBBLESTONE)
+                && !state.is(net.minecraft.tags.BlockTags.IRON_ORES)
+                && !state.is(net.minecraftforge.common.Tags.Blocks.STORAGE_BLOCKS_IRON)
+                && !state.is(net.minecraftforge.common.Tags.Blocks.STORAGE_BLOCKS_RAW_IRON)
+                && !state.is(net.minecraft.tags.BlockTags.REDSTONE_ORES)
+                && !state.is(net.minecraftforge.common.Tags.Blocks.STORAGE_BLOCKS_REDSTONE)
+                && !state.is(net.minecraft.tags.BlockTags.DIAMOND_ORES)
+                && !state.is(net.minecraftforge.common.Tags.Blocks.STORAGE_BLOCKS_DIAMOND)
+                && !state.is(net.minecraft.tags.BlockTags.LAPIS_ORES)
+                && !state.is(net.minecraftforge.common.Tags.Blocks.STORAGE_BLOCKS_LAPIS)
+                && !state.is(net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL);
     }
 
     @Shadow

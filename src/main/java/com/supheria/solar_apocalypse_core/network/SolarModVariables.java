@@ -55,8 +55,8 @@ public class SolarModVariables {
 			if (!event.getEntity().level().isClientSide()) {
 				SavedData mapdata = MapVariables.get(event.getEntity().level());
 				SavedData worlddata = WorldVariables.get(event.getEntity().level());
-				if (mapdata != null)
-					SolarApocalypseCoreMod.PACKET_HANDLER.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) event.getEntity()), new SavedDataSyncMessage(0, mapdata));
+				if (mapdata instanceof MapVariables mapVariables)
+					mapVariables.syncToPlayer((ServerPlayer) event.getEntity());
 				if (worlddata != null)
 					SolarApocalypseCoreMod.PACKET_HANDLER.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) event.getEntity()), new SavedDataSyncMessage(1, worlddata));
 			}
@@ -162,10 +162,19 @@ public class SolarModVariables {
 		 * <p>由于该数据固定代表整张存档共享的太阳阶段进度，而不是单维度状态，
 		 * 因此这里使用全服广播而不是按维度分发。
 		 */
-		public void syncData(LevelAccessor world) {
+		public void markDirty() {
 			this.setDirty();
-			if (world instanceof Level && !world.isClientSide())
+		}
+
+		public void syncData(LevelAccessor world) {
+			markDirty();
+			if (world instanceof Level level && !level.isClientSide()) {
 				SolarApocalypseCoreMod.PACKET_HANDLER.send(PacketDistributor.ALL.noArg(), new SavedDataSyncMessage(0, this));
+			}
+		}
+
+		public void syncToPlayer(ServerPlayer player) {
+			SolarApocalypseCoreMod.PACKET_HANDLER.send(PacketDistributor.PLAYER.with(() -> player), new SavedDataSyncMessage(0, this));
 		}
 
 		static MapVariables clientSide = new MapVariables();

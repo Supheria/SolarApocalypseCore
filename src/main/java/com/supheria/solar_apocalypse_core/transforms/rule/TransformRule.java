@@ -23,11 +23,13 @@ public record TransformRule(TransformCondition condition, TransformAction action
         return new TransformRule(condition, action);
     }
 
-    /** 若条件成立则执行动作。 */
-    public void apply(LevelAccessor world, double x, double y, double z, SolarStage stage) {
-        if (condition.test(world, x, y, z, stage)) {
-            action.execute(world, x, y, z);
+    /** 若条件成立则执行动作，并返回是否命中。 */
+    public boolean apply(LevelAccessor world, double x, double y, double z, SolarStage stage) {
+        if (!condition.test(world, x, y, z, stage)) {
+            return false;
         }
+        action.execute(world, x, y, z);
+        return true;
     }
 
     /**
@@ -43,7 +45,9 @@ public record TransformRule(TransformCondition condition, TransformAction action
             if (!BlockSpreadUtils.isOverworld(world, x, y, z)) return;
             var stage = SolarModVariables.MapVariables.get(world).getSolarStage();
             for (TransformRule rule : rules) {
-                rule.apply(world, x, y, z, stage);
+                if (rule.apply(world, x, y, z, stage)) {
+                    return;
+                }
             }
         };
     }

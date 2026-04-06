@@ -24,10 +24,20 @@ public class DayTimeTickHandler {
         long dayTime = world.dayTime();
         SolarModVariables.MapVariables mapVariables = SolarModVariables.MapVariables.get(world);
         double dayIndex = SolarStageHelper.getDayIndex(dayTime);
+        double newLunarDay = Math.floor(dayIndex + 1 / 4d);
+        double newTimeOfDay = SolarStageHelper.getTimeOfDay(dayTime);
+        double syncedTimeOfDay = Math.floor(newTimeOfDay * 20d) / 20d;
+
+        boolean changed = mapVariables.currentDay != dayIndex
+                || mapVariables.currentLunarDay != newLunarDay
+                || mapVariables.currentTimeOfDay != syncedTimeOfDay;
+        if (!changed) {
+            return;
+        }
 
         mapVariables.currentDay = dayIndex;
-        mapVariables.currentLunarDay = Math.floor(dayIndex + 1 / 4d);
-        mapVariables.currentTimeOfDay = SolarStageHelper.getTimeOfDay(dayTime);
-        mapVariables.syncData(world);
+        mapVariables.currentLunarDay = newLunarDay;
+        mapVariables.currentTimeOfDay = syncedTimeOfDay;
+        mapVariables.markDirty();
     }
 }

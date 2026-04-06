@@ -37,8 +37,10 @@ public final class TransformConditions {
     private static final int RANDOM_WOOD_FAST_BASE = 3;
     private static final double RANDOM_50_MAX = 2.0;
     private static final double RANDOM_50_THRESHOLD = 1.0;
-    private static final double COLLAPSE_RATE_NORMALIZER = 2.0;
-    private static final double COLLAPSE_RANDOM_MAX = 1.0;
+    private static final double COLLAPSE_RATE_MULTIPLIER = 0.5;
+    private static final double RATE_MIN = 0.0;
+    private static final double RATE_MAX = 1.0;
+    private static final double RANDOM_RATE_MAX = 1.0;
 
     // -----------------------------------------------------------------------
     // 阶段 (Stage)
@@ -215,6 +217,20 @@ public final class TransformConditions {
         return (world, x, y, z, stage) -> world.dayTime() < maxTicks;
     }
 
+    /**
+     * 按当前阶段的统一速率判定本次是否允许触发。
+     */
+    public static TransformCondition stageRate() {
+        return stageRateScaled(1.0);
+    }
+
+    /**
+     * 在阶段统一速率上乘一个系数，用于重型链微调强度。
+     */
+    public static TransformCondition stageRateScaled(double multiplier) {
+        return (world, x, y, z, stage) -> passesRate(SolarStageConfig.getStageTransformRate(stage) * multiplier);
+    }
+
     /** 50% 随机触发（nextDouble(0,2) <= 1）。 */
     public static TransformCondition random50() {
         return (world, x, y, z, stage) ->
@@ -222,15 +238,18 @@ public final class TransformConditions {
     }
 
     /**
-     * 坍缩阶段的概率转换条件，概率由配置项 collapseBlockTransformRate 决定：
-     * probability = min(1.0, transformRate / 2.0)
+     * 坍缩阶段的概率转换条件，复用统一阶段速率并叠加坍缺期倍率。
      */
     public static TransformCondition randomCollapse() {
-        return (world, x, y, z, stage) -> {
-            int rate = SolarStageConfig.getCollapseBlockTransformRate();
-            double p = Math.min(COLLAPSE_RANDOM_MAX, rate / COLLAPSE_RATE_NORMALIZER);
-            return Mth.nextDouble(RandomSource.create(), 0, COLLAPSE_RANDOM_MAX) <= p;
-        };
+        return (world, x, y, z, stage) ->
+                passesRate(SolarStageConfig.getStageTransformRate(stage)
+                        * SolarStageConfig.getCollapseBlockTransformRate()
+                        * COLLAPSE_RATE_MULTIPLIER);
+    }
+
+    private static boolean passesRate(double rate) {
+        double clampedRate = Mth.clamp(rate, RATE_MIN, RATE_MAX);
+        return Mth.nextDouble(RandomSource.create(), 0, RANDOM_RATE_MAX) <= clampedRate;
     }
 
     /** 当前坐标处的方块为指定方块。 */

@@ -287,7 +287,7 @@ public class SolarApocalypseCoreMod {
             return LavaToObsidian.TRANSFORM;
         }
         // 砂岩
-        if (ref.is(SolarModTags.Blocks.SANDSTONE) && notExcluded(ref)) return DirtChain.CRUSHED_DIRT;
+        if (ref.is(SolarModTags.Blocks.SANDSTONE) && notExcluded(ref)) return DirtChain.SANDSTONE;
         // 黏土
         if (ref.is(SolarModTags.Blocks.CLAY) && notExcluded(ref)) return StoneChain.CLAY;
         // 传送门
