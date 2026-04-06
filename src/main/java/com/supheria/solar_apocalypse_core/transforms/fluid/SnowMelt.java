@@ -25,7 +25,7 @@ public class SnowMelt {
 
     public static final BlockTransform TRANSFORM = SnowMelt::transform;
 
-    private static final int MAX_STACKED_SNOW_BLOCKS = 4;
+    private static final int MAX_STACKED_SNOW_BLOCKS = 8;
     private static final int MAX_SNOW_LAYERS = 8;
 
     private static void transform(LevelAccessor world, double x, double y, double z) {
@@ -82,14 +82,19 @@ public class SnowMelt {
     }
 
     public static void landFallingSnow(ServerLevel level, BlockPos pos, BlockState fallingState, BlockState replacedState) {
-        int totalMass = getSnowMass(fallingState) + getSnowMass(replacedState);
+        int totalMass = getSnowMass(fallingState);
+        BlockState currentState = level.getBlockState(pos);
+        if (currentState.is(SolarModBlocks.FALLING_SNOW.get())) {
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+            totalMass += getSnowMass(replacedState);
+        } else {
+            int currentMass = getSnowMass(currentState);
+            totalMass += currentMass > 0 ? currentMass : getSnowMass(replacedState);
+        }
+
         if (totalMass <= 0) {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             return;
-        }
-
-        if (level.getBlockState(pos).is(SolarModBlocks.FALLING_SNOW.get())) {
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
         }
 
         depositSnowMass(level, pos, totalMass);
@@ -139,10 +144,12 @@ public class SnowMelt {
                 if (remainingMass <= 0) {
                     return;
                 }
-                if (totalLayers < MAX_SNOW_LAYERS || !canCompressAt(level, currentPos)) {
+                if (totalLayers < MAX_SNOW_LAYERS) {
                     return;
                 }
-                level.setBlock(currentPos, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
+                if (canCompressAt(level, currentPos)) {
+                    level.setBlock(currentPos, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
+                }
                 currentPos = currentPos.above();
                 continue;
             }
@@ -163,8 +170,13 @@ public class SnowMelt {
                 continue;
             }
 
-            level.setBlock(currentPos, snowLayerState(Math.min(remainingMass, MAX_SNOW_LAYERS)), 3);
-            return;
+            int placedLayers = Math.min(remainingMass, MAX_SNOW_LAYERS);
+            level.setBlock(currentPos, snowLayerState(placedLayers), 3);
+            remainingMass -= placedLayers;
+            if (remainingMass <= 0) {
+                return;
+            }
+            currentPos = currentPos.above();
         }
     }
 
