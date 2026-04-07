@@ -40,4 +40,24 @@ public abstract class WorldCreationUiStateMixin {
             cir.setReturnValue(Difficulty.HARD);
         }
     }
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void solarApocalypseCore$initializeBonusChestEnabled(CallbackInfo ci) {
+        WorldCreationUiState self = (WorldCreationUiState) (Object) this;
+        self.setBonusChest(true);
+    }
+
+    @Inject(method = "setBonusChest", at = @At("HEAD"), cancellable = true)
+    private void solarApocalypseCore$forceBonusChestEnabled(boolean bonusChest, CallbackInfo ci) {
+        WorldCreationUiState self = (WorldCreationUiState) (Object) this;
+        if (!bonusChest) {
+            self.setBonusChest(true);
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "isBonusChest", at = @At("HEAD"), cancellable = true)
+    private void solarApocalypseCore$alwaysEnableBonusChest(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(true);
+    }
 }
