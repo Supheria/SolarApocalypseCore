@@ -1,7 +1,7 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
-import com.supheria.solar_apocalypse_core.network.SolarModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.HeightZoneHelper;
+import com.supheria.solar_apocalypse_core.world.HeightZoneHelper.HeightZone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
@@ -14,11 +14,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * 根据太阳阶段调整原版钓鱼上钩节奏：
- * 第 1-4 阶段逐步拉长等待时间，第 5 阶段完全不上钩，第 6 阶段保持原版。
+ * 根据高度区间调整原版钓鱼上钩节奏。
  */
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin {
+    private static final int DANGER_FISHING_DELAY = 600;
 
     @Shadow
     private int nibble;
@@ -40,33 +40,23 @@ public abstract class FishingHookMixin {
             return;
         }
 
-        SolarStage stage = SolarModVariables.MapVariables.get(serverLevel).getSolarStage();
-        if (stage.isCollapsePhase() || stage == SolarStage.NONE) {
-            return;
-        }
-
-        if (stage == SolarStage.STAGE_5) {
+        HeightZone heightZone = HeightZoneHelper.getHeightZone(serverLevel, pos);
+        if (heightZone == HeightZone.DANGER) {
             this.nibble = 0;
             this.timeUntilHooked = 0;
             if (this.timeUntilLured <= 0) {
-                this.timeUntilLured = 600;
+                this.timeUntilLured = DANGER_FISHING_DELAY;
             }
             hook.getEntityData().set(DATA_BITING, false);
             return;
         }
 
-        if (this.timeUntilLured > 0) {
-            this.timeUntilLured += getAdditionalLureDelay(stage, serverLevel);
+        if (heightZone == HeightZone.SAFE && this.timeUntilLured > 0) {
+            this.timeUntilLured += getAdditionalLureDelay(serverLevel);
         }
     }
 
-    private int getAdditionalLureDelay(SolarStage stage, ServerLevel serverLevel) {
-        return switch (stage) {
-            case STAGE_1 -> serverLevel.random.nextFloat() < 0.25F ? 1 : 0;
-            case STAGE_2 -> serverLevel.random.nextFloat() < 0.5F ? 1 : 0;
-            case STAGE_3 -> 1;
-            case STAGE_4 -> 2;
-            default -> 0;
-        };
+    private int getAdditionalLureDelay(ServerLevel serverLevel) {
+        return serverLevel.random.nextFloat() < 0.5F ? 1 : 0;
     }
 }

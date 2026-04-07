@@ -4,6 +4,7 @@ import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -40,6 +41,10 @@ public class EntityFireHandler {
         }
 
         if (y <= StageHeightConfig.getSafeHeight(stage)) {
+            return;
+        }
+
+        if (stage == SolarStage.STAGE_2 && !world.canSeeSkyFromBelowWater(BlockPos.containing(entity.getX(), y + 1, entity.getZ()))) {
             return;
         }
 

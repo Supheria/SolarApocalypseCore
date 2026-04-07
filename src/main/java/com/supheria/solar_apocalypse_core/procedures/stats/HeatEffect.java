@@ -5,6 +5,7 @@ import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.thirst.SolarThirstHelper;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -60,6 +61,10 @@ public class HeatEffect {
         }
 
         if (y <= StageHeightConfig.getSafeHeight(stage)) {
+            return;
+        }
+
+        if (stage == SolarStage.STAGE_2 && !world.canSeeSkyFromBelowWater(BlockPos.containing(entity.getX(), y + 1, entity.getZ()))) {
             return;
         }
 

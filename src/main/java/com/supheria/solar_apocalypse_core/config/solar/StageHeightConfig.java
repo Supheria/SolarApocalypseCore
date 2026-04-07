@@ -14,7 +14,7 @@ public final class StageHeightConfig {
 	private static final float DEFAULT_FIRE_DAMAGE = 0.0f;
 
 	public static final int STAGE_1_SAFE_HEIGHT = 512;
-	public static final int STAGE_2_SAFE_HEIGHT = 63;
+	public static final int STAGE_2_SAFE_HEIGHT = 64;
 	public static final int STAGE_3_SAFE_HEIGHT = 32;
 	public static final int STAGE_4_SAFE_HEIGHT = 8;
 	public static final int STAGE_5_SAFE_HEIGHT = -16;

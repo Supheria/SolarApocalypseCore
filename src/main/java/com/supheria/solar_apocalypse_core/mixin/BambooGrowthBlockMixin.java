@@ -1,5 +1,6 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
+import com.supheria.solar_apocalypse_core.world.HeightZoneHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -12,13 +13,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * 禁止竹苗与竹子自然生长，保留骨粉催熟。
+ * 仅允许舒适高度的竹苗与竹子自然生长，保留骨粉催熟。
  */
 @Mixin({BambooSaplingBlock.class, BambooStalkBlock.class})
 public class BambooGrowthBlockMixin {
 
     @Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
     private void solar$disableNaturalGrowth(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo ci) {
-        ci.cancel();
+        if (!HeightZoneHelper.allowsNaturalGrowth(level, pos)) {
+            ci.cancel();
+        }
     }
 }
