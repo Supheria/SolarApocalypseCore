@@ -11,6 +11,11 @@
   "message.solar_apocalypse_core.command.set_stage": "Solar stage set to %s (starting on day %s)",
   "message.solar_apocalypse_core.command.current": "Current solar stage: %s / Day: %s / Time: %s",
   "message.solar_apocalypse_core.create_world.hardcore_locked": "This is impossible!",
+  "message.solar_apocalypse_core.create_world.creative.tooltip": "We do not recommend this, but if you insist...",
+  "message.solar_apocalypse_core.create_world.survival.line1": "Gather resources and face disasters together within a limited time.",
+  "message.solar_apocalypse_core.create_world.survival.line2": "(Warning: solo play is extremely challenging)",
+
+  "generator.solar_apocalypse_core.default_world_name": "Solar Apocalypse",
 
   "solarstage.none": "Uninitialized",
   "solarstage.stage1": "Eruption: Initial",

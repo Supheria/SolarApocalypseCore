@@ -11,6 +11,11 @@
   "message.solar_apocalypse_core.command.set_stage": "太阳阶段已设置为：%s（第%s天起）",
   "message.solar_apocalypse_core.command.current": "当前太阳阶段：%s / 天数：%s / 时间：%s",
   "message.solar_apocalypse_core.create_world.hardcore_locked": "这不可能！",
+  "message.solar_apocalypse_core.create_world.creative.tooltip": "我们不建议您这么做，但如果您坚持的话……",
+  "message.solar_apocalypse_core.create_world.survival.line1": "在有限的时间内，和伙伴们收集资源、应对灾难",
+  "message.solar_apocalypse_core.create_world.survival.line2": "（注意：单人游玩极具挑战）",
+
+  "generator.solar_apocalypse_core.default_world_name": "烈焰升腾",
 
   "solarstage.none": "未初始化",
   "solarstage.stage1": "爆发初期",
