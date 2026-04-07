@@ -12,9 +12,6 @@
   "message.solar_apocalypse_core.command.current": "当前太阳阶段：%s / 天数：%s / 时间：%s",
   "message.solar_apocalypse_core.create_world.hardcore_locked": "这不可能！",
 
-  "key.categories.solar_apocalypse_core": "烈日升腾",
-  "key.solar_apocalypse_core.hud_edit": "HUD编辑器",
-
   "solarstage.none": "未初始化",
   "solarstage.stage1": "爆发初期",
   "solarstage.stage2": "爆发前期",

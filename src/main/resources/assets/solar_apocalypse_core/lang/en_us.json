@@ -12,9 +12,6 @@
   "message.solar_apocalypse_core.command.current": "Current solar stage: %s / Day: %s / Time: %s",
   "message.solar_apocalypse_core.create_world.hardcore_locked": "This is impossible!",
 
-  "key.categories.solar_apocalypse_core": "Solar Apocalypse Core",
-  "key.solar_apocalypse_core.hud_edit": "HUD Editor",
-
   "solarstage.none": "Uninitialized",
   "solarstage.stage1": "Eruption: Initial",
   "solarstage.stage2": "Eruption: Early",

@@ -28,6 +28,10 @@ public class SolarHudRenderer {
         }
 
         Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || !minecraft.player.hasPermissions(2)) {
+            return;
+        }
+
         Level level = minecraft.level;
 
         if (level == null || !level.isClientSide()) {
@@ -44,28 +48,9 @@ public class SolarHudRenderer {
         SolarStage currentPhase = mapVars.getSolarStage();
         float progress = SolarStageHelper.getPhaseProgress(dayTime, currentPhase);
 
-        // 获取配置信息
-        int posX = SolarHudConfig.getHudX();
-        int posY = SolarHudConfig.getHudY();
-        boolean detailedMode = SolarHudConfig.isDetailedMode();
-
-        if (detailedMode) {
-            renderDetailedMode(guiGraphics, posX, posY, today, currentPhase, progress);
-        } else {
-            renderCompactMode(guiGraphics, posX, posY, today, currentPhase);
-        }
-    }
-
-    /**
-     * 精简模式：显示一行信息
-     * 格式：第27天 · 危机期
-     */
-    private static void renderCompactMode(GuiGraphics guiGraphics, int posX, int posY, long today, SolarStage phase) {
-        String dayText = String.format("第%d天", today);
-        String phaseText = getPhaseDisplayName(phase);
-        String compactText = dayText + " · " + phaseText;
-
-        guiGraphics.drawString(Minecraft.getInstance().font, compactText, posX, posY, SolarHudConfig.getTextColor(), false);
+        int posX = SolarHudConfig.getHudMarginLeft();
+        int posY = guiGraphics.guiHeight() - getHudHeight() - SolarHudConfig.getHudMarginBottom();
+        renderDetailedMode(guiGraphics, posX, posY, today, currentPhase, progress);
     }
 
     /**
@@ -111,12 +96,10 @@ public class SolarHudRenderer {
         String percentText = String.format("%.0f%%", progress * 100);
         guiGraphics.drawString(minecraft.font, percentText, posX + progressBarWidth + SolarHudConfig.getHudPercentTextOffsetX(), barY + 1, SolarHudConfig.getTextColor(), false);
 
-        // 下一阶段信息
-        SolarStage nextPhase = getNextPhase(phase);
-        if (nextPhase != phase) {
-            String arrowAndPhase = " → " + getPhaseDisplayName(nextPhase);
-            guiGraphics.drawString(minecraft.font, arrowAndPhase, posX + progressBarWidth + SolarHudConfig.getHudNextPhaseTextOffsetX(), barY + 1, SolarHudConfig.getMutedTextColor(), false);
-        }
+    }
+
+    private static int getHudHeight() {
+        return SolarHudConfig.getHudDetailBarOffsetY() + SolarHudConfig.getProgressBarHeight();
     }
 
     /**
@@ -126,13 +109,4 @@ public class SolarHudRenderer {
         return phase.getDisplayName().getString();
     }
 
-    /**
-     * 获取下一个阶段
-     */
-    private static SolarStage getNextPhase(SolarStage current) {
-        if (current != SolarStage.STAGE_6) {
-            return SolarStage.values()[current.ordinal() + 1];
-        }
-        return current;
-    }
 }
