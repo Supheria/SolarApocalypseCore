@@ -1,14 +1,17 @@
 package com.supheria.solar_apocalypse_core.transforms.rule;
 
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
+import com.supheria.solar_apocalypse_core.integration.minecollapse.MineCollapseBridge;
 import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Predicate;
@@ -282,6 +285,45 @@ public final class TransformActions {
     public static TransformAction setBlockAbove(Block target) {
         return (world, x, y, z) ->
                 BlockSpreadUtils.setBlockIfChanged(world, BlockPos.containing(x, y + 1, z), target.defaultBlockState());
+    }
+
+    public static TransformAction destroyBlockWithDrops() {
+        return (world, x, y, z) -> destroyWithDrops(world, BlockPos.containing(x, y, z));
+    }
+
+    public static TransformAction destroyBlockAboveWithDrops() {
+        return (world, x, y, z) -> destroyWithDrops(world, BlockPos.containing(x, y + 1, z));
+    }
+
+    public static TransformAction destroyCenterAnd4HWithDrops(Predicate<BlockState> predicate) {
+        return (world, x, y, z) -> {
+            BlockPos center = BlockPos.containing(x, y, z);
+            destroyIfMatches(world, center, predicate);
+            destroyIfMatches(world, center.north(), predicate);
+            destroyIfMatches(world, center.south(), predicate);
+            destroyIfMatches(world, center.east(), predicate);
+            destroyIfMatches(world, center.west(), predicate);
+        };
+    }
+
+    private static void destroyIfMatches(LevelAccessor world, BlockPos pos, Predicate<BlockState> predicate) {
+        BlockState state = world.getBlockState(pos);
+        if (!predicate.test(state)) {
+            return;
+        }
+        destroyWithDrops(world, pos);
+    }
+
+    private static void destroyWithDrops(LevelAccessor world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos);
+        if (state.isAir()) {
+            return;
+        }
+
+        if (world instanceof ServerLevel level) {
+            Block.dropResources(state, level, pos);
+        }
+        MineCollapseBridge.setBlockWithCurrentSource(world, pos, Blocks.AIR.defaultBlockState());
     }
 
     /** 将中心及水流体邻居（按 offsets 扩散）全部设为 AIR（水蒸发扩散）。 */

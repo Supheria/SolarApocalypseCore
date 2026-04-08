@@ -56,11 +56,11 @@ public final class SolarStageConfig {
      */
     private static final int[] RANDOM_TICKING_LEVELS = {4, 5, 5, 6, 7, 7};
     /** 各阶段通用转换触发率。 */
-    private static final double[] STAGE_TRANSFORM_RATES = {0.22, 0.35, 0.5, 0.68, 0.82, 1.0};
+    private static final double[] STAGE_TRANSFORM_RATES = {0.22, 0.35, 0.56, 0.75, 0.9, 1.0};
     /** 各阶段通用单次扩散预算。 */
-    private static final int[] STAGE_SPREAD_BUDGETS = {2, 3, 4, 6, 8, 10};
+    private static final int[] STAGE_SPREAD_BUDGETS = {2, 3, 5, 7, 9, 10};
     /** 水蒸发链的单次扩散预算。 */
-    private static final int[] WATER_SPREAD_BUDGETS = {3, 4, 6, 9, 12, 16};
+    private static final int[] WATER_SPREAD_BUDGETS = {3, 4, 7, 10, 13, 16};
 
     public static int getStage2StartTime() {
         return STAGE_2_START_TIME;

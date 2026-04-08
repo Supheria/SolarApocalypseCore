@@ -50,9 +50,14 @@ public final class EnvironmentalTransformScheduler {
     private static final int MIN_INDEXED_CHUNKS_PER_PLAYER = 18;
     private static final int CHUNK_INDEX_BUDGET_MULTIPLIER = 5;
     private static final int CHUNK_REFRESHES_PER_PLAYER = 6;
+    private static final int FAR_CHUNK_REFRESHES_PER_PLAYER = 8;
     private static final int PLAYER_KEEPALIVE_RADIUS = 1;
     private static final int MIN_CHUNK_RADIUS = 2;
     private static final int MAX_CHUNK_RADIUS = 6;
+    private static final int FAR_RADIUS_MULTIPLIER = 3;
+    private static final int FAR_RADIUS_PADDING = 4;
+    private static final int FAR_RING_THICKNESS = 4;
+    private static final int FAR_TIME_SLICE_TICKS = 200;
     private static final int INDEX_INTERVAL_TICKS = 20;
     private static final int REFILL_INTERVAL_TICKS = 4;
     private static final int MIN_CHUNK_SAMPLES_PER_TICK = 8;
@@ -127,16 +132,20 @@ public final class EnvironmentalTransformScheduler {
         int targetSize = Math.max(MIN_INDEXED_CHUNKS_PER_PLAYER * players.size(), stageBudget(stage) * CHUNK_INDEX_BUDGET_MULTIPLIER * players.size());
         keepAlivePlayerChunks(level, players, chunks);
         int refreshCount = Math.max(players.size() * CHUNK_REFRESHES_PER_PLAYER, targetSize / 4);
-        int attempts = Math.max(targetSize, refreshCount) * 3;
-        while (attempts-- > 0 && (chunks.size() < targetSize || refreshCount > 0)) {
+        int farRefreshCount = Math.max(players.size() * FAR_CHUNK_REFRESHES_PER_PLAYER, targetSize / 3);
+        int attempts = Math.max(targetSize, refreshCount + farRefreshCount) * 3;
+        while (attempts-- > 0 && (chunks.size() < targetSize || refreshCount > 0 || farRefreshCount > 0)) {
             ServerPlayer player = players.get(random.nextInt(players.size()));
-            int chunkX = player.chunkPosition().x + random.nextInt(radius * 2 + 1) - radius;
-            int chunkZ = player.chunkPosition().z + random.nextInt(radius * 2 + 1) - radius;
+            boolean useFarSample = farRefreshCount > 0 && (refreshCount <= 0 || random.nextBoolean());
+            long candidate = useFarSample
+                    ? sampleFarChunk(level, player, radius, level.getGameTime(), random)
+                    : sampleNearChunk(player, radius, random);
+            int chunkX = unpackChunkX(candidate);
+            int chunkZ = unpackChunkZ(candidate);
             if (!level.hasChunk(chunkX, chunkZ)) {
                 continue;
             }
 
-            long candidate = chunkKey(chunkX, chunkZ);
             boolean isNew = chunks.add(candidate);
             if (!isNew) {
                 // 重新插入已存在区块，让热点区块保持活跃，同时给新采样区块腾出淘汰顺序。
@@ -146,7 +155,9 @@ public final class EnvironmentalTransformScheduler {
                 removeOldestChunk(chunks);
             }
 
-            if (refreshCount > 0) {
+            if (useFarSample) {
+                farRefreshCount--;
+            } else if (refreshCount > 0) {
                 refreshCount--;
             }
         }
@@ -171,6 +182,34 @@ public final class EnvironmentalTransformScheduler {
                 }
             }
         }
+    }
+
+    private static long sampleNearChunk(ServerPlayer player, int radius, RandomSource random) {
+        int chunkX = player.chunkPosition().x + random.nextInt(radius * 2 + 1) - radius;
+        int chunkZ = player.chunkPosition().z + random.nextInt(radius * 2 + 1) - radius;
+        return chunkKey(chunkX, chunkZ);
+    }
+
+    private static long sampleFarChunk(ServerLevel level, ServerPlayer player, int radius, long gameTime, RandomSource random) {
+        int farRadius = Math.min(MAX_CHUNK_RADIUS * FAR_RADIUS_MULTIPLIER, radius * FAR_RADIUS_MULTIPLIER + FAR_RADIUS_PADDING);
+        int minFarRadius = Math.max(radius + 1, farRadius - FAR_RING_THICKNESS);
+        int timeSlice = (int) (gameTime / FAR_TIME_SLICE_TICKS);
+        int angleBucket = Math.floorMod(timeSlice + player.getId(), 8);
+        int[] direction = switch (angleBucket) {
+            case 0 -> new int[]{1, 0};
+            case 1 -> new int[]{1, 1};
+            case 2 -> new int[]{0, 1};
+            case 3 -> new int[]{-1, 1};
+            case 4 -> new int[]{-1, 0};
+            case 5 -> new int[]{-1, -1};
+            case 6 -> new int[]{0, -1};
+            default -> new int[]{1, -1};
+        };
+
+        int distance = minFarRadius + random.nextInt(Math.max(1, farRadius - minFarRadius + 1));
+        int chunkX = player.chunkPosition().x + direction[0] * distance + random.nextInt(FAR_RING_THICKNESS * 2 + 1) - FAR_RING_THICKNESS;
+        int chunkZ = player.chunkPosition().z + direction[1] * distance + random.nextInt(FAR_RING_THICKNESS * 2 + 1) - FAR_RING_THICKNESS;
+        return chunkKey(chunkX, chunkZ);
     }
 
     private static void refillPositionQueues(ServerLevel level, int playerCount, SolarStage stage, RandomSource random) {

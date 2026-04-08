@@ -7,10 +7,9 @@ import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.BambooSaplingBlock;
 import net.minecraft.world.level.block.BambooStalkBlock;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.setBlock;
+import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.destroyBlockWithDrops;
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformConditions.*;
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.when;
 
@@ -35,11 +34,11 @@ public class BambooDecay {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
             when(BAMBOO_TOP.and(stageExact(SolarStage.STAGE_2)).and(sky()).and(noRain()).and(randomDayRate()),
-                    setBlock(Blocks.FIRE)),
+                    destroyBlockWithDrops()),
             when(BAMBOO_TOP.and(stageExact(SolarStage.STAGE_3)).and(aboveSafeHeight()),
-                    setBlock(Blocks.FIRE)),
+                    destroyBlockWithDrops()),
             when(BAMBOO_TOP.and(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6)).and(aboveSafeHeight()),
-                    setBlock(Blocks.FIRE))
+                    destroyBlockWithDrops())
     );
 
     private BambooDecay() {}

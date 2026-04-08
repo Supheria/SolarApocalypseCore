@@ -250,7 +250,7 @@ public class SolarApocalypseCoreMod {
         // 冰类
         if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMelt.TRANSFORM;
         // 水
-        if (ref.is(FluidTags.WATER.location()) && notExcluded(ref)) return WaterEvaporate.TRANSFORM;
+        if (ref.is(FluidTags.WATER.location()) && blockState.getFluidState().isSource() && notExcluded(ref)) return WaterEvaporate.TRANSFORM;
         // 含水方块（当前处于含水状态）
         if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)
                 && blockState.getValue(BlockStateProperties.WATERLOGGED)
@@ -426,7 +426,7 @@ public class SolarApocalypseCoreMod {
         // 冰类
         if (ref.is(BlockTags.ICE) && notExcluded(ref)) return IceMelt.TRANSFORM;
         // 水
-        if (ref.is(FluidTags.WATER.location()) && notExcluded(ref)) return WaterEvaporate.TRANSFORM;
+        if (ref.is(FluidTags.WATER.location()) && blockState.getFluidState().isSource() && notExcluded(ref)) return WaterEvaporate.TRANSFORM;
         // 含水方块（当前处于含水状态）
         if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)
                 && blockState.getValue(BlockStateProperties.WATERLOGGED)

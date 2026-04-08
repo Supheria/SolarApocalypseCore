@@ -8,7 +8,6 @@ import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformActions.*;
@@ -24,9 +23,8 @@ public class LeavesWither {
     private static final java.util.function.Predicate<BlockState> IS_LEAVES =
             bs -> bs.is(BlockTags.LEAVES);
 
-    /** 向4邻扩散火焰。 */
-    private static final TransformAction FIRE_4H =
-            spread4H(Blocks.FIRE.defaultBlockState(), IS_LEAVES);
+    /** 中心及4邻树叶直接掉落并销毁。 */
+    private static final TransformAction FIRE_4H = destroyCenterAnd4HWithDrops(IS_LEAVES);
 
     /** 天空可见 或 正上方是枯萎树叶。 */
     private static final TransformCondition SKY_OR_WITHER_ABOVE =
@@ -58,12 +56,12 @@ public class LeavesWither {
             // 阶段3-5（枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 概率 → 上方点火
             when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(IS_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
                             .and(randomDayWood()),
-                    setBlockAbove(Blocks.FIRE)),
+                    destroyBlockWithDrops()),
 
-            // 阶段2（枯萎叶）：白天 + 不下雨 + 高于安全高度 + 慢速概率 → 点火
+            // 阶段2（枯萎叶）：白天 + 不下雨 + 高于安全高度 + 慢速概率 → 掉落并销毁
             when(stageExact(SolarStage.STAGE_2).and(IS_WITHERED).and(SOFT_BASE_2).and(aboveSafeHeight())
                             .and(randomDayWoodSlow()),
-                    setBlock(Blocks.FIRE)),
+                    destroyBlockWithDrops()),
 
             // 阶段3-5（非枯萎叶）：高于安全高度 + 概率 → 扩散火焰到4邻树叶
             when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(NOT_WITHERED).and(aboveSafeHeight()),

@@ -9,6 +9,7 @@ import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -84,6 +85,13 @@ public final class TransformConditions {
     public static TransformCondition noWaterAbove() {
         return (world, x, y, z, stage) ->
                 world.getBlockState(BlockPos.containing(x, y + 1, z)).getBlock() != Blocks.WATER;
+    }
+
+    /** 当前方块必须是完整水源块。 */
+    public static TransformCondition waterSource() {
+        return (world, x, y, z, stage) ->
+                world.getFluidState(BlockPos.containing(x, y, z)).is(FluidTags.WATER)
+                        && world.getFluidState(BlockPos.containing(x, y, z)).isSource();
     }
 
     /** 当前不下雨 */

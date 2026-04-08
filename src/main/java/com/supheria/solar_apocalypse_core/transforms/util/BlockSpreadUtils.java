@@ -276,8 +276,11 @@ public final class BlockSpreadUtils {
 
     public static void spreadWaterLimited(LevelAccessor world, double cx, double cy, double cz, int[][] offsets, int budget) {
         BlockPos center = BlockPos.containing(cx, cy, cz);
-        setBlockIfChanged(world, center, AIR);
-        visitLimitedOffsets(world, center, offsets, budget, pos -> world.getFluidState(pos).is(FluidTags.WATER),
+        if (world.getFluidState(center).is(FluidTags.WATER) && world.getFluidState(center).isSource()) {
+            setBlockIfChanged(world, center, AIR);
+        }
+        visitLimitedOffsets(world, center, offsets, budget,
+                pos -> world.getFluidState(pos).is(FluidTags.WATER) && world.getFluidState(pos).isSource(),
                 pos -> queueDelayedBlockChange(world, pos, AIR, EnvironmentalWorkType.WATER));
     }
 
@@ -323,11 +326,13 @@ public final class BlockSpreadUtils {
     }
 
     public static int countWaterNeighbors(LevelAccessor world, BlockPos center, int[][] offsets, int limit) {
-        int matches = world.getFluidState(center).is(FluidTags.WATER) ? 1 : 0;
+        int matches = world.getFluidState(center).is(FluidTags.WATER) && world.getFluidState(center).isSource() ? 1 : 0;
         if (matches >= limit) {
             return matches;
         }
-        return matches + countMatchedOffsets(world, center, offsets, pos -> world.getFluidState(pos).is(FluidTags.WATER), limit - matches);
+        return matches + countMatchedOffsets(world, center, offsets,
+                pos -> world.getFluidState(pos).is(FluidTags.WATER) && world.getFluidState(pos).isSource(),
+                limit - matches);
     }
 
     public static int countMatchingNeighbors(LevelAccessor world, BlockPos center, int[][] offsets,
