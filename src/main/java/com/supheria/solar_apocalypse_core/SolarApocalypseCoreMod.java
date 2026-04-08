@@ -187,10 +187,14 @@ public class SolarApocalypseCoreMod {
                 && !(block instanceof LeavesBlock)) {
             return SimpleDecay.TRANSFORM;
         }
-        // 小型植物（树苗、竹子）
-        if ((ref.is(BlockTags.SAPLINGS)
-                || block instanceof BambooSaplingBlock
+        // 竹子（仅从顶部开始转换，避免中段删除导致整列掉落）
+        if ((block instanceof BambooSaplingBlock
                 || block instanceof BambooStalkBlock)
+                && !ref.is(BlockTags.LEAVES) && notExcluded(ref)) {
+            return BambooDecay.TRANSFORM;
+        }
+        // 小型植物（树苗等）
+        if (ref.is(BlockTags.SAPLINGS)
                 && !ref.is(BlockTags.LEAVES) && notExcluded(ref)) {
             return SmallPlantDecay.TRANSFORM;
         }
@@ -359,10 +363,14 @@ public class SolarApocalypseCoreMod {
                 && !(block instanceof LeavesBlock)) {
             return SimpleDecay.TRANSFORM;
         }
-        // 小型植物（树苗、竹子）
-        if ((ref.is(BlockTags.SAPLINGS)
-                || block instanceof BambooSaplingBlock
+        // 竹子（仅从顶部开始转换，避免中段删除导致整列掉落）
+        if ((block instanceof BambooSaplingBlock
                 || block instanceof BambooStalkBlock)
+                && !ref.is(BlockTags.LEAVES) && notExcluded(ref)) {
+            return BambooDecay.TRANSFORM;
+        }
+        // 小型植物（树苗等）
+        if (ref.is(BlockTags.SAPLINGS)
                 && !ref.is(BlockTags.LEAVES) && notExcluded(ref)) {
             return SmallPlantDecay.TRANSFORM;
         }

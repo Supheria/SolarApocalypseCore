@@ -11,6 +11,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.Snowball;
@@ -27,6 +28,9 @@ public class EntityFireHandler {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide()) {
+            return;
+        }
         execute(event.getEntity().level(), event.getEntity().getY(), event.getEntity());
     }
 
@@ -52,6 +56,12 @@ public class EntityFireHandler {
         float fireDamage = StageHeightConfig.getFireDamage(stage);
 
         if (fireSeconds <= 0 || fireDamage <= 0.0f) {
+            return;
+        }
+
+        if (entity instanceof ItemEntity) {
+            entity.setSecondsOnFire(Math.max(fireSeconds, 30));
+            entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), fireDamage);
             return;
         }
 
