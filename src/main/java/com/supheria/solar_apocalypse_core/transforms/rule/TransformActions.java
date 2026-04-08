@@ -281,7 +281,7 @@ public final class TransformActions {
     /** 将当前方块正上方一格设为指定方块（不影响当前方块本身）。 */
     public static TransformAction setBlockAbove(Block target) {
         return (world, x, y, z) ->
-                world.setBlock(BlockPos.containing(x, y + 1, z), target.defaultBlockState(), 3);
+                BlockSpreadUtils.setBlockIfChanged(world, BlockPos.containing(x, y + 1, z), target.defaultBlockState());
     }
 
     /** 将中心及水流体邻居（按 offsets 扩散）全部设为 AIR（水蒸发扩散）。 */

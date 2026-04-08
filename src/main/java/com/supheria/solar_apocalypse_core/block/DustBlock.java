@@ -1,11 +1,6 @@
 package com.supheria.solar_apocalypse_core.block;
 
 import com.supheria.solar_apocalypse_core.init.SolarModBlocks;
-import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
@@ -24,7 +19,7 @@ import java.util.Collections;
 public class DustBlock extends FallingBlock {
     public DustBlock() {
         super(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.SNARE).mapColor(MapColor.SAND).sound(SoundType.SAND)
-                .strength(0.4f, 0.4f).speedFactor(0.8f).jumpFactor(0.9f).randomTicks());
+                .strength(0.4f, 0.4f).speedFactor(0.8f).jumpFactor(0.9f));
     }
 
     @Override
@@ -43,15 +38,5 @@ public class DustBlock extends FallingBlock {
         if (!dropsOriginal.isEmpty())
             return dropsOriginal;
         return Collections.singletonList(new ItemStack(SolarModBlocks.DUST.get()));
-    }
-
-    @Override
-    public void randomTick(BlockState blockstate, ServerLevel level, BlockPos pos, RandomSource random) {
-        super.randomTick(blockstate, level, pos, random);
-        Player entity = Minecraft.getInstance().player;
-        int x = pos.getX();
-        int y = pos.getY();
-        int z = pos.getZ();
-        DirtChain.DUST.call(level, x, y, z);
     }
 }

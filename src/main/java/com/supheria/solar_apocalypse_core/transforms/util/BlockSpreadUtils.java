@@ -369,9 +369,16 @@ public final class BlockSpreadUtils {
     }
 
     public static void setBlockIfChanged(LevelAccessor world, BlockPos pos, BlockState target) {
-        if (!world.getBlockState(pos).equals(target)) {
-            MineCollapseBridge.setBlockWithCurrentSource(world, pos, target);
+        if (world.getBlockState(pos).equals(target)) {
+            return;
         }
+
+        if (target.is(Blocks.FIRE)) {
+            queueDelayedBlockChange(world, pos, target, EnvironmentalWorkType.FIRE);
+            return;
+        }
+
+        MineCollapseBridge.setBlockWithCurrentSource(world, pos, target);
     }
 
     public static void queueDelayedBlockChange(LevelAccessor world, BlockPos pos, BlockState target, EnvironmentalWorkType workType) {

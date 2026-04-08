@@ -1,11 +1,5 @@
-
 package com.supheria.solar_apocalypse_core.block;
 
-import com.supheria.solar_apocalypse_core.transforms.plant.LeavesWither;
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.material.MapColor;
@@ -50,18 +44,4 @@ public class WitheredLeavesBlock extends LeavesBlock {
 		return Collections.singletonList(new ItemStack(this, 1));
 	}
 
-	@Override
-	public boolean isRandomlyTicking(BlockState state) {
-		return true;
-	}
-
-	@Override
-	public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-		super.randomTick(state, level, pos, random);
-		Player entity = Minecraft.getInstance().player;
-		int x = pos.getX();
-		int y = pos.getY();
-		int z = pos.getZ();
-		LeavesWither.TRANSFORM.call(level, x, y, z);
-	}
 }

@@ -3,7 +3,6 @@ package com.supheria.solar_apocalypse_core.block;
 import com.supheria.solar_apocalypse_core.transforms.fluid.SnowMelt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -34,11 +33,5 @@ public class FallingSnowBlock extends FallingBlock {
             return;
         }
         super.onLand(level, pos, fallingState, replacedState, fallingBlock);
-    }
-
-    @Override
-    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        super.randomTick(state, level, pos, random);
-        SnowMelt.triggerVisibleFall(level, pos, state);
     }
 }

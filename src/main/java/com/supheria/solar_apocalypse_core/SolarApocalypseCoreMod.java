@@ -36,6 +36,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import java.util.function.Supplier;
 import java.util.function.Function;
 import java.util.function.BiConsumer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.List;
 import java.util.Collection;
@@ -57,6 +59,8 @@ import java.util.AbstractMap;
 public class SolarApocalypseCoreMod {
     public static final Logger LOGGER = LogManager.getLogger(SolarApocalypseCoreMod.class);
     public static final String MOD_ID = "solar_apocalypse_core";
+    private static final Map<BlockState, BlockTransform> BLOCK_TRANSFORM_CACHE = new ConcurrentHashMap<>();
+    private static final Map<BlockState, BlockTransform> ON_PLACE_TRANSFORM_CACHE = new ConcurrentHashMap<>();
 
     public SolarApocalypseCoreMod() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -132,8 +136,16 @@ public class SolarApocalypseCoreMod {
                 && !ref.is(BlockTags.NEEDS_DIAMOND_TOOL);
     }
 
+    public static BlockTransform getCachedBlockTransform(BlockState blockState) {
+        return BLOCK_TRANSFORM_CACHE.computeIfAbsent(blockState, SolarApocalypseCoreMod::getBlockTransform);
+    }
+
+    public static BlockTransform getCachedOnPlaceTransform(BlockState blockState) {
+        return ON_PLACE_TRANSFORM_CACHE.computeIfAbsent(blockState, SolarApocalypseCoreMod::getNBlockTransform);
+    }
+
     /**
-     * 为支持 randomTick 的方块状态选择一条灾变转换规则。
+     * 为可参与太阳环境调度的方块状态选择一条灾变转换规则。
      *
      * <p>这里的判断顺序本身就是优先级：一旦前面的分类命中，后续更具体或更宽泛的分类都不会再参与。
      * 因此该方法既是规则入口，也是规则冲突的裁决点。

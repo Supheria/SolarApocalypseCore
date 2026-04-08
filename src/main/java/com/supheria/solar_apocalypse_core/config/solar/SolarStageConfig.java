@@ -49,8 +49,12 @@ public final class SolarStageConfig {
     /**
      * 各阶段对应的 randomTickSpeed。
      * 下标按 STAGE_1 ~ STAGE_6 顺序排列；NONE 与未初始化状态回退到第一档。
+     *
+     * <p>本模组会把大量方块接入自定义环境 random tick，因此第三阶段后如果继续维持
+     * 8~10 的高档位，服务端主线程容易被方块更新挤占，进而让实体移动、受击和 AI
+     * 表现出明显卡顿。这里收敛中后期档位，优先保证实体更新稳定。</p>
      */
-    private static final int[] RANDOM_TICKING_LEVELS = {4, 5, 8, 9, 10, 10};
+    private static final int[] RANDOM_TICKING_LEVELS = {4, 5, 5, 6, 7, 7};
     /** 各阶段通用转换触发率。 */
     private static final double[] STAGE_TRANSFORM_RATES = {0.22, 0.35, 0.5, 0.68, 0.82, 1.0};
     /** 各阶段通用单次扩散预算。 */
