@@ -1,5 +1,8 @@
 package com.supheria.solar_apocalypse_core.transforms.util;
 
+import com.supheria.solar_apocalypse_core.environment.EnvironmentalDirtyTracker;
+import com.supheria.solar_apocalypse_core.environment.EnvironmentalWorkType;
+import com.supheria.solar_apocalypse_core.integration.minecollapse.MineCollapseBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -102,7 +105,7 @@ public final class BlockSpreadUtils {
         BlockPos center = BlockPos.containing(cx, cy, cz);
         setBlockIfChanged(world, center, target);
         visitLimitedOffsets(world, center, offsets, budget, pos -> neighborPredicate.test(world.getBlockState(pos)),
-                pos -> setBlockIfChanged(world, pos, target));
+                pos -> queueDelayedBlockChange(world, pos, target, inferWorkType(target)));
     }
 
     public static void spreadBlockSameLayerFirstLimited(LevelAccessor world, double cx, double cy, double cz,
@@ -112,7 +115,7 @@ public final class BlockSpreadUtils {
         setBlockIfChanged(world, center, target);
         visitLimitedOffsetsSameLayerFirst(world, center, offsets, budget,
                 pos -> neighborPredicate.test(world.getBlockState(pos)),
-                pos -> setBlockIfChanged(world, pos, target));
+                pos -> queueDelayedBlockChange(world, pos, target, inferWorkType(target)));
     }
 
     public static void spreadBlockLimited(LevelAccessor world, double cx, double cy, double cz,
@@ -126,7 +129,7 @@ public final class BlockSpreadUtils {
                                               int[][] offsets, int budget) {
         BlockPos center = BlockPos.containing(cx, cy, cz);
         visitLimitedOffsets(world, center, offsets, budget, pos -> neighborPredicate.test(world.getBlockState(pos)),
-                pos -> setBlockIfChanged(world, pos, target));
+                pos -> queueDelayedBlockChange(world, pos, target, inferWorkType(target)));
     }
 
     public static void spreadNeighborsLimited(LevelAccessor world, double cx, double cy, double cz,
@@ -258,7 +261,7 @@ public final class BlockSpreadUtils {
         for (int[] o : offsets) {
             BlockPos neighbor = center.offset(o[0], o[1], o[2]);
             if (neighborPredicate.test(world.getBlockState(neighbor))) {
-                setBlockIfChanged(world, neighbor, target);
+                queueDelayedBlockChange(world, neighbor, target, inferWorkType(target));
             }
         }
     }
@@ -275,7 +278,7 @@ public final class BlockSpreadUtils {
         BlockPos center = BlockPos.containing(cx, cy, cz);
         setBlockIfChanged(world, center, AIR);
         visitLimitedOffsets(world, center, offsets, budget, pos -> world.getFluidState(pos).is(FluidTags.WATER),
-                pos -> setBlockIfChanged(world, pos, AIR));
+                pos -> queueDelayedBlockChange(world, pos, AIR, EnvironmentalWorkType.WATER));
     }
 
     public static void spreadWaterLimited(LevelAccessor world, double cx, double cy, double cz, int[][] offsets) {
@@ -287,7 +290,7 @@ public final class BlockSpreadUtils {
             setBlockIfChanged(world, center, ICE);
         }
         visitLimitedOffsets(world, center, offsets, budget, pos -> isSurfaceWater(world, pos),
-                pos -> setBlockIfChanged(world, pos, ICE));
+                pos -> queueDelayedBlockChange(world, pos, ICE, EnvironmentalWorkType.ICE));
     }
 
     public static void freezeSurfaceWaterLimited(LevelAccessor world, BlockPos center, int[][] offsets) {
@@ -367,8 +370,29 @@ public final class BlockSpreadUtils {
 
     public static void setBlockIfChanged(LevelAccessor world, BlockPos pos, BlockState target) {
         if (!world.getBlockState(pos).equals(target)) {
-            world.setBlock(pos, target, 3);
+            MineCollapseBridge.setBlockWithCurrentSource(world, pos, target);
         }
+    }
+
+    public static void queueDelayedBlockChange(LevelAccessor world, BlockPos pos, BlockState target, EnvironmentalWorkType workType) {
+        EnvironmentalDirtyTracker.queueBlockChange(world, pos, target, workType);
+    }
+
+    public static EnvironmentalWorkType inferWorkType(BlockState target) {
+        if (target.is(Blocks.WATER) || target.isAir()) {
+            return EnvironmentalWorkType.SURFACE;
+        }
+        if (target.is(Blocks.ICE) || target.is(Blocks.PACKED_ICE) || target.is(Blocks.BLUE_ICE) || target.is(Blocks.FROSTED_ICE)) {
+            return EnvironmentalWorkType.ICE;
+        }
+        if (target.is(Blocks.FIRE)) {
+            return EnvironmentalWorkType.FIRE;
+        }
+        if (target.is(Blocks.COBBLESTONE) || target.is(Blocks.COBBLED_DEEPSLATE) || target.is(Blocks.GRAVEL)
+                || target.is(Blocks.LAVA) || target.is(Blocks.TERRACOTTA) || target.is(Blocks.OBSIDIAN)) {
+            return EnvironmentalWorkType.STONE;
+        }
+        return EnvironmentalWorkType.SURFACE;
     }
 
     /**

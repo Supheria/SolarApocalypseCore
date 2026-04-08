@@ -3,6 +3,7 @@ package com.supheria.solar_apocalypse_core.mixin;
 import com.supheria.solar_apocalypse_core.client.CollapsePhaseState;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biome.Precipitation;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -42,6 +43,26 @@ public abstract class BiomeGetTemperatureMixin {
 		try {
 			if (CollapsePhaseState.isInCollapse()) {
 				cir.setReturnValue(true);
+			}
+		} catch (Exception e) {
+		}
+	}
+
+	@Inject(method = "coldEnoughToSnow(Lnet/minecraft/core/BlockPos;)Z", at = @At("HEAD"), cancellable = true)
+	private void onColdEnoughToSnow(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+		try {
+			if (CollapsePhaseState.isInCollapse()) {
+				cir.setReturnValue(true);
+			}
+		} catch (Exception e) {
+		}
+	}
+
+	@Inject(method = "getPrecipitationAt(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/biome/Biome$Precipitation;", at = @At("HEAD"), cancellable = true)
+	private void onGetPrecipitationAt(BlockPos pos, CallbackInfoReturnable<Precipitation> cir) {
+		try {
+			if (CollapsePhaseState.isInCollapse()) {
+				cir.setReturnValue(Precipitation.SNOW);
 			}
 		} catch (Exception e) {
 		}

@@ -77,8 +77,9 @@ public class StageTickHandler {
         }
 
         // 第六阶段转入坍缺后强制降水，与冻伤和水源恢复规则共同塑造恒冬环境。
-        if (phase.isCollapsePhase()) {
-            world.getLevelData().setRaining(true);
+        if (phase.isCollapsePhase() && world instanceof ServerLevel level) {
+            level.setWeatherParameters(0, Integer.MAX_VALUE, true, false);
+            level.getLevelData().setRaining(true);
         }
     }
 

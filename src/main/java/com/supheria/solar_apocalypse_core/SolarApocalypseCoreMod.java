@@ -146,7 +146,7 @@ public class SolarApocalypseCoreMod {
         // 这些规则优先于木材、泥土、石头等长链规则，避免被后续通用分类截获。
         // 雪类
         if ((block == Blocks.SNOW_BLOCK || block == Blocks.SNOW) && notExcluded(ref)) {
-            return SimpleDecay.TRANSFORM;
+            return SnowMelt.FALL_CHECK_TRANSFORM;
         }
         // 简单删除类（杂草、花朵、旗帜、蜡烛、床、珊瑚等）
         if ((ref.is(SolarModTags.Blocks.SIMPLE_DELETE)
@@ -322,7 +322,7 @@ public class SolarApocalypseCoreMod {
         if (block instanceof EndPortalFrameBlock) return EndFrameClear.TRANSFORM;
         // 雪类
         if ((block == Blocks.SNOW_BLOCK || block == Blocks.SNOW) && notExcluded(ref)) {
-            return SimpleDecay.TRANSFORM;
+            return SnowMelt.FALL_CHECK_TRANSFORM;
         }
         // 简单删除类（杂草、花朵、旗帜、蜡烛、床、珊瑚等）
         if ((ref.is(SolarModTags.Blocks.SIMPLE_DELETE)

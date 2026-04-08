@@ -1,8 +1,6 @@
 package com.supheria.solar_apocalypse_core.mixin;
 
-import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.fluid.SnowMelt;
-import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +22,7 @@ public abstract class SnowLayerMixin {
     @Inject(method = "canSurvive", at = @At("HEAD"), cancellable = true)
     private void solar$allowStage6Settling(BlockState state, LevelReader world, BlockPos pos,
             CallbackInfoReturnable<Boolean> cir) {
-        if (world instanceof ServerLevel serverLevel && isStage6(serverLevel) && !SnowMelt.canSnowSurviveAt(world, pos)) {
+        if (world instanceof ServerLevel && !SnowMelt.canSnowSurviveAt(world, pos)) {
             cir.setReturnValue(true);
         }
     }
@@ -32,15 +30,11 @@ public abstract class SnowLayerMixin {
     @Inject(method = "updateShape(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", at = @At("HEAD"), cancellable = true)
     private void solar$settleOnSupportChange(BlockState state, Direction direction, BlockState neighborState,
             LevelAccessor level, BlockPos pos, BlockPos neighborPos, CallbackInfoReturnable<BlockState> cir) {
-        if (!(level instanceof ServerLevel serverLevel) || !isStage6(serverLevel) || SnowMelt.canSnowSurviveAt(level, pos)) {
+        if (!(level instanceof ServerLevel serverLevel) || SnowMelt.canSnowSurviveAt(level, pos)) {
             return;
         }
 
-        SnowMelt.triggerVisibleFall(serverLevel, pos, state);
+        SnowMelt.triggerVisibleFallAnyStage(serverLevel, pos, state);
         cir.setReturnValue(level.getBlockState(pos));
-    }
-
-    private boolean isStage6(ServerLevel serverLevel) {
-        return SolarModVariables.MapVariables.get(serverLevel).getSolarStage() == SolarStage.STAGE_6;
     }
 }

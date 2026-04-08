@@ -43,9 +43,8 @@ public class CollapsePhaseHandler {
         if (!(world instanceof ServerLevel serverLevel)) {
             return;
         }
-        if (!serverLevel.isRaining()) {
-            serverLevel.getLevelData().setRaining(true);
-        }
+        serverLevel.setWeatherParameters(0, Integer.MAX_VALUE, true, false);
+        serverLevel.getLevelData().setRaining(true);
         if (serverLevel.players().isEmpty()) {
             return;
         }

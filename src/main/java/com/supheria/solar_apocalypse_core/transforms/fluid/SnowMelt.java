@@ -26,12 +26,20 @@ import org.jetbrains.annotations.Nullable;
 public class SnowMelt {
 
     public static final BlockTransform TRANSFORM = SnowMelt::transform;
+    public static final BlockTransform FALL_CHECK_TRANSFORM = SnowMelt::checkUnsupportedSnow;
 
     private static final int MAX_STACKED_SNOW_BLOCKS = 8;
     private static final int MAX_SNOW_LAYERS = 8;
 
     private static void transform(LevelAccessor world, double x, double y, double z) {
         processBudgeted(world, BlockPos.containing(x, y, z), SolarStageConfig.getCollapseSnowStepBudget());
+    }
+
+    private static void checkUnsupportedSnow(LevelAccessor world, double x, double y, double z) {
+        if (world instanceof ServerLevel serverLevel) {
+            BlockPos pos = BlockPos.containing(x, y, z);
+            triggerVisibleFallAnyStage(serverLevel, pos, world.getBlockState(pos));
+        }
     }
 
     public static void processBudgeted(LevelAccessor world, BlockPos startPos, int stepBudget) {
@@ -63,6 +71,10 @@ public class SnowMelt {
         if (!isStage6(level)) {
             return false;
         }
+        return triggerVisibleFallAnyStage(level, pos, state);
+    }
+
+    public static boolean triggerVisibleFallAnyStage(ServerLevel level, BlockPos pos, BlockState state) {
 
         int mass = getSnowMass(state);
         if (mass <= 0 || state.is(SolarModBlocks.FALLING_SNOW.get())) {

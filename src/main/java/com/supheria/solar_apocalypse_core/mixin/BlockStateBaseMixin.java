@@ -11,10 +11,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.google.common.collect.ImmutableMap;
 import com.supheria.solar_apocalypse_core.BlockTransform;
 import com.supheria.solar_apocalypse_core.SolarApocalypseCoreMod;
+import com.supheria.solar_apocalypse_core.integration.minecollapse.MineCollapseBridge;
 import com.supheria.solar_apocalypse_core.init.SolarModTags;
-import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.transforms.fluid.SnowMelt;
-import com.supheria.solar_apocalypse_core.world.SolarStage;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
@@ -107,7 +106,8 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
             int x = pos.getX();
             int y = pos.getY();
             int z = pos.getZ();
-            this.solar$procedure.call(level, x, y, z);
+            MineCollapseBridge.withSolarSource(MineCollapseBridge.SOURCE_SOLAR_RANDOM_TICK,
+                    () -> this.solar$procedure.call(level, x, y, z));
         }
 
         triggerStage6SnowBlockFall(level, pos, this.asState());
@@ -143,7 +143,8 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
                 int x = pos.getX();
                 int y = pos.getY();
                 int z = pos.getZ();
-                this.solar$onPlaceProcedure.call(level, x, y, z);
+                MineCollapseBridge.withSolarSource(MineCollapseBridge.SOURCE_SOLAR_SPREAD,
+                        () -> this.solar$onPlaceProcedure.call(level, x, y, z));
             } finally {
                 solar$isExecutingOnPlace.set(false);
             }
@@ -161,9 +162,8 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
     @Unique
     private static boolean triggerStage6SnowBlockFall(ServerLevel level, BlockPos pos, BlockState state) {
         return state.is(Blocks.SNOW_BLOCK)
-                && SolarModVariables.MapVariables.get(level).getSolarStage() == SolarStage.STAGE_6
                 && level.getBlockState(pos.below()).isAir()
-                && SnowMelt.triggerVisibleFall(level, pos, state);
+                && SnowMelt.triggerVisibleFallAnyStage(level, pos, state);
     }
 
     @Unique
@@ -173,6 +173,7 @@ public abstract class BlockStateBaseMixin extends StateHolder<Block, BlockState>
         }
         return state.is(Blocks.WATER)
                 || state.is(Blocks.BUBBLE_COLUMN)
+                || state.is(Blocks.SNOW_BLOCK)
                 || state.is(Blocks.ICE)
                 || state.is(Blocks.PACKED_ICE)
                 || state.is(Blocks.BLUE_ICE)

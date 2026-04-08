@@ -56,7 +56,7 @@ public abstract class LevelRendererMixin {
     @Unique
     private static final float STAGE_5_SCALE = 10.6F;
     @Unique
-    private static final float STAGE_6_SCALE = 13.0F;
+    private static final float STAGE_6_SCALE = 0.7F;
 
     @Inject(method="renderSky", at = @At("HEAD"))
     private void onRendersky(PoseStack p_202424_, Matrix4f p_254034_, float p_202426_, Camera p_202427_, boolean p_202428_, Runnable p_202429_, CallbackInfo ci){
@@ -65,8 +65,8 @@ public abstract class LevelRendererMixin {
             return;
         }
 
-        SolarStage solarFlare = SolarStageHelper.getPhaseByDayTime(level.dayTime());
-        SolarStage currentPhase = solarFlare;
+        SolarStage currentPhase = SolarModVariables.MapVariables.get(level).getSolarStage();
+        SolarStage solarFlare = currentPhase.isAtLeast(SolarStage.STAGE_1) ? currentPhase : SolarStageHelper.getPhaseByDayTime(level.dayTime());
 
         SUN_LOCATION = getSunTexture(solarFlare);
 
@@ -124,8 +124,10 @@ public abstract class LevelRendererMixin {
             return STAGE_1_START_SCALE;
         }
 
-        long dayTime = level.dayTime();
-        SolarStage currentStage = SolarStageHelper.getPhaseByDayTime(dayTime);
+        SolarStage currentStage = SolarModVariables.MapVariables.get(level).getSolarStage();
+        if (!currentStage.isAtLeast(SolarStage.STAGE_1)) {
+            currentStage = SolarStageHelper.getPhaseByDayTime(level.dayTime());
+        }
 
         return switch (currentStage) {
             case STAGE_1 -> STAGE_1_START_SCALE;
