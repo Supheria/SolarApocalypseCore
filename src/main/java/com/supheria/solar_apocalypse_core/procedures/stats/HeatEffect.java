@@ -29,6 +29,7 @@ import net.minecraftforge.fml.common.Mod;
 public class HeatEffect {
     private static final int DEHYDRATION_REFRESH_INTERVAL = 40;
     private static final int DEHYDRATION_DURATION = 100;
+    private static final int HEAT_DAMAGE_INTERVAL = 20;
     private static final int EFFECT_LEVEL_1 = 0;
     private static final int EFFECT_LEVEL_2 = 1;
 
@@ -60,6 +61,10 @@ public class HeatEffect {
             applyDehydrationEffects(livingEntity, stage);
         }
 
+        if (livingEntity.tickCount % HEAT_DAMAGE_INTERVAL != 0) {
+            return;
+        }
+
         if (y <= StageHeightConfig.getSafeHeight(stage)) {
             return;
         }
@@ -75,7 +80,7 @@ public class HeatEffect {
             return;
         }
 
-        entity.setSecondsOnFire(fireSeconds);
+        entity.setSecondsOnFire(Math.max(fireSeconds, 2));
         entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.ON_FIRE)), fireDamage);
     }
 

@@ -45,6 +45,8 @@ public final class SolarStageConfig {
     public static final float COLLAPSE_BIOME_TEMPERATURE = -0.5f;
     /** 坍缺期天空最小变暗值。 */
     public static final int COLLAPSE_MIN_SKY_DARKEN = 11;
+    /** 玩家重新放水时，清理假空气的球形半径。 */
+    public static final int EVAPORATED_VOID_WATER_CLEANUP_RADIUS = 15;
 
     /**
      * 各阶段对应的 randomTickSpeed。
@@ -54,13 +56,13 @@ public final class SolarStageConfig {
      * 8~10 的高档位，服务端主线程容易被方块更新挤占，进而让实体移动、受击和 AI
      * 表现出明显卡顿。这里收敛中后期档位，优先保证实体更新稳定。</p>
      */
-    private static final int[] RANDOM_TICKING_LEVELS = {4, 5, 5, 6, 7, 7};
-    /** 各阶段通用转换触发率。 */
-    private static final double[] STAGE_TRANSFORM_RATES = {0.22, 0.35, 0.56, 0.75, 0.9, 1.0};
-    /** 各阶段通用单次扩散预算。 */
-    private static final int[] STAGE_SPREAD_BUDGETS = {2, 3, 5, 7, 9, 10};
-    /** 水蒸发链的单次扩散预算。 */
-    private static final int[] WATER_SPREAD_BUDGETS = {3, 4, 7, 10, 13, 16};
+    private static final int UNIFORM_RANDOM_TICKING_LEVEL = 5;
+    /** 各阶段转换触发率。后期阶段适当提高，恢复阶段性推进速度。 */
+    private static final double[] STAGE_TRANSFORM_RATES = {0.22, 0.38, 0.62, 0.82, 0.96, 1.0};
+    /** 各阶段通用单次扩散预算。统一固定，避免高阶段主线程负载继续抬升。 */
+    private static final int UNIFORM_STAGE_SPREAD_BUDGET = 4;
+    /** 水蒸发链的单次扩散预算。统一固定，避免第五阶段水链过重。 */
+    private static final int UNIFORM_WATER_SPREAD_BUDGET = 5;
 
     public static int getStage2StartTime() {
         return STAGE_2_START_TIME;
@@ -130,15 +132,16 @@ public final class SolarStageConfig {
         return COLLAPSE_MIN_SKY_DARKEN;
     }
 
+    public static int getEvaporatedVoidWaterCleanupRadius() {
+        return EVAPORATED_VOID_WATER_CLEANUP_RADIUS;
+    }
+
     /**
      * 返回指定阶段对应的 randomTickSpeed。
      * 未初始化阶段不会返回 0，而是沿用第一阶段强度，避免阶段系统启动前出现过低刷新频率。
      */
     public static int getRandomTickingLevel(SolarStage stage) {
-        if (stage == null || !stage.isAtLeast(SolarStage.STAGE_1)) {
-            return RANDOM_TICKING_LEVELS[0];
-        }
-        return RANDOM_TICKING_LEVELS[stage.ordinal() - 1];
+        return UNIFORM_RANDOM_TICKING_LEVEL;
     }
 
     public static double getStageTransformRate(SolarStage stage) {
@@ -146,11 +149,11 @@ public final class SolarStageConfig {
     }
 
     public static int getStageSpreadBudget(SolarStage stage) {
-        return STAGE_SPREAD_BUDGETS[getStageIndex(stage)];
+        return UNIFORM_STAGE_SPREAD_BUDGET;
     }
 
     public static int getWaterSpreadBudget(SolarStage stage) {
-        return WATER_SPREAD_BUDGETS[getStageIndex(stage)];
+        return UNIFORM_WATER_SPREAD_BUDGET;
     }
 
     private static int getStageIndex(SolarStage stage) {

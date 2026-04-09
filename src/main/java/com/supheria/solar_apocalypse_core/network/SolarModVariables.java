@@ -49,6 +49,7 @@ public class SolarModVariables {
 	@SubscribeEvent
 	public static void init(FMLCommonSetupEvent event) {
 		SolarApocalypseCoreMod.addNetworkMessage(SavedDataSyncMessage.class, SavedDataSyncMessage::buffer, SavedDataSyncMessage::new, SavedDataSyncMessage::handler);
+		SolarApocalypseCoreMod.addNetworkMessage(ClientRenderDistanceSyncMessage.class, ClientRenderDistanceSyncMessage::buffer, ClientRenderDistanceSyncMessage::new, ClientRenderDistanceSyncMessage::handler);
 	}
 
 	/**

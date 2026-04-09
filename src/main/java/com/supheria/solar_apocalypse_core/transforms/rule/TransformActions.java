@@ -91,9 +91,20 @@ public final class TransformActions {
                 SolarStageConfig.getWaterSpreadBudget(getSolarStage(world)));
     }
 
+    public static TransformAction spreadWaterRateLimited(int[][] offsets, BlockState evaporatedState) {
+        return (world, x, y, z) -> BlockSpreadUtils.spreadWaterLimited(world, x, y, z, offsets,
+                SolarStageConfig.getWaterSpreadBudget(getSolarStage(world)), evaporatedState);
+    }
+
     public static TransformAction spreadWaterRateLimited(int[][] offsets, ToIntFunction<SolarStage> budgetProvider) {
         return (world, x, y, z) -> BlockSpreadUtils.spreadWaterLimited(world, x, y, z, offsets,
                 budgetProvider.applyAsInt(getSolarStage(world)));
+    }
+
+    public static TransformAction spreadWaterRateLimited(int[][] offsets, ToIntFunction<SolarStage> budgetProvider,
+                                                         BlockState evaporatedState) {
+        return (world, x, y, z) -> BlockSpreadUtils.spreadWaterLimited(world, x, y, z, offsets,
+                budgetProvider.applyAsInt(getSolarStage(world)), evaporatedState);
     }
 
     public static TransformAction freezeSurfaceWaterRateLimited(int[][] offsets, ToIntFunction<SolarStage> budgetProvider) {
@@ -235,6 +246,11 @@ public final class TransformActions {
     public static TransformAction spreadWaterRateLimited(int[][] offsets, double multiplier) {
         return spreadWaterRateLimited(offsets, stage -> Math.max(1,
                 (int) Math.round(SolarStageConfig.getWaterSpreadBudget(stage) * multiplier)));
+    }
+
+    public static TransformAction spreadWaterRateLimited(int[][] offsets, double multiplier, BlockState evaporatedState) {
+        return spreadWaterRateLimited(offsets, stage -> Math.max(1,
+                (int) Math.round(SolarStageConfig.getWaterSpreadBudget(stage) * multiplier)), evaporatedState);
     }
 
     public static TransformAction spread5x5RateLimited(BlockState target, Predicate<BlockState> neighborPredicate,

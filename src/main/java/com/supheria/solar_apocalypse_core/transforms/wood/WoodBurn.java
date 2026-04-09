@@ -15,11 +15,11 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class WoodBurn {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5：白天 + 露天 + 不下雨 + 概率 → 掉落并销毁
-            when(stageIsEruptionPhase().and(daytime()).and(sky()).and(noRain()).and(randomDayWood()),
+            // 阶段2-5：白天 + 露天 + 不下雨 + 快速概率 → 掉落并销毁
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(daytime()).and(sky()).and(noRain()).and(randomDayWoodFast()),
                     destroyBlockWithDrops()),
-            // 阶段2：白天 + 露天 + 不下雨 + 慢速概率 → 掉落并销毁
-            when(stageExact(SolarStage.STAGE_2).and(daytime()).and(sky()).and(noRain()).and(randomDayWoodSlow()),
+            // 阶段1：白天 + 露天 + 不下雨 + 概率 → 掉落并销毁
+            when(stageExact(SolarStage.STAGE_1).and(daytime()).and(sky()).and(noRain()).and(randomDayWood()),
                     destroyBlockWithDrops()),
             // 阶段3：高于安全高度 + 露天 + 慢速概率 → 掉落并销毁
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()).and(sky()).and(randomDayWoodSlow()),

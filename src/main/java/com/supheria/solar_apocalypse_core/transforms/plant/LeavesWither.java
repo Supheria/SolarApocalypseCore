@@ -43,36 +43,42 @@ public class LeavesWither {
     private static final TransformCondition SOFT_BASE_2 = daytime().and(noRain());
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
+            // 阶段2-5（非枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 快速概率 → 枯萎树叶
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(NOT_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
+                            .and(randomDayWoodFast()),
+                    setBlock(SolarModBlocks.WITHERED_LEAVES.get())),
+
             // 阶段1-5（非枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 慢速概率 → 枯萎树叶
-            when(stageIsEruptionPhase().and(NOT_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
+            when(stageExact(SolarStage.STAGE_1).and(NOT_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
                             .and(daytime()).and(randomDayWoodSlow()),
                     setBlock(SolarModBlocks.WITHERED_LEAVES.get())),
 
-            // 阶段2-5（非枯萎叶）：白天 + 不下雨 + 高于安全高度 → 枯萎树叶
+            // 阶段2-5（非枯萎叶）：白天 + 不下雨 + 高于安全高度 + 快速概率 → 枯萎树叶
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(NOT_WITHERED).and(SOFT_BASE_2)
-                            .and(aboveSafeHeight()).and(randomDayWood()),
+                            .and(aboveSafeHeight()).and(randomDayWoodFast()),
                     setBlock(SolarModBlocks.WITHERED_LEAVES.get())),
 
-            // 阶段3-5（枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 概率 → 上方点火
+            // 阶段2-5（枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 快速概率 → 掉落并销毁
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(IS_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
+                            .and(randomDayWoodFast()),
+                    destroyBlockWithDrops()),
+
+            // 阶段3-5（枯萎叶）：白天 + 天空/枯萎叶在上 + 不下雨 + 概率 → 掉落并销毁
             when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(IS_WITHERED).and(SOFT_BASE_2).and(SKY_OR_WITHER_ABOVE)
                             .and(randomDayWood()),
                     destroyBlockWithDrops()),
 
-            // 阶段2（枯萎叶）：白天 + 不下雨 + 高于安全高度 + 慢速概率 → 掉落并销毁
+            // 阶段2（枯萎叶）：白天 + 不下雨 + 高于安全高度 + 快速概率 → 掉落并销毁
             when(stageExact(SolarStage.STAGE_2).and(IS_WITHERED).and(SOFT_BASE_2).and(aboveSafeHeight())
-                            .and(randomDayWoodSlow()),
+                            .and(randomDayWoodFast()),
                     destroyBlockWithDrops()),
 
-            // 阶段3-5（非枯萎叶）：高于安全高度 + 概率 → 扩散火焰到4邻树叶
-            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(NOT_WITHERED).and(aboveSafeHeight()),
+            // 阶段2-5（枯萎叶）：扩散火焰到4邻树叶
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(IS_WITHERED),
                     FIRE_4H),
 
-            // 阶段3-5（枯萎叶）：扩散火焰到4邻树叶
-            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(IS_WITHERED),
-                    FIRE_4H),
-
-            // 阶段3-5（非枯萎叶）：高于安全高度 → 枯萎叶
-            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(NOT_WITHERED).and(aboveSafeHeight()),
+            // 阶段2-5（非枯萎叶）：高于安全高度 → 枯萎叶
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(NOT_WITHERED).and(aboveSafeHeight()),
                     setBlock(SolarModBlocks.WITHERED_LEAVES.get()))
     );
 

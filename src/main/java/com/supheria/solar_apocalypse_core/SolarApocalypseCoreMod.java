@@ -3,6 +3,7 @@ package com.supheria.solar_apocalypse_core;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
 import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.init.*;
+import com.supheria.solar_apocalypse_core.integration.weather2.Weather2StageStormHandler;
 import com.supheria.solar_apocalypse_core.transforms.dirt.DirtChain;
 import com.supheria.solar_apocalypse_core.transforms.fluid.*;
 import com.supheria.solar_apocalypse_core.transforms.misc.*;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -64,6 +66,9 @@ public class SolarApocalypseCoreMod {
 
     public SolarApocalypseCoreMod() {
         MinecraftForge.EVENT_BUS.register(this);
+        if (ModList.get().isLoaded("weather2")) {
+            MinecraftForge.EVENT_BUS.register(new Weather2StageStormHandler());
+        }
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         SolarModBlocks.REGISTRY.register(bus);

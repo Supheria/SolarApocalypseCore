@@ -46,15 +46,15 @@ public abstract class LevelRendererMixin {
     @Unique
     private Matrix4f originalCelestialMatrix;
     @Unique
-    private static final float STAGE_1_START_SCALE = 1.1F;
+    private static final float STAGE_1_START_SCALE = 1.02F;
     @Unique
-    private static final float STAGE_2_SCALE = 2.1F;
+    private static final float STAGE_2_SCALE = 1.18F;
     @Unique
-    private static final float STAGE_3_SCALE = 4.5F;
+    private static final float STAGE_3_SCALE = 1.42F;
     @Unique
-    private static final float STAGE_4_SCALE = 7.5F;
+    private static final float STAGE_4_SCALE = 1.75F;
     @Unique
-    private static final float STAGE_5_SCALE = 10.6F;
+    private static final float STAGE_5_SCALE = 2.1F;
     @Unique
     private static final float STAGE_6_SCALE = 0.7F;
 

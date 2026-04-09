@@ -27,7 +27,7 @@ public abstract class BiomeGetTemperatureMixin {
 	@Inject(method = "getTemperature(Lnet/minecraft/core/BlockPos;)F", at = @At("HEAD"), cancellable = true)
 	private void onGetTemperature(BlockPos pos, CallbackInfoReturnable<Float> cir) {
 		try {
-			if (CollapsePhaseState.isInCollapse()) {
+			if (CollapsePhaseState.isInCollapseOverworld()) {
 				cir.setReturnValue(SolarStageConfig.getCollapseBiomeTemperature());
 			}
 		} catch (Exception e) {
@@ -41,7 +41,7 @@ public abstract class BiomeGetTemperatureMixin {
 	@Inject(method = "hasPrecipitation()Z", at = @At("HEAD"), cancellable = true)
 	private void onHasPrecipitation(CallbackInfoReturnable<Boolean> cir) {
 		try {
-			if (CollapsePhaseState.isInCollapse()) {
+			if (CollapsePhaseState.isInCollapseOverworld()) {
 				cir.setReturnValue(true);
 			}
 		} catch (Exception e) {
@@ -51,7 +51,7 @@ public abstract class BiomeGetTemperatureMixin {
 	@Inject(method = "coldEnoughToSnow(Lnet/minecraft/core/BlockPos;)Z", at = @At("HEAD"), cancellable = true)
 	private void onColdEnoughToSnow(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
 		try {
-			if (CollapsePhaseState.isInCollapse()) {
+			if (CollapsePhaseState.isInCollapseOverworld()) {
 				cir.setReturnValue(true);
 			}
 		} catch (Exception e) {
@@ -61,7 +61,7 @@ public abstract class BiomeGetTemperatureMixin {
 	@Inject(method = "getPrecipitationAt(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/biome/Biome$Precipitation;", at = @At("HEAD"), cancellable = true)
 	private void onGetPrecipitationAt(BlockPos pos, CallbackInfoReturnable<Precipitation> cir) {
 		try {
-			if (CollapsePhaseState.isInCollapse()) {
+			if (CollapsePhaseState.isInCollapseOverworld()) {
 				cir.setReturnValue(Precipitation.SNOW);
 			}
 		} catch (Exception e) {

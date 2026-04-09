@@ -1,9 +1,7 @@
 package com.supheria.solar_apocalypse_core.transforms.fluid;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
-import com.supheria.solar_apocalypse_core.block.FallingSnowBlock;
 import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
-import com.supheria.solar_apocalypse_core.init.SolarModBlocks;
 import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
@@ -28,7 +26,6 @@ public class SnowMelt {
     public static final BlockTransform TRANSFORM = SnowMelt::transform;
     public static final BlockTransform FALL_CHECK_TRANSFORM = SnowMelt::checkUnsupportedSnow;
 
-    private static final int MAX_STACKED_SNOW_BLOCKS = 8;
     private static final int MAX_SNOW_LAYERS = 8;
 
     private static void transform(LevelAccessor world, double x, double y, double z) {
@@ -75,9 +72,7 @@ public class SnowMelt {
     }
 
     public static boolean triggerVisibleFallAnyStage(ServerLevel level, BlockPos pos, BlockState state) {
-
-        int mass = getSnowMass(state);
-        if (mass <= 0 || state.is(SolarModBlocks.FALLING_SNOW.get())) {
+        if (!(state.getBlock() instanceof SnowLayerBlock) && !state.is(Blocks.SNOW_BLOCK)) {
             return false;
         }
 
@@ -88,29 +83,9 @@ public class SnowMelt {
             return false;
         }
 
-        BlockState fallingState = SolarModBlocks.FALLING_SNOW.get().defaultBlockState().setValue(FallingSnowBlock.MASS, mass);
-        FallingBlockEntity fallingEntity = FallingBlockEntity.fall(level, pos, fallingState);
+        FallingBlockEntity fallingEntity = FallingBlockEntity.fall(level, pos, state);
         fallingEntity.dropItem = false;
         return true;
-    }
-
-    public static void landFallingSnow(ServerLevel level, BlockPos pos, BlockState fallingState, BlockState replacedState) {
-        int totalMass = getSnowMass(fallingState);
-        BlockState currentState = level.getBlockState(pos);
-        if (currentState.is(SolarModBlocks.FALLING_SNOW.get())) {
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-            totalMass += getSnowMass(replacedState);
-        } else {
-            int currentMass = getSnowMass(currentState);
-            totalMass += currentMass > 0 ? currentMass : getSnowMass(replacedState);
-        }
-
-        if (totalMass <= 0) {
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-            return;
-        }
-
-        depositSnowMass(level, pos, totalMass, SolarStageConfig.getCollapseSnowStepBudget());
     }
 
     public static boolean canSnowSurviveAt(LevelReader world, BlockPos pos) {
@@ -128,106 +103,6 @@ public class SnowMelt {
                 || belowState.is(Blocks.SNOW) && belowState.getValue(SnowLayerBlock.LAYERS) == MAX_SNOW_LAYERS;
     }
 
-    public static int getSnowMass(BlockState state) {
-        if (state.getBlock() instanceof SnowLayerBlock) {
-            return state.getValue(SnowLayerBlock.LAYERS);
-        }
-        if (state.is(Blocks.SNOW_BLOCK)) {
-            return MAX_SNOW_LAYERS;
-        }
-        if (state.is(SolarModBlocks.FALLING_SNOW.get())) {
-            return state.getValue(FallingSnowBlock.MASS);
-        }
-        return 0;
-    }
-
-    private static void depositSnowMass(ServerLevel level, BlockPos startPos, int totalMass, int stepBudget) {
-        BlockPos depositPos = findDepositPos(level, startPos);
-        if (depositPos == null) {
-            return;
-        }
-
-        int remainingMass = totalMass;
-        int remainingSteps = Math.max(1, stepBudget);
-        BlockPos currentPos = depositPos;
-        while (remainingMass > 0 && remainingSteps > 0) {
-            BlockState currentState = level.getBlockState(currentPos);
-            if (currentState.getBlock() instanceof SnowLayerBlock) {
-                int currentLayers = currentState.getValue(SnowLayerBlock.LAYERS);
-                int addedLayers = Math.min(remainingMass, Math.min(MAX_SNOW_LAYERS - currentLayers, remainingSteps));
-                if (addedLayers <= 0) {
-                    return;
-                }
-                int totalLayers = currentLayers + addedLayers;
-                placeSnowLayer(level, currentPos, totalLayers);
-                remainingMass -= addedLayers;
-                remainingSteps -= addedLayers;
-                if (remainingMass <= 0 || remainingSteps <= 0) {
-                    return;
-                }
-                if (totalLayers < MAX_SNOW_LAYERS) {
-                    return;
-                }
-                if (canCompressAt(level, currentPos) && remainingSteps > 0) {
-                    placeSnowBlock(level, currentPos);
-                    remainingSteps--;
-                }
-                currentPos = currentPos.above();
-                continue;
-            }
-
-            if (currentState.is(Blocks.SNOW_BLOCK)) {
-                currentPos = currentPos.above();
-                continue;
-            }
-
-            if (!currentState.isAir()) {
-                return;
-            }
-
-            if (remainingMass >= MAX_SNOW_LAYERS && canCompressAt(level, currentPos) && remainingSteps > 0) {
-                placeSnowBlock(level, currentPos);
-                remainingMass -= MAX_SNOW_LAYERS;
-                remainingSteps--;
-                currentPos = currentPos.above();
-                continue;
-            }
-
-            int placedLayers = Math.min(remainingMass, Math.min(MAX_SNOW_LAYERS, remainingSteps));
-            if (placedLayers <= 0) {
-                return;
-            }
-            placeSnowLayer(level, currentPos, placedLayers);
-            remainingMass -= placedLayers;
-            remainingSteps -= placedLayers;
-            if (remainingMass <= 0 || remainingSteps <= 0) {
-                return;
-            }
-            currentPos = currentPos.above();
-        }
-    }
-
-    private static @Nullable BlockPos findDepositPos(ServerLevel level, BlockPos startPos) {
-        BlockPos currentPos = startPos;
-        while (currentPos.getY() > level.getMinBuildHeight()) {
-            if (canSnowSurviveAt(level, currentPos)) {
-                return currentPos;
-            }
-
-            BlockPos belowPos = currentPos.below();
-            BlockState belowState = level.getBlockState(belowPos);
-            if (belowState.isAir()) {
-                currentPos = belowPos;
-                continue;
-            }
-
-            if (belowState.getBlock() instanceof SnowLayerBlock && belowState.getValue(SnowLayerBlock.LAYERS) < MAX_SNOW_LAYERS) {
-                return belowPos;
-            }
-            return null;
-        }
-        return null;
-    }
 
     private static void growOrCompressSnowLayer(LevelAccessor world, BlockPos snowPos, BlockState snowState, int remainingSteps) {
         int currentLayers = snowState.getValue(SnowLayerBlock.LAYERS);
@@ -286,22 +161,11 @@ public class SnowMelt {
     }
 
     private static boolean canContinueRising(LevelAccessor world, BlockPos topPos) {
-        BlockState topState = world.getBlockState(topPos);
-        return !topState.is(Blocks.SNOW_BLOCK) || countStackedSnowBlocks(world, topPos) < MAX_STACKED_SNOW_BLOCKS;
+        return true;
     }
 
     private static boolean canCompressAt(LevelAccessor world, BlockPos pos) {
-        return countStackedSnowBlocks(world, pos.below()) < MAX_STACKED_SNOW_BLOCKS;
-    }
-
-    private static int countStackedSnowBlocks(LevelAccessor world, BlockPos fromPos) {
-        int count = 0;
-        BlockPos currentPos = fromPos;
-        while (world.getBlockState(currentPos).is(Blocks.SNOW_BLOCK)) {
-            count++;
-            currentPos = currentPos.below();
-        }
-        return count;
+        return true;
     }
 
     private static BlockState snowLayerState(int layers) {

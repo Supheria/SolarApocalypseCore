@@ -27,7 +27,7 @@ public class BubbleEvaporate {
             when(stageExact(SolarStage.STAGE_2).and(DETACHED_FROM_WATER_SOURCE).and(daytime()).and(sky()).and(randomDayRate()),
                     spread17RateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN, stage -> scaleBudget(stage, 0.8))),
             // 阶段3：白天 + 高于安全高度，较快清除气泡柱，但仍走限额扩散避免卡顿尖峰
-            when(stageExact(SolarStage.STAGE_3).and(DETACHED_FROM_WATER_SOURCE).and(daytime()).and(aboveSafeHeight()).and(stageRateScaled(0.85)),
+            when(stageExact(SolarStage.STAGE_3).and(DETACHED_FROM_WATER_SOURCE).and(daytime()).and(aboveSafeHeight()).and(stageRate()),
                     spread17RateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == Blocks.BUBBLE_COLUMN, stage -> scaleBudget(stage, 1.0))),
             // 阶段4：白天 + 高于安全高度，继续增强，但保持限额扩散
             when(stageExact(SolarStage.STAGE_4).and(DETACHED_FROM_WATER_SOURCE).and(daytime()).and(aboveSafeHeight()),

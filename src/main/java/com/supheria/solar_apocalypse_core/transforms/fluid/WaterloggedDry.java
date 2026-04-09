@@ -1,6 +1,8 @@
 package com.supheria.solar_apocalypse_core.transforms.fluid;
 
 import com.supheria.solar_apocalypse_core.BlockTransform;
+import com.supheria.solar_apocalypse_core.environment.EnvironmentalDirtyTracker;
+import com.supheria.solar_apocalypse_core.environment.EnvironmentalWorkType;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformAction;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformCondition;
 import com.supheria.solar_apocalypse_core.transforms.rule.TransformRule;
@@ -27,15 +29,15 @@ public class WaterloggedDry {
         BlockPos pos = BlockPos.containing(x, y, z);
         if (world.getBlockState(pos).getBlock().getStateDefinition().getProperty("waterlogged")
                 instanceof BooleanProperty prop) {
-            world.setBlock(pos, world.getBlockState(pos).setValue(prop, false), 3);
+            EnvironmentalDirtyTracker.queueBlockChange(world, pos, world.getBlockState(pos).setValue(prop, false), EnvironmentalWorkType.WATER);
         }
     };
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
             // 阶段2：露天+晴天，概率去水，仅表现为局部逐步失水
-            when(stageExact(SolarStage.STAGE_2).and(sky()).and(daytime()).and(IS_WATERLOGGED).and(randomDayRate()).and(stageRateScaled(0.55)), DEWATERLOG),
+            when(stageExact(SolarStage.STAGE_2).and(sky()).and(daytime()).and(IS_WATERLOGGED).and(randomDayRate()).and(stageRate()), DEWATERLOG),
             // 阶段3：高于安全高度的含水方块更快去水，不再继承第二阶段的露天缓慢失水路径
-            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED).and(stageRateScaled(0.95)), DEWATERLOG),
+            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED).and(stageRate()), DEWATERLOG),
             // 阶段4-5：超过蒸发高度，直接去水
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveWaterEvaporateHeight()).and(IS_WATERLOGGED), DEWATERLOG)
     );

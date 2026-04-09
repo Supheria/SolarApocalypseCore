@@ -27,6 +27,13 @@ public final class StageHeightConfig {
 	public static final int STAGE_5_COZY_HEIGHT = -128;
 	public static final int STAGE_6_COZY_HEIGHT = -64;
 
+	public static final int STAGE_1_WATER_EVAPORATE_HEIGHT = 512;
+	public static final int STAGE_2_WATER_EVAPORATE_HEIGHT = 64;
+	public static final int STAGE_3_WATER_EVAPORATE_HEIGHT = 32;
+	public static final int STAGE_4_WATER_EVAPORATE_HEIGHT = 8;
+	public static final int STAGE_5_WATER_EVAPORATE_HEIGHT = -16;
+	public static final int STAGE_6_WATER_EVAPORATE_HEIGHT = -64;
+
 	public static final int STAGE_1_FIRE_SECONDS = 0;
 	public static final int STAGE_2_FIRE_SECONDS = 1;
 	public static final int STAGE_3_FIRE_SECONDS = 2;
@@ -69,6 +76,22 @@ public final class StageHeightConfig {
 			case STAGE_4 -> STAGE_4_COZY_HEIGHT;
 			case STAGE_5 -> STAGE_5_COZY_HEIGHT;
 			case STAGE_6 -> STAGE_6_COZY_HEIGHT;
+			default -> DEFAULT_SAFE_HEIGHT;
+		};
+	}
+
+	/**
+	 * 返回当前阶段的水蒸发高度阈值。
+	 * 目前与 safe height 保持一致，但单独暴露，避免后续水系规则继续与地表安全线耦合。
+	 */
+	public static int getWaterEvaporateHeight(SolarStage stage) {
+		return switch (stage) {
+			case STAGE_1 -> STAGE_1_WATER_EVAPORATE_HEIGHT;
+			case STAGE_2 -> STAGE_2_WATER_EVAPORATE_HEIGHT;
+			case STAGE_3 -> STAGE_3_WATER_EVAPORATE_HEIGHT;
+			case STAGE_4 -> STAGE_4_WATER_EVAPORATE_HEIGHT;
+			case STAGE_5 -> STAGE_5_WATER_EVAPORATE_HEIGHT;
+			case STAGE_6 -> STAGE_6_WATER_EVAPORATE_HEIGHT;
 			default -> DEFAULT_SAFE_HEIGHT;
 		};
 	}

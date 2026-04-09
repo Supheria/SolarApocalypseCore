@@ -43,15 +43,23 @@ public class CollapsePhaseHandler {
         if (!(world instanceof ServerLevel serverLevel)) {
             return;
         }
-        serverLevel.setWeatherParameters(0, Integer.MAX_VALUE, true, false);
-        serverLevel.getLevelData().setRaining(true);
+        enforceCollapseWeather(serverLevel);
         if (serverLevel.players().isEmpty()) {
             return;
         }
 
-        RandomSource random = RandomSource.create();
+        RandomSource random = serverLevel.getRandom();
         tickSnow(serverLevel, random);
         tickWaterFreeze(serverLevel, random);
+    }
+
+    private static void enforceCollapseWeather(ServerLevel serverLevel) {
+        if (serverLevel.isRaining() && !serverLevel.isThundering()) {
+            return;
+        }
+
+        serverLevel.setWeatherParameters(0, Integer.MAX_VALUE, true, false);
+        serverLevel.getLevelData().setRaining(true);
     }
 
     private static void tickSnow(ServerLevel serverLevel, RandomSource random) {
@@ -108,6 +116,7 @@ public class CollapsePhaseHandler {
                     BlockSpreadUtils.OFFSETS_SURFACE_WATER_5X5, budget);
         }
     }
+
 
     private static BlockPos sampleSurfacePosition(ServerLevel serverLevel, RandomSource random) {
         var player = serverLevel.players().get(random.nextInt(serverLevel.players().size()));

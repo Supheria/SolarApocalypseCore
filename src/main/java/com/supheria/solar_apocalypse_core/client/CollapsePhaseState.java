@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.Level;
 
 /**
  * 客户端COLLAPSE阶段状态追踪
@@ -41,6 +42,11 @@ public class CollapsePhaseState {
 
 	public static boolean isInCollapse() {
 		return isCollapsePhase;
+	}
+
+	public static boolean isInCollapseOverworld() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return isCollapsePhase && minecraft.level != null && minecraft.level.dimension() == Level.OVERWORLD;
 	}
 
 	public static boolean isDaytimeInCollapse() {

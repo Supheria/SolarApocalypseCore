@@ -48,10 +48,10 @@ public final class DirtChain {
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                     spread4H(Blocks.SAND.defaultBlockState(), bs -> bs.is(SolarModTags.Blocks.MOIST_DIRT))),
             // 阶段4：高于安全高度，→ 尘土，并向 MOIST_DIRT 8邻限额扩散
-            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRateScaled(0.9)),
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRate()),
                     spread8HRateLimited(SolarModBlocks.DUST.get().defaultBlockState(), bs -> bs.is(SolarModTags.Blocks.MOIST_DIRT), 0.9)),
             // 阶段5：高于 y=8，→ 空气，并向 DIRT 17邻限额扩散（含下层）
-            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRateScaled(1.1)),
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRate()),
                     spread17SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.DIRT), 1.1))
     );
 
@@ -67,10 +67,10 @@ public final class DirtChain {
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                     spread4H(SolarModBlocks.DUST.get().defaultBlockState(), bs -> bs.is(SolarModTags.Blocks.DIRT))),
             // 阶段4：高于安全高度，→ 空气，向 DIRT 8邻限额扩散
-            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRateScaled(0.9)),
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRate()),
                     spread8HRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.DIRT), 0.9)),
             // 阶段5：高于安全高度，→ 空气，向 DIRT 17邻限额扩散（含下层）
-            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRateScaled(1.1)),
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRate()),
                     spread17SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.DIRT), 1.1))
     );
 
@@ -86,10 +86,10 @@ public final class DirtChain {
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                     spread4H(SolarModBlocks.DUST.get().defaultBlockState(), bs -> bs.is(SolarModTags.Blocks.HARD_DIRT))),
             // 阶段4：高于安全高度，→ 空气，向 DIRT 8邻限额扩散
-            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()).and(stageRateScaled(0.9)),
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRate()),
                     spread8HRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.DIRT), 0.9)),
             // 阶段5：高于安全高度，→ 空气，向 DIRT 17邻限额扩散（含下层）
-            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRateScaled(1.1)),
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRate()),
                     spread17SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.DIRT), 1.1))
     );
 
@@ -105,10 +105,10 @@ public final class DirtChain {
             when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                     spread4H(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == SolarModBlocks.CRUSHED_DIRT.get())),
             // 阶段4：高于安全高度，→ 空气，向碎泥土8邻限额扩散
-            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRateScaled(0.95)),
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRate()),
                     spread8HRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == SolarModBlocks.CRUSHED_DIRT.get(), 0.95)),
             // 阶段5：高于安全高度，→ 空气，向碎泥土17邻限额扩散（含下层）
-            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRateScaled(1.1)),
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRate()),
                     spread17SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == SolarModBlocks.CRUSHED_DIRT.get(), 1.1))
     );
 
@@ -127,23 +127,23 @@ public final class DirtChain {
             when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(daytime()).and(sky()).and(noWaterAbove()).and(noRain()).and(randomOneIn10()),
                     setBlock(SolarModBlocks.DUST.get())),
             // 阶段3：白天+上方无水+高于安全高度，→ 空气，向沙子17邻限额扩散
-            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(noWaterAbove()).and(aboveSafeHeight()).and(stageRateScaled(0.85)),
+            when(stageExact(SolarStage.STAGE_3).and(daytime()).and(noWaterAbove()).and(aboveSafeHeight()).and(stageRate()),
                     spread17SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.SAND), 0.85)),
             // 阶段4：高于 y=32，→ 空气，向沙子5×5限额扩散（含下层）
-            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRateScaled(0.95)),
+            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(stageRate()),
                     spread5x5SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.SAND), 0.95)),
             // 阶段5：高于 y=8，→ 空气，向沙子5×5限额扩散（含下层）
-            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRateScaled(1.1)),
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRate()),
                     spread5x5SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.is(BlockTags.SAND), 1.1))
     );
 
     // 尘土是链路末端：不再继续转化为别的固体，而是作为短暂残留物被扩散删除。
     public static final BlockTransform DUST = TransformRule.rulesOf(
             // 阶段2-4：高于安全高度，向8邻限额扩散 → 空气
-            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRateScaled(0.9)),
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRate()),
                     spread8HRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == SolarModBlocks.DUST.get(), 0.9)),
             // 阶段5：高于安全高度，向17邻限额扩散（含下层）→ 空气
-            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRateScaled(1.1)),
+            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()).and(stageRate()),
                     spread17SameLayerFirstRateLimited(Blocks.AIR.defaultBlockState(), bs -> bs.getBlock() == SolarModBlocks.DUST.get(), 1.1))
     );
 

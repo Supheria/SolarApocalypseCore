@@ -275,13 +275,17 @@ public final class BlockSpreadUtils {
     }
 
     public static void spreadWaterLimited(LevelAccessor world, double cx, double cy, double cz, int[][] offsets, int budget) {
+        spreadWaterLimited(world, cx, cy, cz, offsets, budget, AIR);
+    }
+
+    public static void spreadWaterLimited(LevelAccessor world, double cx, double cy, double cz, int[][] offsets, int budget, BlockState evaporatedState) {
         BlockPos center = BlockPos.containing(cx, cy, cz);
         if (world.getFluidState(center).is(FluidTags.WATER) && world.getFluidState(center).isSource()) {
-            setBlockIfChanged(world, center, AIR);
+            setBlockIfChanged(world, center, evaporatedState);
         }
         visitLimitedOffsets(world, center, offsets, budget,
                 pos -> world.getFluidState(pos).is(FluidTags.WATER) && world.getFluidState(pos).isSource(),
-                pos -> queueDelayedBlockChange(world, pos, AIR, EnvironmentalWorkType.WATER));
+                pos -> queueDelayedBlockChange(world, pos, evaporatedState, EnvironmentalWorkType.WATER));
     }
 
     public static void spreadWaterLimited(LevelAccessor world, double cx, double cy, double cz, int[][] offsets) {
@@ -417,6 +421,19 @@ public final class BlockSpreadUtils {
             return false;
         }
         return !world.getFluidState(pos.above()).is(FluidTags.WATER);
+    }
+
+    /**
+     * 判断是否为表层水面的边缘位，只蒸发这类位置以避免原版无限水源快速回填。
+     */
+    public static boolean isSurfaceWaterEdge(LevelAccessor world, BlockPos pos) {
+        if (!isSurfaceWater(world, pos)) {
+            return false;
+        }
+        return !world.getFluidState(pos.north()).is(FluidTags.WATER)
+                || !world.getFluidState(pos.south()).is(FluidTags.WATER)
+                || !world.getFluidState(pos.east()).is(FluidTags.WATER)
+                || !world.getFluidState(pos.west()).is(FluidTags.WATER);
     }
 
     /**

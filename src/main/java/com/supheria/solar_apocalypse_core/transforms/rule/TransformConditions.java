@@ -94,6 +94,16 @@ public final class TransformConditions {
                         && world.getFluidState(BlockPos.containing(x, y, z)).isSource();
     }
 
+    /** 当前方块必须是最上层完整水源块。 */
+    public static TransformCondition surfaceWaterSource() {
+        return (world, x, y, z, stage) -> BlockSpreadUtils.isSurfaceWater(world, BlockPos.containing(x, y, z));
+    }
+
+    /** 当前方块必须是最上层水面的边缘水源块。 */
+    public static TransformCondition surfaceWaterEdgeSource() {
+        return (world, x, y, z, stage) -> BlockSpreadUtils.isSurfaceWaterEdge(world, BlockPos.containing(x, y, z));
+    }
+
     /** 当前不下雨 */
     public static TransformCondition noRain() {
         return (world, x, y, z, stage) -> !world.getLevelData().isRaining();
@@ -226,14 +236,14 @@ public final class TransformConditions {
     }
 
     /**
-     * 按当前阶段的统一速率判定本次是否允许触发。
+     * 按当前阶段速率判定本次是否允许触发。
      */
     public static TransformCondition stageRate() {
-        return stageRateScaled(1.0);
+        return (world, x, y, z, stage) -> passesRate(SolarStageConfig.getStageTransformRate(stage));
     }
 
     /**
-     * 在阶段统一速率上乘一个系数，用于重型链微调强度。
+     * 在当前阶段速率上叠加规则自身倍率，用于后期阶段适当加速重型链。
      */
     public static TransformCondition stageRateScaled(double multiplier) {
         return (world, x, y, z, stage) -> passesRate(SolarStageConfig.getStageTransformRate(stage) * multiplier);
@@ -277,7 +287,7 @@ public final class TransformConditions {
 
     /** y > StageHeightConfig.getWaterEvapHeight(stage)（水蒸发高度阈值，严格大于） */
     public static TransformCondition aboveWaterEvaporateHeight() {
-        return (world, x, y, z, stage) -> y > StageHeightConfig.getSafeHeight(stage);
+        return (world, x, y, z, stage) -> y > StageHeightConfig.getWaterEvaporateHeight(stage);
     }
 
     /** y >= threshold (冰融化高度条件) */

@@ -21,6 +21,7 @@
 		"ServerGamePacketListenerImplMixin",
 		"ShareToLanScreenMixin",
 		"ThirstHelperSolarMixin",
+		"Weather2ClientWeatherProxyMixin",
 		"CocoaGrowthBlockMixin",
 		"CropGrowthBlockMixin",
 		"SaplingGrowthBlockMixin",

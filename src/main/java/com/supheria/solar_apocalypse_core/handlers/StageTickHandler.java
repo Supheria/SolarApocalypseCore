@@ -76,12 +76,12 @@ public class StageTickHandler {
                     "weather clear");
         }
 
-        // 第六阶段转入坍缺后强制降水，与冻伤和水源恢复规则共同塑造恒冬环境。
-        if (phase.isCollapsePhase() && world instanceof ServerLevel level) {
-            level.setWeatherParameters(0, Integer.MAX_VALUE, true, false);
-            level.getLevelData().setRaining(true);
-        }
-    }
+		// 第六阶段转入坍缺后强制降水，与冻伤和水源恢复规则共同塑造恒冬环境。
+		if (phase.isCollapsePhase() && world instanceof ServerLevel level && level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+			level.setWeatherParameters(0, Integer.MAX_VALUE, true, false);
+			level.getLevelData().setRaining(true);
+		}
+	}
 
     private static void setRandomTickingLevelGradually(LevelAccessor world, int targetLevel) {
         int currentLevel = world.getLevelData().getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
