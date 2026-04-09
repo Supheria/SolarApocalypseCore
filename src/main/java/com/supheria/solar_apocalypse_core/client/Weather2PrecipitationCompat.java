@@ -97,23 +97,19 @@ public final class Weather2PrecipitationCompat {
         }
 
         methodLookupAttempted = true;
-        try {
-            setRainingMethod = level.getLevelData().getClass().getMethod("m_5565_", boolean.class);
-        } catch (ReflectiveOperationException ignored) {
-            setRainingMethod = null;
-        }
+        setRainingMethod = resolveMethod(level.getLevelData().getClass(), boolean.class, "setRaining");
+        setRainLevelMethod = resolveMethod(ClientLevel.class, float.class, "setRainLevel");
+        setThunderLevelMethod = resolveMethod(ClientLevel.class, float.class, "setThunderLevel");
+    }
 
-        try {
-            setRainLevelMethod = ClientLevel.class.getMethod("m_46734_", float.class);
-        } catch (ReflectiveOperationException ignored) {
-            setRainLevelMethod = null;
+    private static Method resolveMethod(Class<?> owner, Class<?> argumentType, String... candidateNames) {
+        for (String candidateName : candidateNames) {
+            try {
+                return owner.getMethod(candidateName, argumentType);
+            } catch (ReflectiveOperationException ignored) {
+            }
         }
-
-        try {
-            setThunderLevelMethod = ClientLevel.class.getMethod("m_46707_", float.class);
-        } catch (ReflectiveOperationException ignored) {
-            setThunderLevelMethod = null;
-        }
+        return null;
     }
 
     private Weather2PrecipitationCompat() {}

@@ -161,11 +161,16 @@ public class SnowMelt {
     }
 
     private static boolean canContinueRising(LevelAccessor world, BlockPos topPos) {
-        return true;
+        BlockPos nextPos = topPos.above();
+        if (!world.getBlockState(nextPos).isAir()) {
+            return false;
+        }
+        LevelReader reader = world;
+        return snowLayerState(1).canSurvive(reader, nextPos);
     }
 
     private static boolean canCompressAt(LevelAccessor world, BlockPos pos) {
-        return true;
+        return canSnowSurviveAt(world, pos) && canContinueRising(world, pos);
     }
 
     private static BlockState snowLayerState(int layers) {

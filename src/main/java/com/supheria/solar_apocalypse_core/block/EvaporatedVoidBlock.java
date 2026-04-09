@@ -60,6 +60,6 @@ public class EvaporatedVoidBlock extends Block {
 
     @Override
     public boolean canBeReplaced(BlockState state, Fluid fluid) {
-        return false;
+        return true;
     }
 }
