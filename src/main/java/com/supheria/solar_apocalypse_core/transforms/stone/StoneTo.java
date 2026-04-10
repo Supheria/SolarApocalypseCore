@@ -18,9 +18,9 @@ public class StoneTo {
 
     public static BlockTransform of(Block target) {
         return TransformRule.rulesOf(
-                when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky().or(adjacentLava())).and(aboveSafeHeight()).and(randomDayVariable()),
+                when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(sky().or(adjacentLava())).and(aboveSafeHeight()),
                         setBlock(target)),
-                when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()).and(randomDayVariable()),
+                when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
                         setBlock(target)),
                 when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
                         setBlock(target))

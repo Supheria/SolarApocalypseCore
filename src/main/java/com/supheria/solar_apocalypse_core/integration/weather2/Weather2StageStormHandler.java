@@ -16,23 +16,16 @@ import weather2.weathersystem.storm.StormObject;
 import weather2.weathersystem.storm.WeatherObject;
 import weather2.weathersystem.storm.WeatherObjectParticleStorm;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class Weather2StageStormHandler {
-    private static final Map<ResourceKey<Level>, Long> NEXT_SPAWN_TICK = new ConcurrentHashMap<>();
     private static final Map<ResourceKey<Level>, SolarStage> LAST_STAGE = new ConcurrentHashMap<>();
-    private static final int STORM_NEARBY_RADIUS = 256;
-    private static final long FAILED_RETRY_TICKS = 1200L;
-    private static final long[] STAGE_SPAWN_INTERVALS = {
-            24000L,
-            18000L,
-            14000L,
-            10000L,
-            8000L,
-            8000L
-    };
+    private static final int STORM_MAINTENANCE_INTERVAL_TICKS = 20;
+    private static final double MAX_STORM_PLAYER_DISTANCE = 256.0;
+    private static final double MAX_STORM_PLAYER_DISTANCE_SQR = MAX_STORM_PLAYER_DISTANCE * MAX_STORM_PLAYER_DISTANCE;
 
     @SubscribeEvent
     public void onLevelTick(TickEvent.LevelTickEvent event) {
@@ -60,43 +53,65 @@ public final class Weather2StageStormHandler {
         }
 
         ResourceKey<Level> dimension = level.dimension();
-        long gameTime = level.getGameTime();
         SolarStage lastStage = LAST_STAGE.put(dimension, stage);
         if (lastStage != null && lastStage != stage) {
             manager.clearAllStorms();
-            NEXT_SPAWN_TICK.remove(dimension);
         }
 
-        if (gameTime < NEXT_SPAWN_TICK.getOrDefault(dimension, 0L)) {
+        if (level.getGameTime() % STORM_MAINTENANCE_INTERVAL_TICKS != 0) {
             return;
         }
 
-        boolean spawned = trySpawnStageStorm(level, manager, stage, players, level.random);
-        NEXT_SPAWN_TICK.put(dimension, gameTime + (spawned ? getSpawnInterval(stage) : FAILED_RETRY_TICKS));
+        ensureSingleStageStorm(manager, stage, players, level.random);
     }
 
-    private static boolean trySpawnStageStorm(ServerLevel level, WeatherManagerServer manager, SolarStage stage,
-                                              List<ServerPlayer> players, RandomSource random) {
+    private static void ensureSingleStageStorm(WeatherManagerServer manager, SolarStage stage,
+                                               List<ServerPlayer> players, RandomSource random) {
+        WeatherObject retainedStorm = null;
+        double retainedDistance = Double.MAX_VALUE;
+        for (WeatherObject weatherObject : new ArrayList<>(manager.getStormObjects())) {
+            if (!isStageStorm(weatherObject, stage)) {
+                manager.removeWeatherObjectAndSync(weatherObject);
+                continue;
+            }
+            double distanceToPlayers = minDistanceToPlayersSqr(weatherObject, players);
+            if (distanceToPlayers > MAX_STORM_PLAYER_DISTANCE_SQR) {
+                manager.removeWeatherObjectAndSync(weatherObject);
+                continue;
+            }
+            if (retainedStorm == null || distanceToPlayers < retainedDistance) {
+                if (retainedStorm != null) {
+                    manager.removeWeatherObjectAndSync(retainedStorm);
+                }
+                retainedStorm = weatherObject;
+                retainedDistance = distanceToPlayers;
+            } else {
+                manager.removeWeatherObjectAndSync(weatherObject);
+            }
+        }
+
+        if (retainedStorm == null) {
+            spawnStageStorm(manager, stage, players, random);
+        }
+    }
+
+    private static boolean spawnStageStorm(WeatherManagerServer manager, SolarStage stage,
+                                           List<ServerPlayer> players, RandomSource random) {
         ServerPlayer player = players.get(random.nextInt(players.size()));
-        Vec3 center = player.position();
 
         return switch (stage) {
-            case STAGE_1 -> spawnRainstorm(manager, player, center, StormObject.STATE_THUNDER, false);
-            case STAGE_2 -> spawnRainstorm(manager, player, center, StormObject.STATE_HAIL, false);
-            case STAGE_3 -> spawnTornado(manager, center, false);
-            case STAGE_4 -> spawnTornado(manager, center, true);
-            case STAGE_5 -> spawnParticleStorm(manager, player, center, WeatherObjectParticleStorm.StormType.SANDSTORM);
-            case STAGE_6 -> spawnParticleStorm(manager, player, center, WeatherObjectParticleStorm.StormType.SNOWSTORM);
+            case STAGE_1 -> spawnRainstorm(manager, player, StormObject.STATE_THUNDER, false);
+            case STAGE_2 -> spawnRainstorm(manager, player, StormObject.STATE_HAIL, false);
+            case STAGE_3 -> spawnTornado(manager, false);
+            case STAGE_4 -> spawnTornado(manager, true);
+            case STAGE_5 -> spawnParticleStorm(manager, player, WeatherObjectParticleStorm.StormType.SANDSTORM);
+            case STAGE_6 -> spawnParticleStorm(manager, player, WeatherObjectParticleStorm.StormType.SNOWSTORM);
             case NONE -> false;
         };
     }
 
-    private static boolean spawnRainstorm(WeatherManagerServer manager, ServerPlayer player, Vec3 center,
+    private static boolean spawnRainstorm(WeatherManagerServer manager, ServerPlayer player,
                                           int intensityStage, boolean firenado) {
-        if (hasNearbyRainstorm(manager, center, intensityStage, firenado)) {
-            return false;
-        }
-
         StormObject storm = new StormObject(manager);
         storm.setupStorm(player);
         storm.levelCurIntensityStage = intensityStage;
@@ -111,11 +126,7 @@ public final class Weather2StageStormHandler {
         return true;
     }
 
-    private static boolean spawnTornado(WeatherManagerServer manager, Vec3 center, boolean firenado) {
-        if (hasNearbyTornado(manager, center, firenado)) {
-            return false;
-        }
-
+    private static boolean spawnTornado(WeatherManagerServer manager, boolean firenado) {
         StormObject storm = new StormObject(manager);
         storm.setupStorm(null);
         storm.levelCurIntensityStage = StormObject.STATE_STAGE1;
@@ -132,12 +143,8 @@ public final class Weather2StageStormHandler {
         return true;
     }
 
-    private static boolean spawnParticleStorm(WeatherManagerServer manager, ServerPlayer player, Vec3 center,
+    private static boolean spawnParticleStorm(WeatherManagerServer manager, ServerPlayer player,
                                               WeatherObjectParticleStorm.StormType type) {
-        if (hasNearbyParticleStorm(manager, center, type)) {
-            return false;
-        }
-
         manager.spawnParticleStorm(player.blockPosition(), type);
         long gameTime = manager.getWorld().getGameTime();
         if (type == WeatherObjectParticleStorm.StormType.SANDSTORM) {
@@ -148,54 +155,53 @@ public final class Weather2StageStormHandler {
         return true;
     }
 
-    private static boolean hasNearbyRainstorm(WeatherManagerServer manager, Vec3 center,
-                                              int intensityStage, boolean firenado) {
-        for (WeatherObject weatherObject : manager.getStormsAround(center, STORM_NEARBY_RADIUS)) {
-            if (!(weatherObject instanceof StormObject storm) || storm.isDead) {
-                continue;
-            }
-            if (storm.isFirenado != firenado) {
-                continue;
-            }
-            if (storm.isPrecipitating() && storm.levelCurIntensityStage == intensityStage) {
-                return true;
-            }
+    private static boolean isStageStorm(WeatherObject weatherObject, SolarStage stage) {
+        if (weatherObject == null || weatherObject.isDead) {
+            return false;
         }
-        return false;
+
+        return switch (stage) {
+            case STAGE_1 -> isRainstorm(weatherObject, StormObject.STATE_THUNDER, false);
+            case STAGE_2 -> isRainstorm(weatherObject, StormObject.STATE_HAIL, false);
+            case STAGE_3 -> isTornado(weatherObject, false);
+            case STAGE_4 -> isTornado(weatherObject, true);
+            case STAGE_5 -> isParticleStorm(weatherObject, WeatherObjectParticleStorm.StormType.SANDSTORM);
+            case STAGE_6 -> isParticleStorm(weatherObject, WeatherObjectParticleStorm.StormType.SNOWSTORM);
+            case NONE -> false;
+        };
     }
 
-    private static boolean hasNearbyTornado(WeatherManagerServer manager, Vec3 center, boolean firenado) {
-        for (WeatherObject weatherObject : manager.getStormsAround(center, STORM_NEARBY_RADIUS)) {
-            if (!(weatherObject instanceof StormObject storm) || storm.isDead) {
-                continue;
-            }
-            if (firenado) {
-                if (storm.isFirenado) {
-                    return true;
-                }
-                continue;
-            }
-            if (!storm.isFirenado && (storm.isTornadoFormingOrGreater() || storm.isCycloneFormingOrGreater())) {
-                return true;
-            }
+    private static boolean isRainstorm(WeatherObject weatherObject, int intensityStage, boolean firenado) {
+        if (!(weatherObject instanceof StormObject storm)) {
+            return false;
         }
-        return false;
+        return storm.isPrecipitating() && storm.levelCurIntensityStage == intensityStage && storm.isFirenado == firenado;
     }
 
-    private static boolean hasNearbyParticleStorm(WeatherManagerServer manager, Vec3 center,
-                                                  WeatherObjectParticleStorm.StormType type) {
-        for (WeatherObject weatherObject : manager.getStormsAround(center, STORM_NEARBY_RADIUS)) {
-            if (!(weatherObject instanceof WeatherObjectParticleStorm particleStorm) || particleStorm.isDead) {
-                continue;
-            }
-            if (particleStorm.getType() == type) {
-                return true;
-            }
+    private static boolean isTornado(WeatherObject weatherObject, boolean firenado) {
+        if (!(weatherObject instanceof StormObject storm)) {
+            return false;
         }
-        return false;
+        if (firenado) {
+            return storm.isFirenado;
+        }
+        return !storm.isFirenado && (storm.isTornadoFormingOrGreater() || storm.isCycloneFormingOrGreater());
     }
 
-    private static long getSpawnInterval(SolarStage stage) {
-        return STAGE_SPAWN_INTERVALS[Math.max(0, Math.min(STAGE_SPAWN_INTERVALS.length - 1, stage.ordinal() - 1))];
+    private static boolean isParticleStorm(WeatherObject weatherObject, WeatherObjectParticleStorm.StormType type) {
+        return weatherObject instanceof WeatherObjectParticleStorm particleStorm && particleStorm.getType() == type;
+    }
+
+    private static double minDistanceToPlayersSqr(WeatherObject weatherObject, List<ServerPlayer> players) {
+        Vec3 center = weatherObject.posGround != null ? weatherObject.posGround : weatherObject.pos;
+        if (center == null) {
+            return Double.MAX_VALUE;
+        }
+
+        double best = Double.MAX_VALUE;
+        for (ServerPlayer player : players) {
+            best = Math.min(best, player.position().distanceToSqr(center));
+        }
+        return best;
     }
 }

@@ -33,11 +33,9 @@ public class BambooDecay {
     };
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            when(BAMBOO_TOP.and(stageExact(SolarStage.STAGE_2)).and(sky()).and(noRain()).and(randomDayRate()),
+            when(BAMBOO_TOP.and(stageExact(SolarStage.STAGE_2)).and(sky()).and(noRain()),
                     destroyBlockWithDrops()),
-            when(BAMBOO_TOP.and(stageExact(SolarStage.STAGE_3)).and(aboveSafeHeight()),
-                    destroyBlockWithDrops()),
-            when(BAMBOO_TOP.and(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6)).and(aboveSafeHeight()),
+            when(BAMBOO_TOP.and(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6)).and(aboveSafeHeight()),
                     destroyBlockWithDrops())
     );
 

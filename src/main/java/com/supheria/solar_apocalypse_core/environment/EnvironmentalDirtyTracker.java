@@ -8,10 +8,8 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.supheria.solar_apocalypse_core.config.solar.SolarStageConfig;
+import com.supheria.solar_apocalypse_core.handlers.EnvironmentalTransformScheduler;
 import com.supheria.solar_apocalypse_core.integration.minecollapse.MineCollapseBridge;
-import com.supheria.solar_apocalypse_core.network.SolarModVariables;
-import com.supheria.solar_apocalypse_core.world.SolarStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -28,6 +26,7 @@ public final class EnvironmentalDirtyTracker {
     private static final Map<ResourceKey<Level>, Map<Long, Integer>> FIRE_QUEUE_CHUNK_COUNTS = new ConcurrentHashMap<>();
     private static final int MAX_FIRE_QUEUE_PER_CHUNK = 8;
     private static final int MAX_FIRE_WRITES_PER_CHUNK_PER_TICK = 2;
+    private static final int VISIBLE_WRITES_PER_TICK = 15;
 
     public static void queueBlockChange(net.minecraft.world.level.LevelAccessor world, BlockPos pos, BlockState target, EnvironmentalWorkType workType) {
         if (!(world instanceof ServerLevel serverLevel)) {
@@ -62,21 +61,36 @@ public final class EnvironmentalDirtyTracker {
             return;
         }
 
-        SolarStage stage = SolarModVariables.MapVariables.get(level).getSolarStage();
         Map<Long, Integer> fireWritesThisTick = new ConcurrentHashMap<>();
+        processZone(level, byType, EnvironmentalTransformScheduler.ChunkZone.VISIBLE, VISIBLE_WRITES_PER_TICK, fireWritesThisTick);
+    }
+
+    private static void processZone(ServerLevel level,
+                                    EnumMap<EnvironmentalWorkType, LinkedHashMap<Long, BlockState>> byType,
+                                    EnvironmentalTransformScheduler.ChunkZone zone,
+                                    int budget,
+                                    Map<Long, Integer> fireWritesThisTick) {
+        int remaining = budget;
         for (EnvironmentalWorkType workType : EnvironmentalWorkType.values()) {
+            if (remaining <= 0) {
+                return;
+            }
+
             LinkedHashMap<Long, BlockState> queue = byType.get(workType);
             if (queue == null || queue.isEmpty()) {
                 continue;
             }
 
-            int remaining = budgetFor(stage, workType);
             List<Map.Entry<Long, BlockState>> batch = new ArrayList<>(Math.min(remaining, queue.size()));
             Iterator<Map.Entry<Long, BlockState>> iterator = queue.entrySet().iterator();
             while (iterator.hasNext() && remaining > 0) {
                 Map.Entry<Long, BlockState> entry = iterator.next();
+                BlockPos pos = BlockPos.of(entry.getKey());
+                if (EnvironmentalTransformScheduler.getChunkZone(level, pos) != zone) {
+                    continue;
+                }
                 if (workType == EnvironmentalWorkType.FIRE && entry.getValue().is(Blocks.FIRE)) {
-                    long chunkKey = chunkKey(BlockPos.of(entry.getKey()));
+                    long chunkKey = chunkKey(pos);
                     int written = fireWritesThisTick.getOrDefault(chunkKey, 0);
                     if (written >= MAX_FIRE_WRITES_PER_CHUNK_PER_TICK) {
                         continue;
@@ -96,17 +110,6 @@ public final class EnvironmentalDirtyTracker {
                         () -> MineCollapseBridge.setBlockWithCurrentSource(level, pos, target));
             }
         }
-    }
-
-    private static int budgetFor(SolarStage stage, EnvironmentalWorkType workType) {
-        return switch (workType) {
-            case WATER -> SolarStageConfig.getWaterSpreadBudget(stage) * 4;
-            case ICE -> SolarStageConfig.getStageSpreadBudget(stage) * 4;
-            case FIRE -> Math.max(1, SolarStageConfig.getStageSpreadBudget(stage));
-            case STAGE6_SURFACE -> Math.max(4, SolarStageConfig.getCollapseSnowStepBudget() * SolarStageConfig.getCollapseSnowSampleCount());
-            case STONE -> SolarStageConfig.getStageSpreadBudget(stage) * 3;
-            case SURFACE -> SolarStageConfig.getStageSpreadBudget(stage) * 4;
-        };
     }
 
     private static void decrementQueuedFire(ResourceKey<Level> dimension, long chunkKey) {

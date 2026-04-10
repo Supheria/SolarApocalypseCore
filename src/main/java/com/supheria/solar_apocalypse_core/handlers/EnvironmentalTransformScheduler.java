@@ -25,6 +25,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -36,7 +38,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,35 +50,56 @@ import java.util.concurrent.ConcurrentHashMap;
 @Mod.EventBusSubscriber
 public final class EnvironmentalTransformScheduler {
 
-    private static final int MIN_INDEXED_CHUNKS_PER_PLAYER = 18;
-    private static final int CHUNK_INDEX_BUDGET_MULTIPLIER = 5;
-    private static final int CHUNK_REFRESHES_PER_PLAYER = 6;
     private static final int BASE_VIEW_DISTANCE = 6;
-    private static final int BASE_KEEPALIVE_RADIUS = 1;
-    private static final int BASE_VISIBLE_CHUNK_SIDE = 6;
-    private static final int BASE_VISIBLE_CHUNK_SAMPLE_LIMIT = 12;
-    private static final int INDEX_INTERVAL_TICKS = 20;
-    private static final int REFILL_INTERVAL_TICKS = 4;
-    private static final int MIN_CHUNK_SAMPLES_PER_TICK = 8;
-    private static final int MAX_CHUNK_SAMPLES_PER_PLAYER = 12;
+    private static final int VISIBLE_TRANSFORMS_PER_TICK = 15;
+    private static final int VISIBLE_CHUNK_SAMPLE_LIMIT = 12;
     private static final int POSITIONS_PER_CHUNK_SAMPLE = 4;
     private static final int SUBSURFACE_SAMPLE_DEPTH = 12;
     private static final int CANOPY_UNDER_SAMPLE_DEPTH = 3;
     private static final int MAX_QUEUE_MULTIPLIER = 16;
 
-    private static final Map<ResourceKey<Level>, LinkedHashSet<Long>> CANDIDATE_CHUNKS = new ConcurrentHashMap<>();
+    private static final Map<ResourceKey<Level>, LinkedHashSet<Long>> VISIBLE_CHUNKS = new ConcurrentHashMap<>();
     private static final Map<ResourceKey<Level>, EnumMap<EnvironmentalWorkType, LinkedHashSet<Long>>> POSITION_QUEUES = new ConcurrentHashMap<>();
-    private static final Map<ResourceKey<Level>, Long> LAST_INDEX_TICKS = new ConcurrentHashMap<>();
-    private static final Map<ResourceKey<Level>, Long> LAST_REFILL_TICKS = new ConcurrentHashMap<>();
     private static final Map<UUID, Integer> CLIENT_RENDER_DISTANCES = new ConcurrentHashMap<>();
+
+    public enum ChunkZone {
+        VISIBLE,
+        NONE
+    }
 
     public static void updateClientRenderDistance(ServerPlayer player, int renderDistance) {
         CLIENT_RENDER_DISTANCES.put(player.getUUID(), Math.max(2, renderDistance));
+        refreshVisibleChunks(player.serverLevel());
     }
 
     @SubscribeEvent
     public static void onPlayerLogout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
         CLIENT_RENDER_DISTANCES.remove(event.getEntity().getUUID());
+        if (event.getEntity() instanceof ServerPlayer player) {
+            refreshVisibleChunks(player.serverLevel());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            refreshVisibleChunks(player.serverLevel());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            refreshVisibleChunks(player.serverLevel());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerEnteringSection(EntityEvent.EnteringSection event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || !event.didChunkChange()) {
+            return;
+        }
+        refreshVisibleChunks(player.serverLevel());
     }
 
     @SubscribeEvent
@@ -99,137 +121,168 @@ public final class EnvironmentalTransformScheduler {
         }
 
         RandomSource random = level.getRandom();
-        long gameTime = level.getGameTime();
-        if (shouldRunIndexPass(level.dimension(), gameTime)) {
-            indexCandidateChunks(level, players, stage, random);
+        if (!VISIBLE_CHUNKS.containsKey(level.dimension())) {
+            refreshPlayerChunkZones(level, players);
         }
-        if (shouldRunRefillPass(level.dimension(), gameTime)) {
-            refillPositionQueues(level, players.size(), stage, random);
-        }
-        processPositionQueues(level, players, stage);
+        refillPositionQueues(level, players, random);
+        processPositionQueues(level);
     }
 
     private static void clearDimension(ResourceKey<Level> dimension) {
-        CANDIDATE_CHUNKS.remove(dimension);
+        VISIBLE_CHUNKS.remove(dimension);
         POSITION_QUEUES.remove(dimension);
-        LAST_INDEX_TICKS.remove(dimension);
-        LAST_REFILL_TICKS.remove(dimension);
     }
 
-    private static boolean shouldRunIndexPass(ResourceKey<Level> dimension, long gameTime) {
-        Long lastTick = LAST_INDEX_TICKS.get(dimension);
-        if (lastTick != null && gameTime - lastTick < INDEX_INTERVAL_TICKS) {
-            return false;
+    public static ChunkZone getChunkZone(ServerLevel level, BlockPos pos) {
+        long key = chunkKey(pos.getX() >> 4, pos.getZ() >> 4);
+        LinkedHashSet<Long> visibleChunks = VISIBLE_CHUNKS.get(level.dimension());
+        if (visibleChunks != null && visibleChunks.contains(key)) {
+            return ChunkZone.VISIBLE;
         }
-        LAST_INDEX_TICKS.put(dimension, gameTime);
-        return true;
+        return ChunkZone.NONE;
     }
 
-    private static boolean shouldRunRefillPass(ResourceKey<Level> dimension, long gameTime) {
-        Long lastTick = LAST_REFILL_TICKS.get(dimension);
-        if (lastTick != null && gameTime - lastTick < REFILL_INTERVAL_TICKS) {
-            return false;
-        }
-        LAST_REFILL_TICKS.put(dimension, gameTime);
-        return true;
-    }
-
-    private static void indexCandidateChunks(ServerLevel level, List<ServerPlayer> players, SolarStage stage, RandomSource random) {
-        LinkedHashSet<Long> chunks = CANDIDATE_CHUNKS.computeIfAbsent(level.dimension(), ignored -> new LinkedHashSet<>());
-        int targetSize = Math.max(MIN_INDEXED_CHUNKS_PER_PLAYER * players.size(), totalVisibleChunkArea(level, players));
-        keepAlivePlayerChunks(level, players, chunks);
-        int refreshCount = Math.max(players.size() * CHUNK_REFRESHES_PER_PLAYER, targetSize / 4);
-        int visibleRefreshCount = Math.max(totalVisibleChunkSamples(level, players), targetSize / 3);
-        int attempts = Math.max(targetSize, refreshCount + visibleRefreshCount) * 3;
-        while (attempts-- > 0 && (chunks.size() < targetSize || refreshCount > 0 || visibleRefreshCount > 0)) {
-            ServerPlayer player = players.get(random.nextInt(players.size()));
-            boolean useVisibleSample = visibleRefreshCount > 0 && (refreshCount <= 0 || random.nextBoolean());
-            long candidate = useVisibleSample
-                    ? sampleVisibleChunk(player, level, random)
-                    : sampleNearChunk(player, keepAliveRadius(level, player), random);
-            int chunkX = unpackChunkX(candidate);
-            int chunkZ = unpackChunkZ(candidate);
-            if (!level.hasChunk(chunkX, chunkZ)) {
-                continue;
-            }
-
-            boolean isNew = chunks.add(candidate);
-            if (!isNew) {
-                // 重新插入已存在区块，让热点区块保持活跃，同时给新采样区块腾出淘汰顺序。
-                chunks.remove(candidate);
-                chunks.add(candidate);
-            } else if (chunks.size() > targetSize) {
-                removeOldestChunk(chunks);
-            }
-
-            if (useVisibleSample) {
-                visibleRefreshCount--;
-            } else if (refreshCount > 0) {
-                refreshCount--;
-            }
-        }
-
-        trimLinkedSet(chunks, targetSize * 2);
-    }
-
-    private static void keepAlivePlayerChunks(ServerLevel level, List<ServerPlayer> players, LinkedHashSet<Long> chunks) {
+    private static void refreshPlayerChunkZones(ServerLevel level, List<ServerPlayer> players) {
+        LinkedHashSet<Long> visibleChunks = new LinkedHashSet<>();
         for (ServerPlayer player : players) {
-            int keepAliveRadius = keepAliveRadius(level, player);
-            int baseChunkX = player.chunkPosition().x;
-            int baseChunkZ = player.chunkPosition().z;
-            for (int dx = -keepAliveRadius; dx <= keepAliveRadius; dx++) {
-                for (int dz = -keepAliveRadius; dz <= keepAliveRadius; dz++) {
-                    int chunkX = baseChunkX + dx;
-                    int chunkZ = baseChunkZ + dz;
-                    if (!level.hasChunk(chunkX, chunkZ)) {
-                        continue;
-                    }
-                    long key = chunkKey(chunkX, chunkZ);
-                    chunks.remove(key);
-                    chunks.add(key);
+            int visibleRadius = visibleChunkRadius(level, player);
+            addChunkSquare(level, visibleChunks, player.chunkPosition().x, player.chunkPosition().z, visibleRadius);
+        }
+
+        VISIBLE_CHUNKS.put(level.dimension(), visibleChunks);
+    }
+
+    private static void refreshVisibleChunks(ServerLevel level) {
+        List<ServerPlayer> players = level.players();
+        if (players.isEmpty()) {
+            clearDimension(level.dimension());
+            return;
+        }
+        refreshPlayerChunkZones(level, players);
+    }
+
+    private static void addChunkSquare(ServerLevel level, LinkedHashSet<Long> chunks, int centerChunkX, int centerChunkZ, int radius) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                int chunkX = centerChunkX + dx;
+                int chunkZ = centerChunkZ + dz;
+                if (!level.hasChunk(chunkX, chunkZ)) {
+                    continue;
                 }
+                chunks.add(chunkKey(chunkX, chunkZ));
             }
         }
     }
 
-    private static long sampleNearChunk(ServerPlayer player, int radius, RandomSource random) {
-        int chunkX = player.chunkPosition().x + random.nextInt(radius * 2 + 1) - radius;
-        int chunkZ = player.chunkPosition().z + random.nextInt(radius * 2 + 1) - radius;
-        return chunkKey(chunkX, chunkZ);
+    private static void refillPositionQueues(ServerLevel level, List<ServerPlayer> players, RandomSource random) {
+        EnumMap<EnvironmentalWorkType, LinkedHashSet<Long>> byType = POSITION_QUEUES.computeIfAbsent(level.dimension(), ignored -> new EnumMap<>(EnvironmentalWorkType.class));
+        int maxPerQueue = maxQueueSize(players.size());
+        sampleChunkZone(level, VISIBLE_CHUNKS.get(level.dimension()), VISIBLE_CHUNK_SAMPLE_LIMIT, random, byType, maxPerQueue);
+        for (EnvironmentalWorkType workType : EnvironmentalWorkType.values()) {
+            trimLinkedSet(byType.computeIfAbsent(workType, ignored -> new LinkedHashSet<>()), maxPerQueue);
+        }
     }
 
-    private static long sampleVisibleChunk(ServerPlayer player, ServerLevel level, RandomSource random) {
-        int side = visibleChunkSide(level, player);
-        int minOffset = -side / 2;
-        int chunkX = player.chunkPosition().x + minOffset + random.nextInt(side);
-        int chunkZ = player.chunkPosition().z + minOffset + random.nextInt(side);
-        return chunkKey(chunkX, chunkZ);
-    }
-
-    private static void refillPositionQueues(ServerLevel level, int playerCount, SolarStage stage, RandomSource random) {
-        LinkedHashSet<Long> chunks = CANDIDATE_CHUNKS.get(level.dimension());
+    private static void sampleChunkZone(ServerLevel level, LinkedHashSet<Long> chunks, int sampleLimit, RandomSource random,
+                                        EnumMap<EnvironmentalWorkType, LinkedHashSet<Long>> byType, int maxPerQueue) {
         if (chunks == null || chunks.isEmpty()) {
             return;
         }
-
-        EnumMap<EnvironmentalWorkType, LinkedHashSet<Long>> byType = POSITION_QUEUES.computeIfAbsent(level.dimension(), ignored -> new EnumMap<>(EnvironmentalWorkType.class));
-        int maxPerQueue = maxQueueSize(stage, playerCount);
-        int targetChunkSamples = Math.max(MIN_CHUNK_SAMPLES_PER_TICK, totalVisibleChunkSamples(level, level.players()));
-        int cappedChunkSamples = Math.max(MIN_CHUNK_SAMPLES_PER_TICK, playerCount * MAX_CHUNK_SAMPLES_PER_PLAYER);
-        int chunkSamples = Math.min(chunks.size(), Math.min(targetChunkSamples, cappedChunkSamples));
+        int chunkSamples = Math.min(chunks.size(), sampleLimit);
         ArrayList<Long> chunkList = new ArrayList<>(chunks);
         for (int i = 0; i < chunkSamples; i++) {
-            long chunkKey = chunkList.get(Math.max(0, chunkList.size() - 1 - random.nextInt(chunkList.size())));
-            int chunkX = unpackChunkX(chunkKey);
-            int chunkZ = unpackChunkZ(chunkKey);
+            long key = chunkList.get(random.nextInt(chunkList.size()));
+            int chunkX = unpackChunkX(key);
+            int chunkZ = unpackChunkZ(key);
             if (!level.hasChunk(chunkX, chunkZ)) {
                 continue;
             }
             enqueueChunkSamples(level, chunkX, chunkZ, random, byType, maxPerQueue);
         }
+    }
 
+    private static void processPositionQueues(ServerLevel level) {
+        EnumMap<EnvironmentalWorkType, LinkedHashSet<Long>> byType = POSITION_QUEUES.get(level.dimension());
+        if (byType == null || byType.isEmpty()) {
+            return;
+        }
+        processZoneQueues(level, byType, ChunkZone.VISIBLE, VISIBLE_TRANSFORMS_PER_TICK);
+    }
+
+    private static void processZoneQueues(ServerLevel level, EnumMap<EnvironmentalWorkType, LinkedHashSet<Long>> byType,
+                                          ChunkZone zone, int budget) {
+        int remaining = budget;
         for (EnvironmentalWorkType workType : EnvironmentalWorkType.values()) {
-            trimLinkedSet(byType.computeIfAbsent(workType, ignored -> new LinkedHashSet<>()), maxPerQueue);
+            if (remaining <= 0) {
+                return;
+            }
+            LinkedHashSet<Long> queue = byType.get(workType);
+            if (queue == null || queue.isEmpty()) {
+                continue;
+            }
+
+            ArrayList<Long> snapshot = new ArrayList<>(queue);
+            for (int index = snapshot.size() - 1; index >= 0 && remaining > 0; index--) {
+                long posKey = snapshot.get(index);
+                BlockPos pos = BlockPos.of(posKey);
+                if (getChunkZone(level, pos) != zone) {
+                    continue;
+                }
+                if (!queue.remove(posKey)) {
+                    continue;
+                }
+                if (!level.isLoaded(pos)) {
+                    continue;
+                }
+
+                BlockState state = level.getBlockState(pos);
+                BlockTransform transform = SolarApocalypseCoreMod.getCachedBlockTransform(state);
+                if (transform == null) {
+                    continue;
+                }
+
+                MineCollapseBridge.withSolarSource(MineCollapseBridge.SOURCE_SOLAR_RANDOM_TICK,
+                        () -> transform.call(level, pos.getX(), pos.getY(), pos.getZ()));
+                remaining--;
+            }
+        }
+    }
+
+    private static int visibleChunkRadius(ServerLevel level, ServerPlayer player) {
+        return effectiveViewDistance(level, player);
+    }
+
+    private static int effectiveViewDistance(ServerLevel level, ServerPlayer player) {
+        int serverViewDistance = Math.max(2, level.getServer().getPlayerList().getViewDistance());
+        int clientViewDistance = CLIENT_RENDER_DISTANCES.getOrDefault(player.getUUID(), serverViewDistance);
+        return Math.max(2, Math.min(serverViewDistance, clientViewDistance));
+    }
+
+    private static int maxQueueSize(int playerCount) {
+        return Math.max(64, VISIBLE_TRANSFORMS_PER_TICK * MAX_QUEUE_MULTIPLIER * Math.max(1, playerCount));
+    }
+
+    private static long chunkKey(int chunkX, int chunkZ) {
+        return ((long) chunkX << 32) ^ (chunkZ & 0xffffffffL);
+    }
+
+    private static int unpackChunkX(long chunkKey) {
+        return (int) (chunkKey >> 32);
+    }
+
+    private static int unpackChunkZ(long chunkKey) {
+        return (int) chunkKey;
+    }
+
+    private static <T> void trimLinkedSet(LinkedHashSet<T> values, int maxSize) {
+        if (values.size() <= maxSize) {
+            return;
+        }
+
+        Iterator<T> iterator = values.iterator();
+        while (values.size() > maxSize && iterator.hasNext()) {
+            iterator.next();
+            iterator.remove();
         }
     }
 
@@ -309,43 +362,6 @@ public final class EnvironmentalTransformScheduler {
         return state.getFluidState().is(FluidTags.WATER) && !com.supheria.solar_apocalypse_core.transforms.util.BlockSpreadUtils.isSurfaceWater(level, pos);
     }
 
-    private static void processPositionQueues(ServerLevel level, List<ServerPlayer> players, SolarStage stage) {
-        EnumMap<EnvironmentalWorkType, LinkedHashSet<Long>> byType = POSITION_QUEUES.get(level.dimension());
-        if (byType == null || byType.isEmpty()) {
-            return;
-        }
-
-        for (EnvironmentalWorkType workType : EnvironmentalWorkType.values()) {
-            LinkedHashSet<Long> queue = byType.get(workType);
-            if (queue == null || queue.isEmpty()) {
-                continue;
-            }
-
-            int remaining = executionBudget(stage, workType);
-            ArrayList<Long> snapshot = new ArrayList<>(queue);
-            for (int index = snapshot.size() - 1; index >= 0 && remaining > 0; index--) {
-                long posKey = snapshot.get(index);
-                if (!queue.remove(posKey)) {
-                    continue;
-                }
-                BlockPos pos = BlockPos.of(posKey);
-                if (!level.isLoaded(pos)) {
-                    continue;
-                }
-
-                BlockState state = level.getBlockState(pos);
-                BlockTransform transform = SolarApocalypseCoreMod.getCachedBlockTransform(state);
-                if (transform == null) {
-                    continue;
-                }
-
-                MineCollapseBridge.withSolarSource(MineCollapseBridge.SOURCE_SOLAR_RANDOM_TICK,
-                        () -> transform.call(level, pos.getX(), pos.getY(), pos.getZ()));
-                remaining--;
-            }
-        }
-    }
-
     private static EnvironmentalWorkType classifyWorkType(BlockState state) {
         Block block = state.getBlock();
         if (state.is(Blocks.WATER)
@@ -364,8 +380,7 @@ public final class EnvironmentalTransformScheduler {
                 || state.is(BlockTags.LEAVES)
                 || block instanceof LeavesBlock
                 || state.is(BlockTags.WOOL)
-                || state.is(BlockTags.WOOL_CARPETS)
-                || state.is(SolarModTags.Blocks.SIMPLE_DELETE)) {
+                || state.is(BlockTags.WOOL_CARPETS)) {
             return EnvironmentalWorkType.FIRE;
         }
         if (state.is(SolarModTags.Blocks.COBBLESTONE)
@@ -376,99 +391,6 @@ public final class EnvironmentalTransformScheduler {
             return EnvironmentalWorkType.STONE;
         }
         return EnvironmentalWorkType.SURFACE;
-    }
-
-    private static int executionBudget(SolarStage stage, EnvironmentalWorkType workType) {
-        return switch (workType) {
-            case WATER -> SolarStageConfig.getWaterSpreadBudget(stage) * 2;
-            case ICE -> SolarStageConfig.getStageSpreadBudget(stage) * 2;
-            case FIRE -> Math.max(2, SolarStageConfig.getStageSpreadBudget(stage));
-            case STAGE6_SURFACE -> Math.max(4,
-                    SolarStageConfig.getCollapseSnowStepBudget() * SolarStageConfig.getCollapseSnowSampleCount());
-            case STONE -> Math.max(2, SolarStageConfig.getStageSpreadBudget(stage) * 2);
-            case SURFACE -> SolarStageConfig.getStageSpreadBudget(stage) * 3;
-        };
-    }
-
-    private static int stageBudget(SolarStage stage) {
-        return SolarStageConfig.getStageSpreadBudget(stage);
-    }
-
-    private static int maxQueueSize(SolarStage stage, int playerCount) {
-        return Math.max(32, stageBudget(stage) * MAX_QUEUE_MULTIPLIER * Math.max(1, playerCount));
-    }
-
-    private static int keepAliveRadius(ServerLevel level, ServerPlayer player) {
-        int viewDistance = effectiveViewDistance(level, player);
-        return Math.max(1, Math.round((float) viewDistance / BASE_VIEW_DISTANCE * BASE_KEEPALIVE_RADIUS));
-    }
-
-    private static int visibleChunkSide(ServerLevel level, ServerPlayer player) {
-        int viewDistance = effectiveViewDistance(level, player);
-        return Math.max(1, Math.round((float) viewDistance / BASE_VIEW_DISTANCE * BASE_VISIBLE_CHUNK_SIDE));
-    }
-
-    private static int visibleChunkSampleLimit(ServerLevel level, ServerPlayer player) {
-        int visibleChunks = visibleChunkSide(level, player) * visibleChunkSide(level, player);
-        int scaledBaseline = Math.max(BASE_VISIBLE_CHUNK_SAMPLE_LIMIT,
-                Math.round((float) effectiveViewDistance(level, player) / BASE_VIEW_DISTANCE * BASE_VISIBLE_CHUNK_SAMPLE_LIMIT));
-        return Math.min(visibleChunks, Math.max(1, Math.max(scaledBaseline, (visibleChunks + 2) / 3)));
-    }
-
-    private static int totalVisibleChunkArea(ServerLevel level, List<ServerPlayer> players) {
-        int total = 0;
-        for (ServerPlayer player : players) {
-            int side = visibleChunkSide(level, player);
-            total += side * side;
-        }
-        return total;
-    }
-
-    private static int totalVisibleChunkSamples(ServerLevel level, List<ServerPlayer> players) {
-        int total = 0;
-        for (ServerPlayer player : players) {
-            total += visibleChunkSampleLimit(level, player);
-        }
-        return total;
-    }
-
-    private static int effectiveViewDistance(ServerLevel level, ServerPlayer player) {
-        int serverViewDistance = Math.max(2, level.getServer().getPlayerList().getViewDistance());
-        int clientViewDistance = CLIENT_RENDER_DISTANCES.getOrDefault(player.getUUID(), serverViewDistance);
-        return Math.max(2, Math.min(serverViewDistance, clientViewDistance));
-    }
-
-    private static long chunkKey(int chunkX, int chunkZ) {
-        return ((long) chunkX << 32) ^ (chunkZ & 0xffffffffL);
-    }
-
-    private static int unpackChunkX(long chunkKey) {
-        return (int) (chunkKey >> 32);
-    }
-
-    private static int unpackChunkZ(long chunkKey) {
-        return (int) chunkKey;
-    }
-
-    private static <T> void trimLinkedSet(LinkedHashSet<T> values, int maxSize) {
-        if (values.size() <= maxSize) {
-            return;
-        }
-
-        Iterator<T> iterator = values.iterator();
-        while (values.size() > maxSize && iterator.hasNext()) {
-            iterator.next();
-            iterator.remove();
-        }
-    }
-
-    private static void removeOldestChunk(LinkedHashSet<Long> chunks) {
-        Iterator<Long> iterator = chunks.iterator();
-        if (!iterator.hasNext()) {
-            return;
-        }
-        iterator.next();
-        iterator.remove();
     }
 
     private EnvironmentalTransformScheduler() {}

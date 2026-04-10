@@ -57,12 +57,12 @@ public final class SolarStageConfig {
      * 表现出明显卡顿。这里收敛中后期档位，优先保证实体更新稳定。</p>
      */
     private static final int UNIFORM_RANDOM_TICKING_LEVEL = 5;
-    /** 各阶段转换触发率。后期阶段适当提高，恢复阶段性推进速度。 */
-    private static final double[] STAGE_TRANSFORM_RATES = {0.22, 0.38, 0.62, 0.82, 0.96, 1.0};
+    /** 所有阶段统一使用满速率，实际执行速率由活动/视距区块调度控制。 */
+    private static final double UNIFORM_STAGE_TRANSFORM_RATE = 1.0;
     /** 各阶段通用单次扩散预算。统一固定，避免高阶段主线程负载继续抬升。 */
     private static final int UNIFORM_STAGE_SPREAD_BUDGET = 4;
-    /** 水蒸发链的单次扩散预算。统一固定，避免第五阶段水链过重。 */
-    private static final int UNIFORM_WATER_SPREAD_BUDGET = 5;
+    /** 水蒸发链的单次扩散预算。适当提高，缩短高温阶段水体退场时间。 */
+    private static final int UNIFORM_WATER_SPREAD_BUDGET = 8;
 
     public static int getStage2StartTime() {
         return STAGE_2_START_TIME;
@@ -145,7 +145,7 @@ public final class SolarStageConfig {
     }
 
     public static double getStageTransformRate(SolarStage stage) {
-        return STAGE_TRANSFORM_RATES[getStageIndex(stage)];
+        return UNIFORM_STAGE_TRANSFORM_RATE;
     }
 
     public static int getStageSpreadBudget(SolarStage stage) {
@@ -155,13 +155,5 @@ public final class SolarStageConfig {
     public static int getWaterSpreadBudget(SolarStage stage) {
         return UNIFORM_WATER_SPREAD_BUDGET;
     }
-
-    private static int getStageIndex(SolarStage stage) {
-        if (stage == null || !stage.isAtLeast(SolarStage.STAGE_1)) {
-            return 0;
-        }
-        return Math.min(STAGE_TRANSFORM_RATES.length - 1, stage.ordinal() - 1);
-    }
-
     private SolarStageConfig() {}
 }

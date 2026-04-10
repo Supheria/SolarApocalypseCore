@@ -10,16 +10,16 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformCondit
 import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.when;
 
 /**
- * 花盆内植物掉落（含植物的花盆 → 空花盆）。
+ * 生态性小型植物与物件的统一衰亡规则。
  */
-public class FlowerPotDecay {
+public final class PlantObjectDecay {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            when(stageIsEruptionPhase().and(sky()).and(isBlock(Blocks.FLOWER_POT).negate()),
-                    setBlock(Blocks.FLOWER_POT)),
-            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(aboveSafeHeight()).and(isBlock(Blocks.FLOWER_POT).negate()),
-                    setBlock(Blocks.FLOWER_POT))
+            when(stageIsEruptionPhase().and(daytime()).and(sky()).and(noRain()),
+                    setBlock(Blocks.AIR)),
+            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(aboveSafeHeight()),
+                    setBlock(Blocks.AIR))
     );
 
-    private FlowerPotDecay() {}
+    private PlantObjectDecay() {}
 }

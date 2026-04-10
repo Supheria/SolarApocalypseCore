@@ -43,20 +43,9 @@ public class MossyDecay {
     private static final TransformCondition SOFT_BASE = daytime().and(sky()).and(noRain());
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5：白天 + 露天 + 不下雨 概率触发 → 去苔
-            when(stageIsEruptionPhase().and(SOFT_BASE).and(randomDayRate()),
+            when(stageIsEruptionPhase().and(SOFT_BASE),
                     REMOVE_MOSS),
-            // 阶段2：白天 + 高于安全高度 + 概率触发 → 去苔
-            when(stageExact(SolarStage.STAGE_2).and(daytime()).and(aboveSafeHeight()).and(randomDayRate()),
-                    REMOVE_MOSS),
-            // 阶段3：高于安全高度 → 去苔
-            when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
-                    REMOVE_MOSS),
-            // 阶段4：高于安全高度 → 去苔
-            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()),
-                    REMOVE_MOSS),
-            // 阶段5：高于安全高度 → 去苔
-            when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
+            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(aboveSafeHeight()),
                     REMOVE_MOSS)
     );
 

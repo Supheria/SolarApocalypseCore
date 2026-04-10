@@ -28,17 +28,10 @@ public class SpongeDry {
     };
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5：天空可见+晴天+无雨，湿海绵→干海绵
             when(stageIsEruptionPhase().and(sky()).and(noRain()).and(daytime())
-                    .and(isBlock(Blocks.WET_SPONGE)).and(randomDayRate()),
+                    .and(isBlock(Blocks.WET_SPONGE)),
                     setBlock(Blocks.SPONGE)),
-            // 阶段2：晴天+高于安全高度，湿→干或干→空
-            when(stageExact(SolarStage.STAGE_2).and(daytime()).and(aboveSafeHeight()).and(randomDayRate()), SPONGE_DRY),
-            // 阶段3：高于安全高度，湿→干或干→空
-            when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()).and(randomDayRate()), SPONGE_DRY),
-            // 阶段4：高于安全高度，湿→干或干→空
-            when(stageExact(SolarStage.STAGE_4).and(aboveSafeHeight()).and(randomDayRate()), SPONGE_DRY),
-            // 阶段5：高于安全高度，直接删除
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_5).and(aboveSafeHeight()), SPONGE_DRY),
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()), setBlock(Blocks.AIR))
     );
 

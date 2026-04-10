@@ -10,6 +10,9 @@ plugins {
 version = mod_version
 group = mod_group_id
 
+def modDisplayName = 'Solar Apocalypse Core'
+def modDisplayDescription = 'A solar eruption survival overhaul where the world is scorched by extreme heat before collapsing into eternal winter.'
+
 base {
     archivesName = mod_id
 }
@@ -180,10 +183,11 @@ tasks.named('processResources', ProcessResources).configure {
             minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
             forge_version: forge_version, forge_version_range: forge_version_range,
             loader_version_range: loader_version_range,
-            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-            mod_authors: mod_authors, mod_description: mod_description,
+            mod_id: mod_id, mod_name: modDisplayName, mod_license: mod_license, mod_version: mod_version,
+            mod_authors: mod_authors, mod_description: modDisplayDescription,
     ]
     inputs.properties replaceProperties
+    filteringCharset = 'UTF-8'
 
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]

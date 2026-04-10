@@ -24,34 +24,27 @@ public final class StoneChain {
 
     // 卵石 → 砾石
     public static final BlockTransform COBBLESTONE = TransformRule.rulesOf(
-            // 阶段3-5：天空可见，概率性 → 砾石
-            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(sky()).and(randomDayVariable()),
+            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(sky()),
                     setBlock(Blocks.GRAVEL)),
-            // 阶段4-5：高于安全高度，稳定推进为砾石，确保后续岩浆链有原料可用
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
                     setBlock(Blocks.GRAVEL))
     );
 
     // 粘土 → 陶土
     public static final BlockTransform CLAY = TransformRule.rulesOf(
-            // 阶段3-5：天空可见，概率性 → 陶土
-            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(sky()).and(randomDayVariable()),
+            when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(sky()),
                     setBlock(Blocks.TERRACOTTA)),
-            // 阶段4-5：高于安全高度，直接 → 陶土
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
                     setBlock(Blocks.TERRACOTTA))
     );
 
     // 砾石 → 岩浆
     public static final BlockTransform GRAVEL = TransformRule.rulesOf(
-            // 阶段4-5：天空可见或相邻岩浆，高于阶段4/5安全高度最小值，50%概率 → 岩浆
-            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(sky().or(adjacentLava())).and(aboveMinOf(SolarStage.STAGE_4, SolarStage.STAGE_5)).and(random50()),
+            when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(sky().or(adjacentLava())).and(aboveMinOf(SolarStage.STAGE_4, SolarStage.STAGE_5)),
                     setBlock(Blocks.LAVA)),
-            // 阶段5：高于安全高度，直接 → 岩浆
             when(stageExact(SolarStage.STAGE_5).and(aboveSafeHeight()),
                     setBlock(Blocks.LAVA)),
-            // 坍缺阶段：概率由配置决定 → 岩浆
-            when(stageExact(SolarStage.STAGE_6).and(randomCollapse()),
+            when(stageExact(SolarStage.STAGE_6),
                     setBlock(Blocks.LAVA))
     );
 

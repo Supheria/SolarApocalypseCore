@@ -15,16 +15,8 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class SmallPlantDecay {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 阶段1-5：白天 + 天空可见 + 不下雨 + 概率触发 → 空气
-            when(stageIsEruptionPhase().and(daytime()).and(sky()).and(noRain()).and(randomDayRate()),
+            when(stageIsEruptionPhase().and(daytime()).and(sky()).and(noRain()),
                     setBlock(Blocks.AIR)),
-            // 阶段2：天空可见 + 不下雨 + 概率触发 → 空气（无白天限制，夜间也触发）
-            when(stageExact(SolarStage.STAGE_2).and(sky()).and(noRain()).and(randomDayRate()),
-                    setBlock(Blocks.AIR)),
-            // 阶段3：高于安全高度 → 空气
-            when(stageExact(SolarStage.STAGE_3).and(aboveSafeHeight()),
-                    setBlock(Blocks.AIR)),
-            // 阶段4-5：高于安全高度 → 空气
             when(stageRange(SolarStage.STAGE_4, SolarStage.STAGE_6).and(aboveSafeHeight()),
                     setBlock(Blocks.AIR))
     );
