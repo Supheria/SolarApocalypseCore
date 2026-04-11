@@ -4,6 +4,7 @@ import com.supheria.solar_apocalypse_core.config.solar.StageHeightConfig;
 import com.supheria.solar_apocalypse_core.network.SolarModVariables;
 import com.supheria.solar_apocalypse_core.thirst.SolarThirstHelper;
 import com.supheria.solar_apocalypse_core.world.SolarStage;
+import com.supheria.solar_apocalypse_core.world.SolarStageHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -69,8 +70,13 @@ public class HeatEffect {
             return;
         }
 
-        if (stage == SolarStage.STAGE_2 && !world.canSeeSkyFromBelowWater(BlockPos.containing(entity.getX(), y + 1, entity.getZ()))) {
-            return;
+        if (stage == SolarStage.STAGE_2) {
+            if (!SolarStageHelper.isDaytime(world.dayTime())) {
+                return;
+            }
+            if (!world.canSeeSkyFromBelowWater(BlockPos.containing(entity.getX(), y + 1, entity.getZ()))) {
+                return;
+            }
         }
 
         int fireSeconds = StageHeightConfig.getFireSeconds(stage);
