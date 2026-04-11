@@ -15,8 +15,8 @@ import static com.supheria.solar_apocalypse_core.transforms.rule.TransformRule.w
 public class WoodBurn {
 
     public static final BlockTransform TRANSFORM = TransformRule.rulesOf(
-            // 爆发阶段：白天 + 露天 + 不下雨 → 掉落并销毁
-            when(stageIsEruptionPhase().and(daytime()).and(sky()).and(noRain()),
+            // 第二阶段起，露天可燃结构开始持续焚毁。
+            when(stageRange(SolarStage.STAGE_2, SolarStage.STAGE_6).and(daytime()).and(sky()).and(noRain()),
                     destroyBlockWithDrops()),
             // 第三至第五阶段：高温带内露天结构会持续焚毁
             when(stageRange(SolarStage.STAGE_3, SolarStage.STAGE_6).and(aboveSafeHeight()).and(sky()),
