@@ -40,6 +40,10 @@ public class EntityFireHandler {
             return;
         }
 
+        if (!(world instanceof net.minecraft.world.level.Level _level) || _level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            return;
+        }
+
         SolarStage stage = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (!stage.isAtLeast(SolarStage.STAGE_2) || stage.isAtLeast(SolarStage.STAGE_6)) {
             return;

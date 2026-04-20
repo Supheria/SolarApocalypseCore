@@ -40,6 +40,9 @@ public class StageTickHandler {
      * 只有阶段真的发生变化时，才会写入全局状态并触发后续同步与规则刷新。
      */
     public static void execute(LevelAccessor world) {
+        if (!(world instanceof ServerLevel _level) || _level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            return;
+        }
         long dayTime = world.dayTime();
         SolarModVariables.MapVariables mapVars = SolarModVariables.MapVariables.get(world);
 

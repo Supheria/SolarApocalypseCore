@@ -108,6 +108,11 @@ public final class EnvironmentalTransformScheduler {
             return;
         }
 
+        if (level.dimension() != Level.OVERWORLD) {
+            clearDimension(level.dimension());
+            return;
+        }
+
         List<ServerPlayer> players = level.players();
         if (players.isEmpty()) {
             clearDimension(level.dimension());

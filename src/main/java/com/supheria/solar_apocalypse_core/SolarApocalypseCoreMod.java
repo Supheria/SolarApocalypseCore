@@ -232,12 +232,6 @@ public class SolarApocalypseCoreMod {
     }
 
     private static BlockTransform getSpecialStructureTransform(Block block, Reference<Block> ref) {
-        if (ref.is(BlockTags.PORTALS)) {
-            return ForceDelete.TRANSFORM;
-        }
-        if (block instanceof EndPortalFrameBlock) {
-            return EndFrameClear.TRANSFORM;
-        }
         if (ref.is(SolarModTags.Blocks.TNT)) {
             return TntIgnite.TRANSFORM;
         }

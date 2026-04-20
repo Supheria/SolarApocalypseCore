@@ -32,15 +32,15 @@ public class CollapsePhaseHandler {
             return;
         }
 
-        LevelAccessor world = event.level;
+        if (!(event.level instanceof ServerLevel serverLevel) || serverLevel.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            return;
+        }
+
+        LevelAccessor world = serverLevel;
         SolarStage currentPhase = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (currentPhase != SolarStage.STAGE_6) {
             snowTickCounter = 0;
             waterTickCounter = 0;
-            return;
-        }
-
-        if (!(world instanceof ServerLevel serverLevel)) {
             return;
         }
         enforceCollapseWeather(serverLevel);

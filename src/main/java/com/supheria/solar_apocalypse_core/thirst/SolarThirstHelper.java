@@ -18,6 +18,11 @@ public class SolarThirstHelper {
             return 1.0f;
         }
 
+        if (world instanceof net.minecraft.world.level.Level level
+                && level.dimension() == net.minecraft.world.level.Level.NETHER) {
+            return 9.0f;
+        }
+
         SolarStage stage = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (!isDehydrationActive(stage, player.getY())) {
             return 1.0f;

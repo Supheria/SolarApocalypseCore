@@ -44,6 +44,10 @@ public class HeatEffect {
             return;
         }
 
+        if (!(world instanceof net.minecraft.world.level.Level _level) || _level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            return;
+        }
+
         SolarStage stage = SolarModVariables.MapVariables.get(world).getSolarStage();
         if (!(entity instanceof LivingEntity livingEntity)) {
             return;
